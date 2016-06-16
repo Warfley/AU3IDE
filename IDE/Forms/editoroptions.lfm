@@ -1,0 +1,1608 @@
+object EditorConf: TEditorConf
+  Left = 430
+  Height = 682
+  Top = 246
+  Width = 747
+  BorderStyle = bsToolWindow
+  Caption = 'AU3 Editor Optionen'
+  ClientHeight = 682
+  ClientWidth = 747
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  OnShow = FormShow
+  Position = poScreenCenter
+  LCLVersion = '1.6.0.4'
+  Visible = False
+  object ModalPanel: TPanel
+    Left = 0
+    Height = 50
+    Top = 632
+    Width = 747
+    Align = alBottom
+    BevelOuter = bvNone
+    BorderStyle = bsSingle
+    ClientHeight = 46
+    ClientWidth = 743
+    TabOrder = 0
+    object Button1: TButton
+      Left = 640
+      Height = 32
+      Top = 8
+      Width = 99
+      Caption = 'Abbrechen'
+      ModalResult = 2
+      TabOrder = 0
+    end
+    object Button2: TButton
+      Left = 536
+      Height = 32
+      Top = 8
+      Width = 99
+      Caption = 'Ok'
+      ModalResult = 1
+      TabOrder = 1
+    end
+  end
+  object FillPanel: TPanel
+    Left = 0
+    Height = 632
+    Top = 0
+    Width = 747
+    Align = alClient
+    BevelOuter = bvNone
+    ClientHeight = 632
+    ClientWidth = 747
+    TabOrder = 1
+    inline EditorFrame1: TEditorFrame
+      Height = 284
+      Top = 348
+      Width = 747
+      Align = alBottom
+      ClientHeight = 284
+      ClientWidth = 747
+      inherited SearchBar: TPanel
+        Top = 250
+        Width = 747
+        ClientWidth = 747
+        Visible = True
+        inherited CloseSearchButton: TSpeedButton
+          Left = 712
+        end
+      end
+      inherited CodeEditor: TSynEdit
+        Height = 250
+        Width = 512
+        Lines.Strings = (
+          '; Kommentar'
+          '$Var1 = 3 + 0x5F * 2'
+          ';*Doc Kommentar'
+          'Func MyFunc($Arg1)'
+          #9'ConsoleWrite("Hallo " & $Arg1)'
+          'EndFunc'
+          ''
+          'Anderer Text'
+        )
+        Options = [eoAutoIndent, eoBracketHighlight, eoEnhanceHomeKey, eoGroupUndo, eoSmartTabs, eoTabIndent, eoTabsToSpaces, eoTrimTrailingSpaces, eoDragDropEditing, eoRightMouseMovesCursor]
+        MouseOptions = [emDragDropEditing, emRightMouseMovesCursor, emShowCtrlMouseLinks, emCtrlWheelZoom]
+        ReadOnly = True
+      end
+      inherited CodeExplorerPanel: TPanel
+        Left = 512
+        Height = 250
+        ClientHeight = 250
+        inherited CodeExplorerHead: TPanel
+          ClientHeight = 30
+          ClientWidth = 231
+          inherited CloseCodeExplorerButton: TSpeedButton
+            Left = 197
+          end
+        end
+        inherited CodeExplorer: TTreeView
+          Height = 216
+          MultiSelectStyle = [msControlSelect]
+          OnCustomDrawItem = nil
+        end
+      end
+    end
+    object ConfigPageControl: TPageControl
+      Left = 0
+      Height = 348
+      Top = 0
+      Width = 747
+      ActivePage = GeneralOptionsTab
+      Align = alClient
+      TabIndex = 0
+      TabOrder = 1
+      object GeneralOptionsTab: TTabSheet
+        Caption = 'Allgemein'
+        ClientHeight = 310
+        ClientWidth = 739
+        object Label1: TLabel
+          Left = 0
+          Height = 25
+          Top = 8
+          Width = 115
+          Caption = 'Code Explorer:'
+          ParentColor = False
+        end
+        object CESideBox: TToggleBox
+          Left = 168
+          Height = 25
+          Top = 8
+          Width = 92
+          Caption = 'Rechts'
+          Checked = True
+          OnChange = CESideBoxChange
+          State = cbChecked
+          TabOrder = 0
+        end
+        object BGColorPicklist: TColorBox
+          Left = 168
+          Height = 26
+          Top = 40
+          Width = 160
+          DefaultColorColor = clBtnFace
+          NoneColorColor = clNone
+          Selected = clBtnFace
+          ItemHeight = 20
+          OnChange = BGColorPicklistChange
+          TabOrder = 1
+        end
+        object Label2: TLabel
+          Left = 0
+          Height = 25
+          Top = 43
+          Width = 100
+          Caption = 'Hintergrund:'
+          ParentColor = False
+        end
+        object BGColorBtn: TButton
+          Left = 328
+          Height = 25
+          Top = 40
+          Width = 32
+          Caption = '...'
+          OnClick = BGColorBtnClick
+          TabOrder = 2
+        end
+        object EditorColorButton: TButton
+          Left = 328
+          Height = 25
+          Top = 80
+          Width = 32
+          Caption = '...'
+          OnClick = EditorColorButtonClick
+          TabOrder = 3
+        end
+        object EditorColorPicklist: TColorBox
+          Left = 168
+          Height = 26
+          Top = 80
+          Width = 160
+          DefaultColorColor = clWindow
+          NoneColorColor = clNone
+          Selected = clWindow
+          ItemHeight = 20
+          OnChange = EditorColorPicklistChange
+          TabOrder = 4
+        end
+        object Label3: TLabel
+          Left = 0
+          Height = 25
+          Top = 80
+          Width = 152
+          Caption = 'Editor Hintergrund:'
+          ParentColor = False
+        end
+        object GutterColorButton: TButton
+          Left = 328
+          Height = 25
+          Top = 120
+          Width = 32
+          Caption = '...'
+          OnClick = GutterColorButtonClick
+          TabOrder = 5
+        end
+        object GutterColorPicklist: TColorBox
+          Left = 168
+          Height = 26
+          Top = 120
+          Width = 160
+          DefaultColorColor = clBtnFace
+          NoneColorColor = clNone
+          Selected = clBtnFace
+          ItemHeight = 20
+          OnChange = GutterColorPicklistChange
+          TabOrder = 6
+        end
+        object Label4: TLabel
+          Left = 0
+          Height = 25
+          Top = 120
+          Width = 150
+          Caption = 'Seitenleisten Farbe:'
+          ParentColor = False
+        end
+        object GutterForeColorButton: TButton
+          Left = 328
+          Height = 25
+          Top = 160
+          Width = 32
+          Caption = '...'
+          OnClick = GutterForeColorButtonClick
+          TabOrder = 7
+        end
+        object GutterForeColorPicklist: TColorBox
+          Left = 168
+          Height = 26
+          Top = 160
+          Width = 160
+          DefaultColorColor = clGray
+          NoneColorColor = clNone
+          Selected = clGray
+          ItemHeight = 20
+          OnChange = GutterForeColorPicklistChange
+          TabOrder = 8
+        end
+        object Label5: TLabel
+          Left = 0
+          Height = 25
+          Top = 160
+          Width = 157
+          Caption = 'Seitenleisten Schrift:'
+          ParentColor = False
+        end
+        object EditedColorButton: TButton
+          Left = 328
+          Height = 25
+          Top = 200
+          Width = 32
+          Caption = '...'
+          OnClick = EditedColorButtonClick
+          TabOrder = 9
+        end
+        object EditedColorPicklist: TColorBox
+          Left = 168
+          Height = 26
+          Top = 199
+          Width = 160
+          DefaultColorColor = 59900
+          NoneColorColor = clNone
+          Selected = 59900
+          OnGetColors = EditedColorPicklistGetColors
+          AutoComplete = True
+          AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+          Color = 59900
+          ItemHeight = 20
+          OnChange = EditedColorPicklistChange
+          TabOrder = 10
+        end
+        object Label6: TLabel
+          Left = 0
+          Height = 25
+          Top = 200
+          Width = 116
+          Caption = 'Zeile geändert:'
+          ParentColor = False
+        end
+        object SavedColorButton: TButton
+          Left = 328
+          Height = 25
+          Top = 240
+          Width = 32
+          Caption = '...'
+          OnClick = SavedColorButtonClick
+          TabOrder = 11
+        end
+        object SavedColorPicklist: TColorBox
+          Left = 168
+          Height = 26
+          Top = 240
+          Width = 160
+          DefaultColorColor = clGreen
+          NoneColorColor = clNone
+          Selected = clGreen
+          ItemHeight = 20
+          OnChange = SavedColorPicklistChange
+          TabOrder = 12
+        end
+        object Label7: TLabel
+          Left = 0
+          Height = 25
+          Top = 240
+          Width = 116
+          Caption = 'Zeile gesichert:'
+          ParentColor = False
+        end
+        object SelectedColorButton: TButton
+          Left = 328
+          Height = 25
+          Top = 280
+          Width = 32
+          Caption = '...'
+          OnClick = SelectedColorButtonClick
+          TabOrder = 13
+        end
+        object SelectedColorPicklist: TColorBox
+          Left = 168
+          Height = 26
+          Top = 280
+          Width = 160
+          DefaultColorColor = clHighlight
+          NoneColorColor = clNone
+          Selected = clHighlight
+          ItemHeight = 20
+          OnChange = SelectedColorPicklistChange
+          TabOrder = 14
+        end
+        object Label8: TLabel
+          Left = 0
+          Height = 25
+          Top = 280
+          Width = 118
+          Caption = 'Auswahl Farbe:'
+          ParentColor = False
+        end
+        object SelectedForeColorButton: TButton
+          Left = 704
+          Height = 25
+          Top = 9
+          Width = 32
+          Caption = '...'
+          OnClick = SelectedForeColorButtonClick
+          TabOrder = 15
+        end
+        object SelectedForeColorPicklist: TColorBox
+          Left = 544
+          Height = 26
+          Top = 8
+          Width = 160
+          DefaultColorColor = clWhite
+          NoneColorColor = clNone
+          Selected = clWhite
+          ItemHeight = 20
+          OnChange = SelectedForeColorPicklistChange
+          TabOrder = 16
+        end
+        object Label9: TLabel
+          Left = 376
+          Height = 25
+          Top = 9
+          Width = 153
+          Caption = 'Auswahl Text Farbe:'
+          ParentColor = False
+        end
+        object ScrollPastEOLBox: TCheckBox
+          Left = 376
+          Height = 29
+          Top = 80
+          Width = 277
+          Caption = 'Über Zeilenende Hinausscrollen'
+          OnChange = ScrollPastEOLBoxChange
+          TabOrder = 17
+        end
+        object CaretAlwaysVisibleBox: TCheckBox
+          Left = 376
+          Height = 29
+          Top = 116
+          Width = 205
+          Caption = 'Cursor immer sichtbar'
+          OnChange = CaretAlwaysVisibleBoxChange
+          TabOrder = 18
+        end
+        object Label10: TLabel
+          Left = 376
+          Height = 25
+          Top = 153
+          Width = 80
+          Caption = 'Tab Breite:'
+          ParentColor = False
+        end
+        object TabLenEdit: TEdit
+          Left = 544
+          Height = 33
+          Top = 153
+          Width = 160
+          Alignment = taRightJustify
+          NumbersOnly = True
+          OnChange = TabLenEditChange
+          TabOrder = 19
+          Text = '2'
+        end
+        object TooltipColorButton: TButton
+          Left = 704
+          Height = 25
+          Top = 201
+          Width = 32
+          Caption = '...'
+          OnClick = TooltipColorButtonClick
+          TabOrder = 20
+        end
+        object TooltipColorPicklist: TColorBox
+          Left = 544
+          Height = 26
+          Top = 200
+          Width = 160
+          DefaultColorColor = clWhite
+          NoneColorColor = clNone
+          Selected = clWhite
+          ItemHeight = 20
+          OnChange = TooltipColorPicklistChange
+          TabOrder = 21
+        end
+        object Label25: TLabel
+          Left = 376
+          Height = 25
+          Top = 201
+          Width = 106
+          Caption = 'Tooltip Farbe:'
+          ParentColor = False
+        end
+        object Label26: TLabel
+          Left = 376
+          Height = 25
+          Top = 233
+          Width = 154
+          Caption = 'Tooltip Schriftfarbe:'
+          ParentColor = False
+        end
+        object TooltipForeColorPicklist: TColorBox
+          Left = 544
+          Height = 26
+          Top = 232
+          Width = 160
+          NoneColorColor = clNone
+          ItemHeight = 20
+          OnChange = TooltipForeColorPicklistChange
+          TabOrder = 22
+        end
+        object TooltipForeColorButton: TButton
+          Left = 704
+          Height = 25
+          Top = 233
+          Width = 32
+          Caption = '...'
+          OnClick = TooltipForeColorButtonClick
+          TabOrder = 23
+        end
+        object Label27: TLabel
+          Left = 376
+          Height = 25
+          Top = 280
+          Width = 127
+          Caption = 'Editor Schriftart:'
+          ParentColor = False
+        end
+        object EditorFontButton: TButton
+          Left = 544
+          Height = 25
+          Top = 280
+          Width = 187
+          Caption = 'Courier New'
+          OnClick = EditorFontButtonClick
+          TabOrder = 24
+        end
+        object TextColorPicklist: TColorBox
+          Left = 544
+          Height = 26
+          Top = 40
+          Width = 160
+          NoneColorColor = clNone
+          ItemHeight = 20
+          OnChange = TextColorPicklistChange
+          TabOrder = 25
+        end
+        object TextColorButton: TButton
+          Left = 704
+          Height = 25
+          Top = 40
+          Width = 32
+          Caption = '...'
+          OnClick = TextColorButtonClick
+          TabOrder = 26
+        end
+        object Label31: TLabel
+          Left = 377
+          Height = 25
+          Top = 43
+          Width = 82
+          Caption = 'Text Farbe:'
+          ParentColor = False
+        end
+      end
+      object HighlightOptionsTab: TTabSheet
+        Caption = 'Highlighter'
+        ClientHeight = 310
+        ClientWidth = 739
+        object Label11: TLabel
+          Left = 0
+          Height = 25
+          Top = 24
+          Width = 102
+          Caption = 'Kommentare'
+          ParentColor = False
+        end
+        object CommentB: TToggleBox
+          Left = 248
+          Height = 25
+          Top = 24
+          Width = 34
+          Caption = 'B'
+          OnChange = CommentBChange
+          TabOrder = 0
+        end
+        object CommentFB: TToggleBox
+          Left = 376
+          Height = 25
+          Top = 24
+          Width = 72
+          Caption = 'Rahmen'
+          OnChange = CommentFBChange
+          TabOrder = 1
+        end
+        object CommentBG: TToggleBox
+          Left = 544
+          Height = 25
+          Top = 24
+          Width = 112
+          Caption = 'Hintergrund'
+          OnChange = CommentBGChange
+          TabOrder = 2
+        end
+        object CommentTC: TColorButton
+          Left = 160
+          Height = 25
+          Top = 24
+          Width = 75
+          BorderWidth = 2
+          ButtonColorSize = 16
+          ButtonColor = 39423
+          Flat = True
+          OnColorChanged = CommentTCColorChanged
+        end
+        object CommentFC: TColorButton
+          Left = 456
+          Height = 25
+          Top = 24
+          Width = 75
+          BorderWidth = 2
+          ButtonColorSize = 16
+          ButtonColor = clBlack
+          Flat = True
+          OnColorChanged = CommentFCColorChanged
+        end
+        object CommentI: TToggleBox
+          Left = 288
+          Height = 25
+          Top = 24
+          Width = 34
+          Caption = 'I'
+          OnChange = CommentIChange
+          TabOrder = 3
+        end
+        object CommentU: TToggleBox
+          Left = 328
+          Height = 25
+          Top = 24
+          Width = 34
+          Caption = 'U'
+          OnChange = CommentUChange
+          TabOrder = 4
+        end
+        object CommentBC: TColorButton
+          Left = 664
+          Height = 25
+          Top = 24
+          Width = 75
+          BorderWidth = 2
+          ButtonColorSize = 16
+          ButtonColor = clBlack
+          Flat = True
+          OnColorChanged = CommentBGChange
+        end
+        object IdentifierBC: TColorButton
+          Left = 664
+          Height = 25
+          Top = 52
+          Width = 75
+          BorderWidth = 2
+          ButtonColorSize = 16
+          ButtonColor = clBlack
+          Flat = True
+          OnColorChanged = IdentifierBGChange
+        end
+        object IdentifierBG: TToggleBox
+          Left = 544
+          Height = 25
+          Top = 52
+          Width = 112
+          Caption = 'Hintergrund'
+          OnChange = IdentifierBGChange
+          TabOrder = 5
+        end
+        object IdentifierFC: TColorButton
+          Left = 456
+          Height = 25
+          Top = 52
+          Width = 75
+          BorderWidth = 2
+          ButtonColorSize = 16
+          ButtonColor = clBlack
+          Flat = True
+          OnColorChanged = IdentifierFCColorChanged
+        end
+        object IdentifierFB: TToggleBox
+          Left = 376
+          Height = 25
+          Top = 52
+          Width = 72
+          Caption = 'Rahmen'
+          OnChange = IdentifierFBChange
+          TabOrder = 6
+        end
+        object IdentifierU: TToggleBox
+          Left = 328
+          Height = 25
+          Top = 52
+          Width = 34
+          Caption = 'U'
+          OnChange = IdentifierUChange
+          TabOrder = 7
+        end
+        object IdentifierI: TToggleBox
+          Left = 288
+          Height = 25
+          Top = 52
+          Width = 34
+          Caption = 'I'
+          OnChange = IdentifierIChange
+          TabOrder = 8
+        end
+        object IdentifierB: TToggleBox
+          Left = 248
+          Height = 25
+          Top = 52
+          Width = 34
+          Caption = 'B'
+          OnChange = IdentifierBChange
+          TabOrder = 9
+        end
+        object IdentifierTC: TColorButton
+          Left = 160
+          Height = 25
+          Top = 52
+          Width = 75
+          BorderWidth = 2
+          ButtonColorSize = 16
+          ButtonColor = 10027008
+          Flat = True
+          OnClick = IdentifierTCClick
+          OnColorChanged = IdentifierTCColorChanged
+        end
+        object Label12: TLabel
+          Left = 0
+          Height = 25
+          Top = 52
+          Width = 122
+          Caption = 'Schlüsselwörter'
+          ParentColor = False
+        end
+        object FunctionBC: TColorButton
+          Left = 664
+          Height = 25
+          Top = 80
+          Width = 75
+          BorderWidth = 2
+          ButtonColorSize = 16
+          ButtonColor = clBlack
+          Flat = True
+          OnColorChanged = FunctionBGChange
+        end
+        object FunctionBG: TToggleBox
+          Left = 544
+          Height = 25
+          Top = 80
+          Width = 112
+          Caption = 'Hintergrund'
+          OnChange = FunctionBGChange
+          TabOrder = 10
+        end
+        object FunctionFC: TColorButton
+          Left = 456
+          Height = 25
+          Top = 80
+          Width = 75
+          BorderWidth = 2
+          ButtonColorSize = 16
+          ButtonColor = clBlack
+          Flat = True
+          OnColorChanged = FunctionFCColorChanged
+        end
+        object FunctionFB: TToggleBox
+          Left = 376
+          Height = 25
+          Top = 80
+          Width = 72
+          Caption = 'Rahmen'
+          OnChange = FunctionFBChange
+          TabOrder = 11
+        end
+        object FunctionU: TToggleBox
+          Left = 328
+          Height = 25
+          Top = 80
+          Width = 34
+          Caption = 'U'
+          OnChange = FunctionUChange
+          TabOrder = 12
+        end
+        object FunctionI: TToggleBox
+          Left = 288
+          Height = 25
+          Top = 80
+          Width = 34
+          Caption = 'I'
+          OnChange = FunctionIChange
+          TabOrder = 13
+        end
+        object FunctionB: TToggleBox
+          Left = 248
+          Height = 25
+          Top = 80
+          Width = 34
+          Caption = 'B'
+          OnChange = FunctionBChange
+          TabOrder = 14
+        end
+        object FunctionTC: TColorButton
+          Left = 160
+          Height = 25
+          Top = 80
+          Width = 75
+          BorderWidth = 2
+          ButtonColorSize = 16
+          ButtonColor = 26112
+          Flat = True
+          OnColorChanged = FunctionTCColorChanged
+        end
+        object Label13: TLabel
+          Left = 0
+          Height = 25
+          Top = 80
+          Width = 88
+          Caption = 'Funktionen'
+          ParentColor = False
+        end
+        object SymbolBC: TColorButton
+          Left = 664
+          Height = 25
+          Top = 108
+          Width = 75
+          BorderWidth = 2
+          ButtonColorSize = 16
+          ButtonColor = clBlack
+          Flat = True
+          OnColorChanged = SymbolBGChange
+        end
+        object SymbolBG: TToggleBox
+          Left = 544
+          Height = 25
+          Top = 108
+          Width = 112
+          Caption = 'Hintergrund'
+          OnChange = SymbolBGChange
+          TabOrder = 15
+        end
+        object SymbolFC: TColorButton
+          Left = 456
+          Height = 25
+          Top = 108
+          Width = 75
+          BorderWidth = 2
+          ButtonColorSize = 16
+          ButtonColor = clBlack
+          Flat = True
+          OnColorChanged = SymbolFCColorChanged
+        end
+        object SymbolFB: TToggleBox
+          Left = 376
+          Height = 25
+          Top = 108
+          Width = 72
+          Caption = 'Rahmen'
+          OnChange = SymbolFBChange
+          TabOrder = 16
+        end
+        object SymbolU: TToggleBox
+          Left = 328
+          Height = 25
+          Top = 108
+          Width = 34
+          Caption = 'U'
+          OnChange = SymbolUChange
+          TabOrder = 17
+        end
+        object SymbolI: TToggleBox
+          Left = 288
+          Height = 25
+          Top = 108
+          Width = 34
+          Caption = 'I'
+          OnChange = SymbolIChange
+          TabOrder = 18
+        end
+        object SymbolB: TToggleBox
+          Left = 248
+          Height = 25
+          Top = 108
+          Width = 34
+          Caption = 'B'
+          OnChange = SymbolBChange
+          TabOrder = 19
+        end
+        object SymbolTC: TColorButton
+          Left = 160
+          Height = 25
+          Top = 108
+          Width = 75
+          BorderWidth = 2
+          ButtonColorSize = 16
+          ButtonColor = 3552822
+          Flat = True
+          OnColorChanged = SymbolTCColorChanged
+        end
+        object Label14: TLabel
+          Left = 0
+          Height = 25
+          Top = 108
+          Width = 69
+          Caption = 'Symbole'
+          ParentColor = False
+        end
+        object NumberBC: TColorButton
+          Left = 664
+          Height = 25
+          Top = 136
+          Width = 75
+          BorderWidth = 2
+          ButtonColorSize = 16
+          ButtonColor = clBlack
+          Flat = True
+          OnColorChanged = NumberBGChange
+        end
+        object NumberBG: TToggleBox
+          Left = 544
+          Height = 25
+          Top = 136
+          Width = 112
+          Caption = 'Hintergrund'
+          OnChange = NumberBGChange
+          TabOrder = 20
+        end
+        object NumberFC: TColorButton
+          Left = 456
+          Height = 25
+          Top = 136
+          Width = 75
+          BorderWidth = 2
+          ButtonColorSize = 16
+          ButtonColor = clBlack
+          Flat = True
+          OnColorChanged = NumberFCColorChanged
+        end
+        object NumberFB: TToggleBox
+          Left = 376
+          Height = 25
+          Top = 136
+          Width = 72
+          Caption = 'Rahmen'
+          OnChange = NumberFBChange
+          TabOrder = 21
+        end
+        object NumberU: TToggleBox
+          Left = 328
+          Height = 25
+          Top = 136
+          Width = 34
+          Caption = 'U'
+          OnChange = NumberUChange
+          TabOrder = 22
+        end
+        object NumberI: TToggleBox
+          Left = 288
+          Height = 25
+          Top = 136
+          Width = 34
+          Caption = 'I'
+          OnChange = NumberIChange
+          TabOrder = 23
+        end
+        object NumberB: TToggleBox
+          Left = 248
+          Height = 25
+          Top = 136
+          Width = 34
+          Caption = 'B'
+          OnChange = NumberBChange
+          TabOrder = 24
+        end
+        object NumberTC: TColorButton
+          Left = 160
+          Height = 25
+          Top = 136
+          Width = 75
+          BorderWidth = 2
+          ButtonColorSize = 16
+          ButtonColor = clBlue
+          Flat = True
+          OnColorChanged = NumberTCColorChanged
+        end
+        object Label15: TLabel
+          Left = 0
+          Height = 25
+          Top = 136
+          Width = 52
+          Caption = 'Zahlen'
+          ParentColor = False
+        end
+        object SpaceBC: TColorButton
+          Left = 664
+          Height = 25
+          Top = 164
+          Width = 75
+          BorderWidth = 2
+          ButtonColorSize = 16
+          ButtonColor = clBlack
+          Flat = True
+          OnColorChanged = SpaceBGChange
+        end
+        object SpaceBG: TToggleBox
+          Left = 544
+          Height = 25
+          Top = 164
+          Width = 112
+          Caption = 'Hintergrund'
+          OnChange = SpaceBGChange
+          TabOrder = 25
+        end
+        object SpaceFC: TColorButton
+          Left = 456
+          Height = 25
+          Top = 164
+          Width = 75
+          BorderWidth = 2
+          ButtonColorSize = 16
+          ButtonColor = clBlack
+          Flat = True
+          OnColorChanged = SpaceFCColorChanged
+        end
+        object SpaceFB: TToggleBox
+          Left = 376
+          Height = 25
+          Top = 164
+          Width = 72
+          Caption = 'Rahmen'
+          OnChange = SpaceFBChange
+          TabOrder = 26
+        end
+        object SpaceU: TToggleBox
+          Left = 328
+          Height = 25
+          Top = 164
+          Width = 34
+          Caption = 'U'
+          OnChange = SpaceUChange
+          TabOrder = 27
+        end
+        object SpaceI: TToggleBox
+          Left = 288
+          Height = 25
+          Top = 164
+          Width = 34
+          Caption = 'I'
+          OnChange = SpaceIChange
+          TabOrder = 28
+        end
+        object SpaceB: TToggleBox
+          Left = 248
+          Height = 25
+          Top = 164
+          Width = 34
+          Caption = 'B'
+          OnChange = SpaceBChange
+          TabOrder = 29
+        end
+        object SpaceTC: TColorButton
+          Left = 160
+          Height = 25
+          Top = 164
+          Width = 75
+          BorderWidth = 2
+          ButtonColorSize = 16
+          ButtonColor = clBlack
+          Flat = True
+          OnColorChanged = SpaceTCColorChanged
+        end
+        object Label16: TLabel
+          Left = 0
+          Height = 25
+          Top = 164
+          Width = 90
+          Caption = 'Leerzeichen'
+          ParentColor = False
+        end
+        object StringBC: TColorButton
+          Left = 664
+          Height = 25
+          Top = 192
+          Width = 75
+          BorderWidth = 2
+          ButtonColorSize = 16
+          ButtonColor = clBlack
+          Flat = True
+          OnColorChanged = StringBGChange
+        end
+        object StringBG: TToggleBox
+          Left = 544
+          Height = 25
+          Top = 192
+          Width = 112
+          Caption = 'Hintergrund'
+          OnChange = StringBGChange
+          TabOrder = 30
+        end
+        object StringFC: TColorButton
+          Left = 456
+          Height = 25
+          Top = 192
+          Width = 75
+          BorderWidth = 2
+          ButtonColorSize = 16
+          ButtonColor = clBlack
+          Flat = True
+          OnColorChanged = StringFCColorChanged
+        end
+        object StringFB: TToggleBox
+          Left = 376
+          Height = 25
+          Top = 192
+          Width = 72
+          Caption = 'Rahmen'
+          OnChange = StringFBChange
+          TabOrder = 31
+        end
+        object StringU: TToggleBox
+          Left = 328
+          Height = 25
+          Top = 192
+          Width = 34
+          Caption = 'U'
+          OnChange = StringUChange
+          TabOrder = 32
+        end
+        object StringI: TToggleBox
+          Left = 288
+          Height = 25
+          Top = 192
+          Width = 34
+          Caption = 'I'
+          OnChange = StringIChange
+          TabOrder = 33
+        end
+        object StringB: TToggleBox
+          Left = 248
+          Height = 25
+          Top = 192
+          Width = 34
+          Caption = 'B'
+          OnChange = StringBChange
+          TabOrder = 34
+        end
+        object StringTC: TColorButton
+          Left = 160
+          Height = 25
+          Top = 192
+          Width = 75
+          BorderWidth = 2
+          ButtonColorSize = 16
+          ButtonColor = 204
+          Flat = True
+          OnColorChanged = StringTCColorChanged
+        end
+        object Label17: TLabel
+          Left = 0
+          Height = 25
+          Top = 192
+          Width = 54
+          Caption = 'Strings'
+          ParentColor = False
+        end
+        object VariableBC: TColorButton
+          Left = 664
+          Height = 25
+          Top = 220
+          Width = 75
+          BorderWidth = 2
+          ButtonColorSize = 16
+          ButtonColor = clBlack
+          Flat = True
+          OnColorChanged = VariableBGChange
+        end
+        object VariableBG: TToggleBox
+          Left = 544
+          Height = 25
+          Top = 220
+          Width = 112
+          Caption = 'Hintergrund'
+          OnChange = VariableBGChange
+          TabOrder = 35
+        end
+        object VariableFC: TColorButton
+          Left = 456
+          Height = 25
+          Top = 220
+          Width = 75
+          BorderWidth = 2
+          ButtonColorSize = 16
+          ButtonColor = clBlack
+          Flat = True
+          OnColorChanged = VariableFCColorChanged
+        end
+        object VariableFB: TToggleBox
+          Left = 376
+          Height = 25
+          Top = 220
+          Width = 72
+          Caption = 'Rahmen'
+          OnChange = VariableFBChange
+          TabOrder = 36
+        end
+        object VariableU: TToggleBox
+          Left = 328
+          Height = 25
+          Top = 220
+          Width = 34
+          Caption = 'U'
+          OnChange = VariableUChange
+          TabOrder = 37
+        end
+        object VariableI: TToggleBox
+          Left = 288
+          Height = 25
+          Top = 220
+          Width = 34
+          Caption = 'I'
+          OnChange = VariableIChange
+          TabOrder = 38
+        end
+        object VariableB: TToggleBox
+          Left = 248
+          Height = 25
+          Top = 220
+          Width = 34
+          Caption = 'B'
+          Checked = True
+          OnChange = VariableBChange
+          State = cbChecked
+          TabOrder = 39
+        end
+        object VariableTC: TColorButton
+          Left = 160
+          Height = 25
+          Top = 220
+          Width = 75
+          BorderWidth = 2
+          ButtonColorSize = 16
+          ButtonColor = 16737792
+          Flat = True
+          OnColorChanged = VariableTCColorChanged
+        end
+        object Label18: TLabel
+          Left = 0
+          Height = 25
+          Top = 220
+          Width = 72
+          Caption = 'Variablen'
+          ParentColor = False
+        end
+        object OtherBC: TColorButton
+          Left = 664
+          Height = 25
+          Top = 276
+          Width = 75
+          BorderWidth = 2
+          ButtonColorSize = 16
+          ButtonColor = clBlack
+          Flat = True
+          OnColorChanged = OtherBGChange
+        end
+        object OtherBG: TToggleBox
+          Left = 544
+          Height = 25
+          Top = 276
+          Width = 112
+          Caption = 'Hintergrund'
+          OnChange = OtherBGChange
+          TabOrder = 40
+        end
+        object OtherFC: TColorButton
+          Left = 456
+          Height = 25
+          Top = 276
+          Width = 75
+          BorderWidth = 2
+          ButtonColorSize = 16
+          ButtonColor = clBlack
+          Flat = True
+          OnColorChanged = OtherFCColorChanged
+        end
+        object OtherFB: TToggleBox
+          Left = 376
+          Height = 25
+          Top = 276
+          Width = 72
+          Caption = 'Rahmen'
+          OnChange = OtherFBChange
+          TabOrder = 41
+        end
+        object OtherU: TToggleBox
+          Left = 328
+          Height = 25
+          Top = 276
+          Width = 34
+          Caption = 'U'
+          OnChange = OtherUChange
+          TabOrder = 42
+        end
+        object OtherI: TToggleBox
+          Left = 288
+          Height = 25
+          Top = 276
+          Width = 34
+          Caption = 'I'
+          OnChange = OtherIChange
+          TabOrder = 43
+        end
+        object OtherB: TToggleBox
+          Left = 248
+          Height = 25
+          Top = 276
+          Width = 34
+          Caption = 'B'
+          OnChange = OtherBChange
+          TabOrder = 44
+        end
+        object OtherTC: TColorButton
+          Left = 160
+          Height = 25
+          Top = 276
+          Width = 75
+          BorderWidth = 2
+          ButtonColorSize = 16
+          ButtonColor = 3552822
+          Flat = True
+          OnClick = OtherTCClick
+        end
+        object Label19: TLabel
+          Left = 0
+          Height = 25
+          Top = 274
+          Width = 65
+          Caption = 'Anderes'
+          ParentColor = False
+        end
+        object DocBC: TColorButton
+          Left = 664
+          Height = 25
+          Top = 248
+          Width = 75
+          BorderWidth = 2
+          ButtonColorSize = 16
+          ButtonColor = clBlack
+          Flat = True
+          OnColorChanged = DocBGChange
+        end
+        object DocBG: TToggleBox
+          Left = 544
+          Height = 25
+          Top = 248
+          Width = 112
+          Caption = 'Hintergrund'
+          OnChange = DocBGChange
+          TabOrder = 45
+        end
+        object DocFC: TColorButton
+          Left = 456
+          Height = 25
+          Top = 248
+          Width = 75
+          BorderWidth = 2
+          ButtonColorSize = 16
+          ButtonColor = clBlack
+          Flat = True
+          OnColorChanged = DocFCColorChanged
+        end
+        object DocFB: TToggleBox
+          Left = 376
+          Height = 25
+          Top = 248
+          Width = 72
+          Caption = 'Rahmen'
+          OnChange = DocFBChange
+          TabOrder = 46
+        end
+        object DocU: TToggleBox
+          Left = 328
+          Height = 25
+          Top = 248
+          Width = 34
+          Caption = 'U'
+          OnChange = DocUChange
+          TabOrder = 47
+        end
+        object DocI: TToggleBox
+          Left = 288
+          Height = 25
+          Top = 248
+          Width = 34
+          Caption = 'I'
+          OnChange = DocIChange
+          TabOrder = 48
+        end
+        object DocB: TToggleBox
+          Left = 248
+          Height = 25
+          Top = 248
+          Width = 34
+          Caption = 'B'
+          OnChange = DocBChange
+          TabOrder = 49
+        end
+        object DocTC: TColorButton
+          Left = 160
+          Height = 25
+          Top = 248
+          Width = 75
+          BorderWidth = 2
+          ButtonColorSize = 16
+          ButtonColor = clRed
+          Flat = True
+          OnClick = DocTCClick
+        end
+        object Label20: TLabel
+          Left = 0
+          Height = 25
+          Top = 246
+          Width = 139
+          Caption = 'Doc Kommentare'
+          ParentColor = False
+        end
+        object Label21: TLabel
+          Left = 160
+          Height = 25
+          Top = 0
+          Width = 47
+          Caption = 'Farbe:'
+          ParentColor = False
+        end
+        object Label22: TLabel
+          Left = 280
+          Height = 25
+          Top = 0
+          Width = 50
+          Caption = 'Schrift'
+          ParentColor = False
+        end
+        object Label23: TLabel
+          Left = 424
+          Height = 25
+          Top = 0
+          Width = 65
+          Caption = 'Rahmen'
+          ParentColor = False
+        end
+        object Label24: TLabel
+          Left = 616
+          Height = 25
+          Top = 0
+          Width = 96
+          Caption = 'Hintergrund'
+          ParentColor = False
+        end
+      end
+      object KeywordOptionsTab: TTabSheet
+        Caption = 'Schlüsselwörter'
+        ClientHeight = 310
+        ClientWidth = 739
+        object KeyWordView: TListView
+          Left = 0
+          Height = 310
+          Top = 0
+          Width = 408
+          Align = alLeft
+          Columns = <          
+            item
+              Caption = 'Schlüssel'
+              Width = 250
+            end          
+            item
+              Caption = 'Typ'
+              Width = 150
+            end>
+          RowSelect = True
+          ScrollBars = ssVertical
+          SortColumn = 0
+          SortType = stText
+          TabOrder = 0
+          ViewStyle = vsReport
+          OnSelectItem = KeyWordViewSelectItem
+        end
+        object KeyEdit: TLabeledEdit
+          Left = 416
+          Height = 33
+          Top = 32
+          Width = 320
+          EditLabel.AnchorSideLeft.Control = KeyEdit
+          EditLabel.AnchorSideRight.Control = KeyEdit
+          EditLabel.AnchorSideRight.Side = asrBottom
+          EditLabel.AnchorSideBottom.Control = KeyEdit
+          EditLabel.Left = 416
+          EditLabel.Height = 25
+          EditLabel.Top = 4
+          EditLabel.Width = 320
+          EditLabel.Caption = 'Schlüsselwort'
+          EditLabel.ParentColor = False
+          TabOrder = 1
+          OnKeyUp = KeyEditKeyUp
+        end
+        object Label28: TLabel
+          Left = 416
+          Height = 25
+          Top = 80
+          Width = 135
+          Caption = 'Typ (Highlighter):'
+          ParentColor = False
+        end
+        object KeyTypeBox: TComboBox
+          Left = 416
+          Height = 33
+          Top = 112
+          Width = 320
+          ItemHeight = 25
+          ItemIndex = 1
+          Items.Strings = (
+            'Kommentar'
+            'Schlüsselwort'
+            'Funktion'
+            'Symbol'
+            'Zahl'
+            'String'
+            'Unbekannt'
+            'Variable'
+            'Undefiniert'
+            'Doc Kommentar'
+          )
+          Style = csDropDownList
+          TabOrder = 2
+          Text = 'Schlüsselwort'
+        end
+        object AddKeywordButton: TButton
+          Left = 637
+          Height = 33
+          Top = 272
+          Width = 99
+          Caption = 'Hinzufügen'
+          OnClick = AddKeywordButtonClick
+          TabOrder = 3
+        end
+        object DeleteKeywordButton: TButton
+          Left = 536
+          Height = 33
+          Top = 272
+          Width = 99
+          Caption = 'Löschen'
+          Enabled = False
+          OnClick = DeleteKeywordButtonClick
+          TabOrder = 4
+        end
+      end
+      object FunctionOptionTab: TTabSheet
+        Caption = 'Standard Funktionen'
+        ClientHeight = 310
+        ClientWidth = 739
+        object FuncBox: TListBox
+          Left = 0
+          Height = 310
+          Top = 0
+          Width = 296
+          Align = alLeft
+          ItemHeight = 0
+          OnClick = FuncBoxClick
+          TabOrder = 0
+        end
+        object FuncNameEdit: TEdit
+          Left = 304
+          Height = 33
+          Top = 40
+          Width = 432
+          OnChange = FuncNameEditChange
+          TabOrder = 1
+        end
+        object Label29: TLabel
+          Left = 304
+          Height = 25
+          Top = 8
+          Width = 69
+          Caption = 'Funktion'
+          ParentColor = False
+        end
+        object FuncInfoMemo: TMemo
+          Left = 304
+          Height = 154
+          Top = 104
+          Width = 432
+          TabOrder = 2
+        end
+        object Label30: TLabel
+          Left = 304
+          Height = 25
+          Top = 80
+          Width = 124
+          Caption = 'Dokumentation'
+          ParentColor = False
+        end
+        object AddFuncButton: TButton
+          Left = 637
+          Height = 33
+          Top = 272
+          Width = 99
+          Caption = 'Hinzufügen'
+          Enabled = False
+          OnClick = AddFuncButtonClick
+          TabOrder = 3
+        end
+        object DeleteFuncButton: TButton
+          Left = 536
+          Height = 33
+          Top = 272
+          Width = 99
+          Caption = 'Löschen'
+          Enabled = False
+          OnClick = DeleteFuncButtonClick
+          TabOrder = 4
+        end
+      end
+    end
+  end
+  object ColorDialog1: TColorDialog
+    Color = clBlack
+    CustomColors.Strings = (
+      'ColorA=000000'
+      'ColorB=000080'
+      'ColorC=008000'
+      'ColorD=008080'
+      'ColorE=800000'
+      'ColorF=800080'
+      'ColorG=808000'
+      'ColorH=808080'
+      'ColorI=C0C0C0'
+      'ColorJ=0000FF'
+      'ColorK=00FF00'
+      'ColorL=00FFFF'
+      'ColorM=FF0000'
+      'ColorN=FF00FF'
+      'ColorO=FFFF00'
+      'ColorP=FFFFFF'
+      'ColorQ=C0DCC0'
+      'ColorR=F0CAA6'
+      'ColorS=F0FBFF'
+      'ColorT=A4A0A0'
+    )
+    left = 712
+  end
+  object FontDialog1: TFontDialog
+    MinFontSize = 0
+    MaxFontSize = 0
+    left = 616
+  end
+end

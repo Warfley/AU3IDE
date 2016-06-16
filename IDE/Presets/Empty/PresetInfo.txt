@@ -1,0 +1,4 @@
+MainFile=MainFile.apr
+OpendFile=MainFile.apr
+FocusedFile=0
+AppType=Console

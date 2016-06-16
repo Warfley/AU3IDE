@@ -1,0 +1,227 @@
+object FormEditorOptionsForm: TFormEditorOptionsForm
+  Left = 490
+  Height = 304
+  Top = 213
+  Width = 378
+  Caption = 'Formular Editor Optionen'
+  ClientHeight = 304
+  ClientWidth = 378
+  Position = poScreenCenter
+  LCLVersion = '1.7'
+  object Label1: TLabel
+    Left = 0
+    Height = 25
+    Top = 8
+    Width = 137
+    Caption = 'Objekt Inspektor:'
+    ParentColor = False
+  end
+  object OISideBox: TToggleBox
+    Left = 168
+    Height = 25
+    Top = 8
+    Width = 92
+    Caption = 'Rechts'
+    Checked = True
+    OnChange = OISideBoxChange
+    State = cbChecked
+    TabOrder = 0
+  end
+  object Label2: TLabel
+    Left = 0
+    Height = 25
+    Top = 51
+    Width = 100
+    Caption = 'Hintergrund:'
+    ParentColor = False
+  end
+  object BGColorPicklist: TColorBox
+    Left = 168
+    Height = 26
+    Top = 48
+    Width = 160
+    DefaultColorColor = clWhite
+    NoneColorColor = clNone
+    Selected = clWhite
+    ItemHeight = 20
+    OnChange = BGColorPicklistChange
+    TabOrder = 1
+  end
+  object BGColorBtn: TButton
+    Left = 328
+    Height = 25
+    Top = 48
+    Width = 32
+    Caption = '...'
+    OnClick = BGColorBtnClick
+    TabOrder = 2
+  end
+  object ForeColorButton: TButton
+    Left = 328
+    Height = 25
+    Top = 88
+    Width = 32
+    Caption = '...'
+    OnClick = ForeColorButtonClick
+    TabOrder = 3
+  end
+  object ForeColorPicklist: TColorBox
+    Left = 168
+    Height = 26
+    Top = 88
+    Width = 160
+    NoneColorColor = clNone
+    ItemHeight = 20
+    OnChange = BGColorPicklistChange
+    TabOrder = 4
+  end
+  object Label3: TLabel
+    Left = 0
+    Height = 25
+    Top = 91
+    Width = 105
+    Caption = 'Vordergrund:'
+    ParentColor = False
+  end
+  object TBColorButton: TButton
+    Left = 328
+    Height = 25
+    Top = 128
+    Width = 32
+    Caption = '...'
+    OnClick = TBColorButtonClick
+    TabOrder = 5
+  end
+  object TBColorPicklist: TColorBox
+    Left = 168
+    Height = 26
+    Top = 128
+    Width = 160
+    DefaultColorColor = clBtnFace
+    NoneColorColor = clNone
+    Selected = clBtnFace
+    ItemHeight = 20
+    OnChange = BGColorPicklistChange
+    TabOrder = 6
+  end
+  object Label4: TLabel
+    Left = 0
+    Height = 25
+    Top = 131
+    Width = 125
+    Caption = 'Toolbox Button:'
+    ParentColor = False
+  end
+  object Button2: TButton
+    Left = 168
+    Height = 32
+    Top = 264
+    Width = 99
+    Caption = 'Ok'
+    ModalResult = 1
+    TabOrder = 7
+  end
+  object Button1: TButton
+    Left = 272
+    Height = 32
+    Top = 264
+    Width = 99
+    Caption = 'Abbrechen'
+    ModalResult = 2
+    TabOrder = 8
+  end
+  object Label5: TLabel
+    Left = 0
+    Height = 25
+    Hint = 'Zeigt ein Raster auf allen Containerkomponenten an'#13#10#13#10'Verlangsamt den Editor bei großen Formen drastisch'
+    Top = 176
+    Width = 168
+    AutoSize = False
+    Caption = 'Raster:'
+    ParentColor = False
+    ParentShowHint = False
+    ShowHint = True
+  end
+  object RasterBox: TCheckBox
+    Left = 168
+    Height = 29
+    Hint = 'Zeigt ein Raster auf allen Containerkomponenten an'#13#10#13#10'Verlangsamt den Editor bei großen Formen drastisch'
+    Top = 174
+    Width = 30
+    Checked = True
+    ParentShowHint = False
+    ShowHint = True
+    State = cbChecked
+    TabOrder = 9
+  end
+  object Label6: TLabel
+    Left = 192
+    Height = 25
+    Top = 176
+    Width = 52
+    Caption = 'Größe:'
+    ParentColor = False
+  end
+  object RasterSizeEdit: TEdit
+    Left = 248
+    Height = 33
+    Top = 174
+    Width = 80
+    Alignment = taRightJustify
+    NumbersOnly = True
+    TabOrder = 10
+    Text = '8'
+  end
+  object HelpLineBox: TCheckBox
+    Left = 0
+    Height = 29
+    Hint = 'Hilfslinien zum Positionieren von Controls'
+    Top = 216
+    Width = 106
+    Caption = 'Hilfslinien'
+    Checked = True
+    ParentShowHint = False
+    ShowHint = True
+    State = cbChecked
+    TabOrder = 11
+  end
+  object DBBox: TCheckBox
+    Left = 168
+    Height = 29
+    Hint = 'Auf langsamen Computern und VMs nicht empfohlen'
+    Top = 216
+    Width = 141
+    Caption = 'Doppel Puffer'
+    Checked = True
+    ParentShowHint = False
+    ShowHint = True
+    State = cbChecked
+    TabOrder = 12
+  end
+  object ColorDialog1: TColorDialog
+    Color = clBlack
+    CustomColors.Strings = (
+      'ColorA=000000'
+      'ColorB=000080'
+      'ColorC=008000'
+      'ColorD=008080'
+      'ColorE=800000'
+      'ColorF=800080'
+      'ColorG=808000'
+      'ColorH=808080'
+      'ColorI=C0C0C0'
+      'ColorJ=0000FF'
+      'ColorK=00FF00'
+      'ColorL=00FFFF'
+      'ColorM=FF0000'
+      'ColorN=FF00FF'
+      'ColorO=FFFF00'
+      'ColorP=FFFFFF'
+      'ColorQ=C0DCC0'
+      'ColorR=F0CAA6'
+      'ColorS=F0FBFF'
+      'ColorT=A4A0A0'
+    )
+    left = 312
+  end
+end

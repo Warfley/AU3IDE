@@ -1,0 +1,36 @@
+object SampleForm: TSampleForm
+  Left = 424
+  Height = 298
+  Top = 179
+  Width = 444
+  BorderStyle = bsToolWindow
+  Caption = 'Beispiele'
+  ClientHeight = 298
+  ClientWidth = 444
+  OnShow = FormShow
+  Position = poScreenCenter
+  LCLVersion = '1.7'
+  Visible = False
+  object ListBox1: TListBox
+    Left = 0
+    Height = 265
+    Top = 33
+    Width = 444
+    Align = alClient
+    ItemHeight = 0
+    OnDblClick = ListBox1DblClick
+    TabOrder = 0
+  end
+  object ListFilterEdit1: TListFilterEdit
+    Left = 0
+    Height = 33
+    Top = 0
+    Width = 444
+    ButtonWidth = 23
+    NumGlyphs = 1
+    Align = alTop
+    MaxLength = 0
+    TabOrder = 1
+    FilteredListbox = ListBox1
+  end
+end

@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectOptions>
+    <Version Value="9"/>
+    <PathDelim Value="\"/>
+    <General>
+      <SessionStorage Value="InProjectDir"/>
+      <MainUnit Value="0"/>
+      <Title Value="AU3IDE"/>
+      <ResourceType Value="res"/>
+      <UseXPManifest Value="True"/>
+    </General>
+    <i18n>
+      <EnableI18N LFM="False"/>
+    </i18n>
+    <VersionInfo>
+      <UseVersionInfo Value="True"/>
+      <AutoIncrementBuild Value="True"/>
+      <RevisionNr Value="5"/>
+      <BuildNr Value="9"/>
+      <Language Value="0407"/>
+      <Attributes pvaPreRelease="True"/>
+      <StringTable Comments="AU3 Alpha 0.0.5" FileDescription="IDE for AutoIt language" LegalCopyright="Copyright (c) F. Kehrein 2016" ProductVersion="0.0.5 Alpha"/>
+    </VersionInfo>
+    <BuildModes Count="3">
+      <Item1 Name="Default" Default="True"/>
+      <Item2 Name="Release">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="bin\Release\$(TargetCPU)-$(TargetOS)\AU3IDE"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+            <OtherUnitFiles Value="Forms;Common;..\Utils;..\Editor;..\Highlighter"/>
+            <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <SmartLinkUnit Value="True"/>
+            <Optimizations>
+              <OptimizationLevel Value="3"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+            </Debugging>
+            <LinkSmart Value="True"/>
+            <Options>
+              <Win32>
+                <GraphicApplication Value="True"/>
+              </Win32>
+            </Options>
+          </Linking>
+        </CompilerOptions>
+      </Item2>
+      <Item3 Name="Release64">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="bin\Release\$(TargetCPU)-$(TargetOS)\AU3IDE"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+            <OtherUnitFiles Value="Forms;Common;..\Utils;..\Editor;..\Highlighter"/>
+            <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <SmartLinkUnit Value="True"/>
+            <TargetCPU Value="x86_64"/>
+            <TargetOS Value="win64"/>
+            <Optimizations>
+              <OptimizationLevel Value="3"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+            </Debugging>
+            <LinkSmart Value="True"/>
+            <Options>
+              <Win32>
+                <GraphicApplication Value="True"/>
+              </Win32>
+            </Options>
+          </Linking>
+        </CompilerOptions>
+      </Item3>
+    </BuildModes>
+    <PublishOptions>
+      <Version Value="2"/>
+    </PublishOptions>
+    <RunParams>
+      <local>
+        <FormatVersion Value="1"/>
+      </local>
+    </RunParams>
+    <RequiredPackages Count="4">
+      <Item1>
+        <PackageName Value="RunTimeTypeInfoControls"/>
+      </Item1>
+      <Item2>
+        <PackageName Value="SynEdit"/>
+      </Item2>
+      <Item3>
+        <PackageName Value="LazControls"/>
+      </Item3>
+      <Item4>
+        <PackageName Value="LCL"/>
+      </Item4>
+    </RequiredPackages>
+    <Units Count="22">
+      <Unit0>
+        <Filename Value="AU3IDE.lpr"/>
+        <IsPartOfProject Value="True"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="Forms\idemainform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="MainForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="IDEMainForm"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="Common\project.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Project"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="Forms\idestartupscreen.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="StartupScreen"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="IDEStartupScreen"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="Forms\projectinspector.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="ProjectInspector"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Frame"/>
+        <UnitName Value="ProjectInspector"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="..\Utils\au3types.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="au3Types"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="..\Utils\listrecords.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ListRecords"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="..\Editor\codeformatter.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit7>
+      <Unit8>
+        <Filename Value="..\Editor\editor.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="EditorFrame"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Frame"/>
+        <UnitName Value="Editor"/>
+      </Unit8>
+      <Unit9>
+        <Filename Value="..\Editor\formeditor.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="FormEditFrame"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Frame"/>
+        <UnitName Value="FormEditor"/>
+      </Unit9>
+      <Unit10>
+        <Filename Value="..\Editor\tooltip.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit10>
+      <Unit11>
+        <Filename Value="..\Editor\unitparser.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="UnitParser"/>
+      </Unit11>
+      <Unit12>
+        <Filename Value="..\Highlighter\au3highlighter.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="au3Highlighter"/>
+      </Unit12>
+      <Unit13>
+        <Filename Value="Forms\editormanagerframe.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="EditorManager"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Frame"/>
+        <UnitName Value="EditorManagerFrame"/>
+      </Unit13>
+      <Unit14>
+        <Filename Value="Common\au3fileinfo.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="au3FileInfo"/>
+      </Unit14>
+      <Unit15>
+        <Filename Value="..\Editor\formeditcomponents.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="FormEditComponents"/>
+      </Unit15>
+      <Unit16>
+        <Filename Value="Common\au3compiler.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="au3Compiler"/>
+      </Unit16>
+      <Unit17>
+        <Filename Value="Forms\compileroptions.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="CompilerOptionsForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="CompilerOptions"/>
+      </Unit17>
+      <Unit18>
+        <Filename Value="Forms\editoroptions.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="EditorConf"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="EditorOptions"/>
+      </Unit18>
+      <Unit19>
+        <Filename Value="Forms\formeditoroptions.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="FormEditorOptionsForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="FormEditorOptions"/>
+      </Unit19>
+      <Unit20>
+        <Filename Value="Forms\sampeprojectview.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="SampleForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="SampeProjectView"/>
+      </Unit20>
+      <Unit21>
+        <Filename Value="Forms\aboutwindow.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="AboutForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="AboutWindow"/>
+      </Unit21>
+    </Units>
+  </ProjectOptions>
+  <CompilerOptions>
+    <Version Value="11"/>
+    <PathDelim Value="\"/>
+    <Target>
+      <Filename Value="AU3IDE"/>
+    </Target>
+    <SearchPaths>
+      <IncludeFiles Value="$(ProjOutDir)"/>
+      <OtherUnitFiles Value="Forms;Common;..\Utils;..\Editor;..\Highlighter"/>
+      <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+    </SearchPaths>
+    <Linking>
+      <Debugging>
+        <UseHeaptrc Value="True"/>
+      </Debugging>
+      <Options>
+        <Win32>
+          <GraphicApplication Value="True"/>
+        </Win32>
+      </Options>
+    </Linking>
+  </CompilerOptions>
+  <Debugging>
+    <Exceptions Count="3">
+      <Item1>
+        <Name Value="EAbort"/>
+      </Item1>
+      <Item2>
+        <Name Value="ECodetoolError"/>
+      </Item2>
+      <Item3>
+        <Name Value="EFOpenError"/>
+      </Item3>
+    </Exceptions>
+  </Debugging>
+</CONFIG>

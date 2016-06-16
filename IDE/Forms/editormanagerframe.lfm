@@ -1,0 +1,22 @@
+object EditorManager: TEditorManager
+  Left = 0
+  Height = 655
+  Top = 0
+  Width = 916
+  ClientHeight = 655
+  ClientWidth = 916
+  LCLVersion = '1.7'
+  TabOrder = 0
+  DesignLeft = 381
+  DesignTop = 232
+  object EditorControl: TPageControl
+    Left = 0
+    Height = 655
+    Top = 0
+    Width = 916
+    Align = alClient
+    TabOrder = 0
+    OnChange = EditorControlChange
+    OnMouseUp = EditorControlMouseUp
+  end
+end

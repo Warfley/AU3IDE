@@ -1,0 +1,174 @@
+object Form1: TForm1
+  Left = 271
+  Height = 547
+  Top = 19
+  Width = 807
+  ActiveControl = PageControl1
+  Caption = 'AU3 Editor'
+  ClientHeight = 527
+  ClientWidth = 807
+  Menu = MainMenu1
+  OnClose = FormClose
+  OnCreate = FormCreate
+  LCLVersion = '1.7'
+  object PageControl1: TPageControl
+    Left = 0
+    Height = 527
+    Top = 0
+    Width = 807
+    Align = alClient
+    ParentFont = False
+    TabOrder = 0
+    OnChange = PageControl1Change
+  end
+  object MainMenu1: TMainMenu
+    left = 206
+    top = 142
+    object MenuItem1: TMenuItem
+      Caption = 'Datei'
+      object NewItem: TMenuItem
+        Caption = 'Neu'
+        ShortCut = 16462
+        OnClick = NewItemClick
+      end
+      object MenuItem11: TMenuItem
+        Caption = '-'
+      end
+      object OpenItem: TMenuItem
+        Caption = 'Öffnen'
+        ShortCut = 16463
+        OnClick = OpenItemClick
+      end
+      object SaveItem: TMenuItem
+        Caption = 'Speichern'
+        ShortCut = 16467
+        OnClick = SaveItemClick
+      end
+      object SaveAsItem: TMenuItem
+        Caption = 'Speichern unter'
+        ShortCut = 24659
+        OnClick = SaveAsItemClick
+      end
+      object MenuItem10: TMenuItem
+        Caption = '-'
+      end
+      object CloseFileItem: TMenuItem
+        Caption = 'Schließen'
+        ShortCut = 16471
+        OnClick = CloseFileItemClick
+      end
+      object CloseAllItem: TMenuItem
+        Caption = 'Alle Schließen'
+        ShortCut = 24663
+        OnClick = CloseAllItemClick
+      end
+      object MenuItem14: TMenuItem
+        Caption = '-'
+      end
+      object QuitItem: TMenuItem
+        Caption = 'Beenden'
+        ShortCut = 16465
+        OnClick = QuitItemClick
+      end
+    end
+    object MenuItem2: TMenuItem
+      Caption = 'Tools'
+      object MenuItem3: TMenuItem
+        Caption = 'Code Formatieren'
+        ShortCut = 16452
+        OnClick = MenuItem3Click
+      end
+    end
+    object MenuItem5: TMenuItem
+      Caption = 'Einstellungen'
+      object MenuItem6: TMenuItem
+        Caption = 'Schrift'
+        OnClick = MenuItem6Click
+      end
+      object MenuItem7: TMenuItem
+        Caption = 'Hintergrund'
+        OnClick = MenuItem7Click
+      end
+      object MenuItem8: TMenuItem
+        Caption = 'Seitenleiste'
+        OnClick = MenuItem8Click
+      end
+    end
+  end
+  object OpenDialog1: TOpenDialog
+    Filter = 'AU3 Source|*.AU31'
+    Options = [ofAllowMultiSelect, ofExtensionDifferent, ofFileMustExist, ofEnableSizing, ofViewDetail]
+    left = 984
+    top = 128
+  end
+  object SaveDialog1: TSaveDialog
+    Filter = 'AU3 Source|*.AU31'
+    Options = [ofExtensionDifferent, ofEnableSizing, ofViewDetail]
+    left = 981
+    top = 256
+  end
+  object FontDialog1: TFontDialog
+    Font.Height = 22
+    Font.Name = 'Courier New'
+    Font.Pitch = fpFixed
+    Font.Quality = fqProof
+    MinFontSize = 0
+    MaxFontSize = 0
+    left = 592
+    top = 142
+  end
+  object BGDLG: TColorDialog
+    Color = clWhite
+    CustomColors.Strings = (
+      'ColorA=000000'
+      'ColorB=000080'
+      'ColorC=008000'
+      'ColorD=008080'
+      'ColorE=800000'
+      'ColorF=800080'
+      'ColorG=808000'
+      'ColorH=808080'
+      'ColorI=C0C0C0'
+      'ColorJ=0000FF'
+      'ColorK=00FF00'
+      'ColorL=00FFFF'
+      'ColorM=FF0000'
+      'ColorN=FF00FF'
+      'ColorO=FFFF00'
+      'ColorP=FFFFFF'
+      'ColorQ=C0DCC0'
+      'ColorR=F0CAA6'
+      'ColorS=F0FBFF'
+      'ColorT=A4A0A0'
+    )
+    left = 624
+    top = 88
+  end
+  object SiteBarDLG: TColorDialog
+    Color = clBtnFace
+    CustomColors.Strings = (
+      'ColorA=000000'
+      'ColorB=000080'
+      'ColorC=008000'
+      'ColorD=008080'
+      'ColorE=800000'
+      'ColorF=800080'
+      'ColorG=808000'
+      'ColorH=808080'
+      'ColorI=C0C0C0'
+      'ColorJ=0000FF'
+      'ColorK=00FF00'
+      'ColorL=00FFFF'
+      'ColorM=FF0000'
+      'ColorN=FF00FF'
+      'ColorO=FFFF00'
+      'ColorP=FFFFFF'
+      'ColorQ=C0DCC0'
+      'ColorR=F0CAA6'
+      'ColorS=F0FBFF'
+      'ColorT=A4A0A0'
+    )
+    left = 513
+    top = 271
+  end
+end

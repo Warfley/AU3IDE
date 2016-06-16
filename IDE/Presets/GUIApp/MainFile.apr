@@ -1,0 +1,7 @@
+#include("Form1.AU31")
+
+
+while (1)
+  ;Idle Loop
+  Sleep(20)
+WEnd

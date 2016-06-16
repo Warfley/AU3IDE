@@ -1,0 +1,3 @@
+;AET Generated Form File
+;Controllerfile should have the same Name
+$Form1 = CreateWindow("Form1", 40, 30, 400, 300, 0)

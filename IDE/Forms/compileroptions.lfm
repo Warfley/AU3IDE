@@ -1,0 +1,207 @@
+object CompilerOptionsForm: TCompilerOptionsForm
+  Left = 249
+  Height = 313
+  Top = 153
+  Width = 600
+  BorderStyle = bsToolWindow
+  Caption = 'Compiler Optionen'
+  ClientHeight = 313
+  ClientWidth = 600
+  Position = poScreenCenter
+  ShowInTaskBar = stAlways
+  LCLVersion = '1.7'
+  object CompilerConfigBox: TGroupBox
+    Left = 8
+    Height = 265
+    Top = 8
+    Width = 289
+    Caption = 'Compiler'
+    ClientHeight = 235
+    ClientWidth = 285
+    TabOrder = 0
+    object Label1: TLabel
+      Left = 8
+      Height = 25
+      Top = 8
+      Width = 99
+      Caption = 'Debug Pfad:'
+      ParentColor = False
+    end
+    object Label2: TLabel
+      Left = 8
+      Height = 25
+      Top = 64
+      Width = 103
+      Caption = 'Release Pfad:'
+      ParentColor = False
+    end
+    object Label3: TLabel
+      Left = 8
+      Height = 25
+      Top = 120
+      Width = 75
+      Caption = 'Log Pfad:'
+      ParentColor = False
+    end
+    object COutputBox: TCheckBox
+      Left = 8
+      Height = 29
+      Top = 200
+      Width = 132
+      Caption = 'IDE Ausgabe'
+      Checked = True
+      State = cbChecked
+      TabOrder = 0
+    end
+    object CAdvOutputBox: TCheckBox
+      Left = 128
+      Height = 29
+      Top = 200
+      Width = 187
+      Caption = 'Komplette Ausgabe'
+      TabOrder = 1
+    end
+    object CLogEdit: TEdit
+      Left = 8
+      Height = 33
+      Top = 144
+      Width = 244
+      TabOrder = 2
+      Text = '($ProjDir)\Output\Compile.txt'
+    end
+    object CDebugFileEdit: TFileNameEdit
+      Left = 8
+      Height = 33
+      Top = 32
+      Width = 271
+      OnAcceptFileName = CDebugFileEditAcceptFileName
+      DialogTitle = 'AU3 Debug Compiler'
+      DialogOptions = [ofExtensionDifferent, ofFileMustExist, ofEnableSizing, ofViewDetail]
+      Filter = 'Windows Executeable|*.exe'
+      FilterIndex = 0
+      HideDirectories = False
+      ButtonWidth = 23
+      NumGlyphs = 1
+      MaxLength = 0
+      TabOrder = 3
+    end
+    object CReleaseFileEdit: TFileNameEdit
+      Left = 8
+      Height = 33
+      Top = 88
+      Width = 271
+      OnAcceptFileName = CDebugFileEditAcceptFileName
+      DialogTitle = 'AU3 Release Compiler'
+      DialogOptions = [ofExtensionDifferent, ofFileMustExist, ofEnableSizing, ofViewDetail]
+      Filter = 'Windows Executeable|*.exe'
+      FilterIndex = 0
+      HideDirectories = False
+      ButtonWidth = 23
+      NumGlyphs = 1
+      MaxLength = 0
+      TabOrder = 4
+    end
+  end
+  object InterpreterConfigBox: TGroupBox
+    Left = 304
+    Height = 265
+    Top = 8
+    Width = 288
+    Caption = 'Interpreter'
+    ClientHeight = 235
+    ClientWidth = 284
+    TabOrder = 1
+    object ILogEdit: TEdit
+      Left = 8
+      Height = 33
+      Top = 144
+      Width = 244
+      TabOrder = 0
+      Text = '($ProjDir)\Output\Interpreter.txt'
+    end
+    object Label4: TLabel
+      Left = 8
+      Height = 25
+      Top = 8
+      Width = 99
+      Caption = 'Debug Pfad:'
+      ParentColor = False
+    end
+    object Label5: TLabel
+      Left = 8
+      Height = 25
+      Top = 64
+      Width = 103
+      Caption = 'Release Pfad:'
+      ParentColor = False
+    end
+    object Label6: TLabel
+      Left = 8
+      Height = 25
+      Top = 120
+      Width = 75
+      Caption = 'Log Pfad:'
+      ParentColor = False
+    end
+    object IOutputBox: TCheckBox
+      Left = 8
+      Height = 29
+      Top = 200
+      Width = 132
+      Caption = 'IDE Ausgabe'
+      TabOrder = 1
+    end
+    object IDebugFileEdit: TFileNameEdit
+      Left = 8
+      Height = 33
+      Top = 32
+      Width = 271
+      OnAcceptFileName = CDebugFileEditAcceptFileName
+      DialogTitle = 'AU3 Debug Interpreter'
+      DialogOptions = [ofExtensionDifferent, ofFileMustExist, ofEnableSizing, ofViewDetail]
+      Filter = 'Windows Executeable|*.exe'
+      FilterIndex = 0
+      HideDirectories = False
+      ButtonWidth = 23
+      NumGlyphs = 1
+      MaxLength = 0
+      TabOrder = 2
+    end
+    object IReleaseFileEdit: TFileNameEdit
+      Left = 8
+      Height = 33
+      Top = 88
+      Width = 271
+      OnAcceptFileName = CDebugFileEditAcceptFileName
+      DialogTitle = 'AU3 Release Interpreter'
+      DialogOptions = [ofExtensionDifferent, ofFileMustExist, ofEnableSizing, ofViewDetail]
+      Filter = 'Windows Executeable|*.exe'
+      FilterIndex = 0
+      HideDirectories = False
+      ButtonWidth = 23
+      NumGlyphs = 1
+      MaxLength = 0
+      TabOrder = 3
+    end
+  end
+  object Button1: TButton
+    Left = 440
+    Height = 25
+    Top = 283
+    Width = 75
+    Anchors = [akRight, akBottom]
+    Caption = 'Ok'
+    ModalResult = 1
+    TabOrder = 2
+  end
+  object Button2: TButton
+    Left = 517
+    Height = 25
+    Top = 283
+    Width = 75
+    Anchors = [akRight, akBottom]
+    Caption = 'Abbrechen'
+    ModalResult = 2
+    TabOrder = 3
+  end
+end
