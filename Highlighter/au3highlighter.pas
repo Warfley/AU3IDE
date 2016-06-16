@@ -6,19 +6,22 @@ unit au3Highlighter;
 interface
 
 uses
-  Classes, SysUtils, Graphics, SynEditTypes, SynEditHighlighter, Dialogs, au3Types;
+  Classes, SysUtils, Graphics, SynEditTypes, SynEditHighlighter,
+  SynEditHighlighterFoldBase, Dialogs, au3Types;
 
 type
 
   { Tau3SynHighlight }
 
-  Tau3SynHighlight = class(TSynCustomHighlighter)
+  Tau3SynHighlight = class(TSynCustomFoldHighlighter)
   private
     FStrAttr, FDocAttr, FCommentAttr, FIdentifierAttr, FKeyAttr,
     FFunctionAttr, FNumberAttr, FSpaceAttr, FTextAttr, FVarAttr,
     FSelectAttr: TSynHighlighterAttributes;
     FSelectText: string;
     CurrLine: integer;
+    FRange: IntPtr;
+    FCurRange: IntPtr;
     procedure SetDocAttr(v: TSynHighlighterAttributes);
     procedure SetStrAttr(v: TSynHighlighterAttributes);
     procedure SetComAttr(v: TSynHighlighterAttributes);
@@ -49,6 +52,9 @@ type
     function GetEol: boolean; override;
     procedure GetTokenEx(out TokenStart: PChar; out TokenLength: integer); override;
     function GetTokenAttribute: TSynHighlighterAttributes; override;
+    function GetRange: Pointer; override;
+    procedure SetRange(Value: Pointer); override;
+    procedure ResetRange; override;
   public
     property Line: string read GetLine;
     function GetToken: string; override;
@@ -79,8 +85,15 @@ type
       read FSelectAttr write SetSelectAttr;
   end;
 
-implementation
+const
+  IfBlockID = 1;
+  WhileBlockID = 2;
+  FuncBlockID = 3;
+  CommentBlockID = 4;
+  ForBlockID = 5;
+  UntilBlockID = 6;
 
+implementation
 
 function Tau3SynHighlight.GetLine: string;
 begin
@@ -153,7 +166,7 @@ procedure Tau3SynHighlight.CheckHash;
     t := LowerCase(FToken);
     aKey := LowerCase(aKey);
     {$Else}
-      t := FToken;
+    t := FToken;
     {$EndIf}
     if Length(aKey) <> FTokLen then
     begin
@@ -547,12 +560,23 @@ begin
   end
   else if FLineText[FTokenEnd] = '#' then
   begin
-    FTokLen:=1;
-    while FLineText[FTokenEnd+FTokLen] in ['A'..'Z', 'a'..'z', '0'..'9', '_', '-'] do
-      inc(FTokLen);
+    FTokLen := 1;
+    while FLineText[FTokenEnd + FTokLen] in ['A'..'Z', 'a'..'z', '0'..'9', '_', '-'] do
+      Inc(FTokLen);
     Inc(FTokenEnd, FTokLen);
     FToken := copy(FLineText, FTokenPos, FTokLen);
     FTok := tkFunction;
+    if isEnd(FToken, '#cs') or isEnd(FToken, '#comments-start', true) then
+    begin
+      Inc(FCurRange);
+      StartCodeFoldBlock(Pointer(CommentBlockID));
+    end
+    else if isEnd(FToken, '#ce') or isEnd(FToken, '#comments-end', True) then
+    begin
+      FTok:=tkComment;
+      Dec(FCurRange);
+      EndCodeFoldBlock();
+    end;
   end
   else if FLineText[FTokenEnd] = '"' then
   begin
@@ -582,6 +606,31 @@ begin
       FTok := tkFunction
     else
       FTok := tkUndefined;
+    if isEnd(FToken, 'if') then
+      StartCodeFoldBlock(Pointer(IfBlockID))
+    else if isEnd(FToken, 'while') then
+      StartCodeFoldBlock(Pointer(WhileBlockID))
+    else if isEnd(FToken, 'func') then
+      StartCodeFoldBlock(Pointer(FuncBlockID))
+    else if isEnd(FToken, 'for') then
+      StartCodeFoldBlock(Pointer(ForBlockID))
+    else if isEnd(FToken, 'do') then
+      StartCodeFoldBlock(Pointer(UntilBlockID))
+    else if isEnd(FToken, 'else') or isEnd(FToken, 'elseif') then
+    begin
+      EndCodeFoldBlock();
+      StartCodeFoldBlock(Pointer(IfBlockID))
+    end
+    else if isEnd(FToken, 'endif') then
+      EndCodeFoldBlock()
+    else if isEnd(FToken, 'endfunc') then
+      EndCodeFoldBlock()
+    else if isEnd(FToken, 'wend') then
+      EndCodeFoldBlock()
+    else if isEnd(FToken, 'next') then
+      EndCodeFoldBlock()
+    else if isEnd(FToken, 'until') then
+      EndCodeFoldBlock();
   end;
 end;
 
@@ -607,7 +656,7 @@ function Tau3SynHighlight.GetTokenAttribute: TSynHighlighterAttributes;
     t := LowerCase(FToken);
     aKey := LowerCase(aKey);
     {$Else}
-      t := FToken;
+    t := FToken;
     {$EndIf}
     if Length(aKey) <> FTokLen then
     begin
@@ -634,8 +683,28 @@ begin
     Result.FrameColor := clSilver;
     Result.FrameEdges := sfeAround;
   end
+  else if FCurRange>0 then
+    Result:=FCommentAttr
   else
     Result := GetAttr(FTok);
+end;
+
+function Tau3SynHighlight.GetRange: Pointer;
+begin
+  CodeFoldRange.RangeType := Pointer(PtrInt(FCurRange));
+  Result := inherited GetRange;
+end;
+
+procedure Tau3SynHighlight.SetRange(Value: Pointer);
+begin
+  inherited SetRange(Value);
+  FCurRange := PtrInt(CodeFoldRange.RangeType);
+end;
+
+procedure Tau3SynHighlight.ResetRange;
+begin
+  inherited ResetRange;
+  FCurRange := 0;
 end;
 
 function Tau3SynHighlight.GetToken: string;

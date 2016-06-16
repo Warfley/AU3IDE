@@ -91,7 +91,7 @@ function FuncInfo(Name: string; Line: integer; Inf: string = '';
   FName: string = ''): TFuncInfo;
 function SelectedItem(Line, Pos: integer): TSelectedItem;
 function VarInfo(Name: string; Line, Position: integer; FName: string = ''): TVarInfo;
-function isEnd(s, endTok: string): boolean;
+function isEnd(s, endTok: string; ex: Boolean=false): boolean;
 function StringsContain(s: TStrings; str: String): Boolean;
 
 implementation
@@ -110,7 +110,7 @@ begin
 end;
 
 
-function isEnd(s, endTok: string): boolean;
+function isEnd(s, endTok: string; ex: Boolean=false): boolean;
 
   function getFirstTok(str: string): string;
   var
@@ -120,6 +120,13 @@ function isEnd(s, endTok: string): boolean;
     if length(str) > 1 then
     begin
       i := 2;
+      if ex then
+      while (str[i] in ['0'..'9', 'A'..'Z', 'a'..'z', '_', '-', '#','.',',']) do
+      begin
+        Inc(i);
+        Inc(len);
+      end
+      else
       while (str[i] in ['0'..'9', 'A'..'Z', 'a'..'z', '_']) do
       begin
         Inc(i);
