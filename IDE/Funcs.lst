@@ -1,0 +1,196 @@
+;Summary: Includes the given File
+;Param: String Const to the give File
+#include(Path)
+;Summary: Defines to only include each file once to prevent recursion
+#include-once
+;Summary: Reads one line from console window
+;Return: Returns read line
+ConsoleRead()
+;Summary: Reads one line from console window
+;Param: $string = String to write to console
+ConsoleWrite($string)
+;Summary: Returns the size of given array
+;Param: $array = Array to determine size of
+;Return: Returns size of array
+SizeOf($array)
+;Summary: Returns the size of given array
+;Param: $array = Array to determine size of
+;Return: Returns size of array
+UBound($array)
+;Summary: Returns the current system time in milliseconds
+;Return: Returns system time in ms
+Time()
+;Summary: Returns the current system time in milliseconds
+;Return: Returns system time in ms
+Timer()
+;Summary: Gets one character of a string at a given position
+;Param: $string = string to recieve characters from
+;Param: $pos = position (0 based) of character to extract
+;Return: Returns extracted character on success, otherwise if string is shorter than $pos it returns -1
+CharAt($string, $pos)
+;Summary: Gets an unique handle to the window by class (if $windowTitle="") or by title (if $windowClass="") if both is not empty the window must have given class and title
+;Param: $windowClass = Classname of window
+;Param: $windowTitle = Title of window
+;Return: Returns an unique handle to the window (this handle never changes no matter what the title of window is)
+GetWindowHandle($windowClass, $windowTitle)
+;Summary: Left clicks with mouse at a specific position in background (so mouse will not be moved)
+;Param: $WindowName = Name of the window to click in
+;Param: $x = x-position to click relative to window
+;Param: $y = y-position to click relative to window
+ClickLeftBackground($WindowName, $x, $y)
+;Summary: Loads a *.bmp file into memory to use it later on for searching pixels or similar
+;Param: $FileName = Name of file to load
+;Return: Returns an unique handle to the loaded image in memory
+LoadImageFromBMP($FileName)
+;Summary: Takes a screenshot of given window 
+;Param: $UniqueWindowHandle = Window Handle (returned by GetWindowHandle or 0) to take screenshot of (if $UniqueWindowHandle=0 then whole dekstop will be screened)
+;Return: Returns an unique handle to the image in memory
+CaptureWindow($UniqueWindowHandle)
+;Summary: Gets color in RGB-Format at a spcific position of loaded image
+;Param: $UniqueImageHandle = created by LoadImageFromBMP or CaptureWindowByName
+;Param: $x = x-position of pixel to get color of
+;Param: $y = y-position of pixel to get color of
+;Return: Returns an Array with 3 entries: [0] = red; [1] = green; [2] = blue
+GetPixelColor($UniqueImageHandle, $x, $y)
+;Summary: Sets color in RGB-Format at a spcific position of loaded image
+;Param: $UniqueImageHandle = created by LoadImageFromBMP or CaptureWindowByName
+;Param: $x = x-position of pixel to set color
+;Param: $y = y-position of pixel to set color
+;Param: $red = red value of pixel
+;Param: $green = green value of pixel
+;Param: $blue = blue value of pixel
+SetPixelColor($UniqueImageHandle, $x, $y, $red, $green, $blue)
+;Summary: Searches for a given color in an image
+;Param: $UniqueImageHandle = created by LoadImageFromBMP or CaptureWindowByName
+;Param: $x = x-position to start searching
+;Param: $y = y-position to start searching
+;Param: $red = red value of pixel to search
+;Param: $green = green value of pixel to search
+;Param: $blue = blue value of pixel to search
+;Param: $variance = variance of pixel color (use 0 for exact match)
+;Return: Returns an Array with 2 entries: [0] = x; [1] = y; If pixel could not be found [0] and [1] equals -1.
+SearchForPixel($UniqueImageHandle, $x, $y, $red, $green, $blue, $variance)
+;Summary: Searches for a given image in an other image
+;Param: $UniqueImageHandle = created by LoadImageFromBMP or CaptureWindowByName
+;Param: $UniqueImageHandleSearch = Image which should be found in $UniqueImageHandle; created by LoadImageFromBMP or CaptureWindowByName
+;Param: $x = x-position to start searching
+;Param: $y = y-position to start searching
+;Param: $variance = variance of image color (use 0 for exact match)
+;Return: Returns an Array with 2 entries: [0] = x; [1] = y; If image could not be found [0] and [1] equals -1.
+SearchForImage($UniqueImageHandle, $UniqueImageHandleSearch, $x, $y, $variance)
+;Summary: Searches for a given color in an image which is next to given position
+;Param: $UniqueImageHandle = created by LoadImageFromBMP or CaptureWindowByName
+;Param: $x = x-position to start searching
+;Param: $y = y-position to start searching
+;Param: $red = red value of pixel to search
+;Param: $green = green value of pixel to search
+;Param: $blue = blue value of pixel to search
+;Param: $variance = variance of pixel color (use 0 for exact match)
+;Return: Returns an Array with 2 entries: [0] = x; [1] = y; If pixel could not be found [0] and [1] equals -1.
+SearchForPixelNextToPosition($UniqueImageHandle, $x, $y, $red, $green, $blue, $variance)
+;Summary: Searches for a given image in an other image which is next to given position
+;Param: $UniqueImageHandle = created by LoadImageFromBMP or CaptureWindowByName
+;Param: $UniqueImageHandleSearch = Image which should be found in $UniqueImageHandle; created by LoadImageFromBMP or CaptureWindowByName
+;Param: $x = x-position to start searching
+;Param: $y = y-position to start searching
+;Param: $variance = variance of image color (use 0 for exact match)
+;Return: Returns an Array with 2 entries: [0] = x; [1] = y; If image could not be found [0] and [1] equals -1.
+SearchForImageNextToPosition($UniqueImageHandle, $UniqueImageHandleSearch, $x, $y, $variance)
+;Summary: Searches for a smilar image in an other image (similar means approximately same size and same color). This function will always find an image but the equality may differ.
+;Param: $UniqueImageHandle = created by LoadImageFromBMP or CaptureWindowByName
+;Param: $UniqueImageHandleSearch = Image which should be found in $UniqueImageHandle; created by LoadImageFromBMP or CaptureWindowByName
+;Param: $x = x-position to start searching
+;Param: $y = y-position to start searching
+;Param: $width = width of area to search in (-1 for complete image)
+;Param: $height = height of area to search in (-1 for complete image)
+;Param: $accuracy =  An number determining the accuracy of used algorithm (can only be: 4,8,16,32; Whereby using 8 or 16 is recommended; higher accuracy means less false-positive matches, but also less correct matches)
+;Param: $overlap = Overlap to use, the higher this number the higher is the chance to find best similar image but it will also take much longer (recommended is a number between 2.0 and 3.0)
+;Return: Returns an Array with 3 entries: [0] = x; [1] = y; [2] = similarity (minimum = 0.0, worst equality; maximum = 1.0, best equality)
+SearchForSimilarImage($UniqueImageHandle, $UniqueImageHandleSearch, $x, $y, $width, $height, $accuracy, $overlap)
+;Summary: Saves an given image as *.bmp
+;Param: $UniqueImageHandle = Handle of image to save to file
+;Param: $NameOfFile = Name of file to save to
+SaveImage($UniqueImageHandle, $NameOfFile)
+;Summary: Sleeps given amount of time
+;Param: $TimeInMs = Time to sleep in ms
+Sleep($TimeInMs)
+;Summary: Creates a Graphical User-Interface Window to interact with
+;Param: $Title = Title of window
+;Param: $x = Starting x-Position of window
+;Param: $y = Starting y-Position of window
+;Param: $width = Width of window
+;Param: $height = Height of window
+;Param: $style = Style of window (you normaly can leave this 0)
+;Return: Returns an unique handle to the created window
+CreateWindow($Title, $x, $y, $width, $height, $style)
+;Summary: Creates a button on a given window
+;Param: $Window = Handle to window where the control should be created on (returned by CreateWindow)
+;Param: $Title = Text of control
+;Param: $x = Starting x-Position
+;Param: $y = Starting y-Position
+;Param: $width = Width
+;Param: $height = Height
+;Param: $style = Style of control (you normaly can leave this 0)
+;Param: $styleEx = Extended style of control (you normaly can leave this 0)
+;Return: Returns an unique handle to the created control
+CreateButton($Window, $Title, $x, $y, $width, $height, $style, $styleEx)
+;Summary: Creates a label on a given window
+;Param: $Window = Handle to window where the control should be created on (returned by CreateWindow)
+;Param: $Title = Text of control
+;Param: $x = Starting x-Position
+;Param: $y = Starting y-Position
+;Param: $width = Width
+;Param: $height = Height
+;Param: $style = Style of control (you normaly can leave this 0)
+;Param: $styleEx = Extended style of control (you normaly can leave this 0)
+;Return: Returns an unique handle to the created control
+CreateLabel($Window, $Title, $x, $y, $width, $height, $style, $styleEx)
+;Summary: Creates a checkbox on a given window
+;Param: $Window = Handle to window where the control should be created on (returned by CreateWindow)
+;Param: $Title = Text of control
+;Param: $x = Starting x-Position
+;Param: $y = Starting y-Position
+;Param: $width = Width
+;Param: $height = Height
+;Param: $style = Style of control (you normaly can leave this 0)
+;Param: $styleEx = Extended style of control (you normaly can leave this 0)
+;Return: Returns an unique handle to the created control
+CreateCheckbox($Window, $Title, $x, $y, $width, $height, $style, $styleEx)
+;Summary: Creates a Inputbox on a given window
+;Param: $Window = Handle to window where the control should be created on (returned by CreateWindow)
+;Param: $Title = Text of control
+;Param: $x = Starting x-Position
+;Param: $y = Starting y-Position
+;Param: $width = Width
+;Param: $height = Height
+;Param: $style = Style of control (you normaly can leave this 0)
+;Param: $styleEx = Extended style of control (you normaly can leave this 0)
+;Return: Returns an unique handle to the created control
+CreateInputbox($Window, $Title, $x, $y, $width, $height, $style, $styleEx)
+;Summary: Sets a a function for given control which should be executed when the event happened
+;Param: $Control = Handle to a control returned by CreateCheckbox or CreateButton
+;Param: $Event = Event to react on (possible values: "onClick")
+;Param: $FunctionName = Functionname of function to call when event happened
+SetOnEvent($Control, $Event, $FunctionName)
+;Summary: Counts the character in a given string
+;Param: $string = string to count characters
+;Return: Returns length of string
+StrLen($string)
+;Summary: Extracts an substring of an given string
+;Param: $string = String to extract string from
+;Param: $position = Position to start extracting
+;Param: $length = Length of string to extract
+;Return: Returns extracted string
+StrSubStr($string, $position, $length)
+;Summary: Finds the position of first occurence of given string in another string
+;Param: $string = String to search in
+;Param: $substring = String to find in $string
+;Param: $position = Position to start searching from
+;Return: Returns -1 if string was nor found, otherwise the position of found string
+StrContains($string, $substring, $position)
+;Summary: Mainly used for debugging; prints the variable/array and its internal structure onto console
+;Param: $var = variable to print
+_Debug_Dump($var)
+;Summary: Mainly used for debugging; prints some information of given array
+;Param: $array = Array to print information for
+_Debug_ShowArrayInfo($array)

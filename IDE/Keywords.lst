@@ -1,0 +1,45 @@
+True
+False
+ContinueCase
+ContinueLoop
+Default
+Dim
+Global
+Local
+Const
+Do
+Until
+Enum
+Exit
+ExitLoop
+For
+To
+Step
+Next
+In
+Func
+Return
+EndFunc
+If
+ElseIf
+Else
+Then
+EndIf
+Null
+ReDim
+Select
+Case
+EndSelect
+Switch
+EndSwitch
+Static
+Volatile
+While
+WEnd
+With
+EndWith
+If <Condition> Then
+ElseIf <Condition> Then
+For <Var> = <Start> To <End>
+For <Var> In <Expr>
+While <Condition>
