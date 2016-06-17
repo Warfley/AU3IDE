@@ -9,7 +9,7 @@ uses
 
 type
   TTokenType = (tkComment, tkIdentifier, tkFunction, tkSymbol, tkNumber, tkSpace,
-    tkString, tkUnknown, tkVar, tkUndefined, tkDoc);
+    tkString, tkUnknown, tkVar, tkUndefined, tkDoc, tkTemp);
   PHashInfo = ^THashInfo;
 
   TOpenEditorEvent = procedure(Filename: string; Pos: TPoint) of object;

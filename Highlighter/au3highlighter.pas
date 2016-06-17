@@ -15,7 +15,7 @@ type
 
   Tau3SynHighlight = class(TSynCustomFoldHighlighter)
   private
-    FStrAttr, FDocAttr, FCommentAttr, FIdentifierAttr, FKeyAttr,
+    FStrAttr, FTempAttr, FDocAttr, FCommentAttr, FIdentifierAttr, FKeyAttr,
     FFunctionAttr, FNumberAttr, FSpaceAttr, FTextAttr, FVarAttr,
     FSelectAttr: TSynHighlighterAttributes;
     FSelectText: string;
@@ -33,6 +33,7 @@ type
     procedure SetTextAttr(v: TSynHighlighterAttributes);
     procedure SetVarAttr(v: TSynHighlighterAttributes);
     procedure SetSelectAttr(v: TSynHighlighterAttributes);
+    procedure SetTempAttr(v: TSynHighlighterAttributes);
     function GetLine: string;
   protected
     FTokenPos, FTokenEnd, FLineNum: integer;
@@ -83,6 +84,7 @@ type
     property VariableAttribute: TSynHighlighterAttributes read FVarAttr write SetVarAttr;
     property SelectAttribute: TSynHighlighterAttributes
       read FSelectAttr write SetSelectAttr;
+    property TempAttribute: TSynHighlighterAttributes read FTempAttr write SetTempAttr;
   end;
 
 const
@@ -92,6 +94,9 @@ const
   CommentBlockID = 4;
   ForBlockID = 5;
   UntilBlockID = 6;
+  SelectBlockID = 7;
+  SwitchBlockID = 8;
+WithBlockID = 9;
 
 implementation
 
@@ -153,6 +158,11 @@ end;
 procedure Tau3SynHighlight.SetSelectAttr(v: TSynHighlighterAttributes);
 begin
   FSelectAttr.Assign(v);
+end;
+
+procedure Tau3SynHighlight.SetTempAttr(v: TSynHighlighterAttributes);
+begin
+  FTempAttr.Assign(v);
 end;
 
 procedure Tau3SynHighlight.CheckHash;
@@ -452,6 +462,7 @@ begin
     tkString: Result := FStrAttr;
     tkDoc: Result := FDocAttr;
     tkVar: Result := FVarAttr;
+    tkTemp: Result := FTempAttr;
     else
       Result := FTextAttr;
   end;
@@ -473,6 +484,11 @@ begin
   FVarAttr := TSynHighlighterAttributes.Create('Variable', 'Variable');
   FSelectAttr := TSynHighlighterAttributes.Create('Selected', 'Selected');
   FDocAttr := TSynHighlighterAttributes.Create('Doc', 'Doc');
+  FTempAttr:=TSynHighlighterAttributes.Create('Temp', 'Temp');
+  FTempAttr.Foreground:=clGray;
+  FTempAttr.Background:=clSilver;
+  FTempAttr.FrameEdges:=sfeAround;
+  FTempAttr.FrameColor:=clGray;
   FSelectText := '';
   for i := 0 to 255 do
     FHashList[i] := TList.Create;
@@ -541,6 +557,23 @@ begin
     FTokLen := l - FTokenPos + 1;
     FToken := Copy(FLineText, FTokenPos, FTokLen);
   end
+  else if (FLineText[FTokenEnd] = '<') then
+  begin
+    Inc(FTokenEnd);
+    FTok := tkTemp;
+    while (FTokenEnd <= l) and (FLineText[FTokenEnd] <> '>') do
+      Inc(FTokenEnd);
+    Inc(FTokenEnd);
+    FTokLen := FTokenEnd - FTokenPos;
+    FToken := copy(FLineText, FTokenPos, FTokLen);
+  end
+  else if (FLineText[FTokenEnd] = '>') then
+  begin
+    Inc(FTokenEnd);
+    FTok:=tkFunction;
+    FToken:='>';
+    FTokLen:=1;
+  end
   else if not (FLineText[FTokenEnd] in ['_', '0'..'9', 'a'..'z',
     'A'..'Z', '$', '"', '#']) then
   begin
@@ -561,7 +594,7 @@ begin
   else if FLineText[FTokenEnd] = '#' then
   begin
     FTokLen := 1;
-    while FLineText[FTokenEnd + FTokLen] in ['A'..'Z', 'a'..'z', '0'..'9', '_', '-'] do
+    while FLineText[FTokenEnd + FTokLen] in ['A'..'Z', 'a'..'z', '0'..'9', '_', '-', '<'] do
       Inc(FTokLen);
     Inc(FTokenEnd, FTokLen);
     FToken := copy(FLineText, FTokenPos, FTokLen);
@@ -616,6 +649,12 @@ begin
       StartCodeFoldBlock(Pointer(ForBlockID))
     else if isEnd(FToken, 'do') then
       StartCodeFoldBlock(Pointer(UntilBlockID))
+    else if isEnd(FToken, 'switch') then
+      StartCodeFoldBlock(Pointer(SwitchBlockID))
+    else if isEnd(FToken, 'select') then
+      StartCodeFoldBlock(Pointer(SelectBlockID))
+    else if isEnd(FToken, 'with') then
+      StartCodeFoldBlock(Pointer(WithBlockID))
     else if isEnd(FToken, 'else') or isEnd(FToken, 'elseif') then
     begin
       EndCodeFoldBlock();
@@ -630,6 +669,12 @@ begin
     else if isEnd(FToken, 'next') then
       EndCodeFoldBlock()
     else if isEnd(FToken, 'until') then
+      EndCodeFoldBlock()
+    else if isEnd(FToken, 'endselect') then
+      EndCodeFoldBlock()
+    else if isEnd(FToken, 'endswitch') then
+      EndCodeFoldBlock()
+    else if isEnd(FToken, 'endwith') then
       EndCodeFoldBlock();
   end;
 end;
@@ -761,6 +806,7 @@ begin
   FTextAttr.Free;
   FVarAttr.Free;
   FSelectAttr.Free;
+  FTempAttr.Free;
   for i := 0 to 255 do
     FreeLst(FHashList[i]);
   inherited;

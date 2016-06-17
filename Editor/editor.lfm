@@ -95,6 +95,7 @@ object EditorFrame: TEditorFrame
     ParentColor = False
     ParentFont = False
     TabOrder = 1
+    OnKeyDown = CodeEditorKeyDown
     OnKeyUp = CodeEditorKeyUp
     OnMouseMove = CodeEditorMouseMove
     OnMouseUp = CodeEditorMouseUp
@@ -604,11 +605,11 @@ object EditorFrame: TEditorFrame
       BevelOuter = bvNone
       BorderStyle = bsSingle
       Caption = 'Code Explorer'
-      ClientHeight = 34
-      ClientWidth = 235
+      ClientHeight = 30
+      ClientWidth = 231
       TabOrder = 0
       object CloseCodeExplorerButton: TSpeedButton
-        Left = 201
+        Left = 197
         Height = 28
         Top = 0
         Width = 28

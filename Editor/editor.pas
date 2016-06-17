@@ -39,6 +39,8 @@ type
     procedure CloseCodeExplorerButtonClick(Sender: TObject);
     procedure CloseSearchButtonClick(Sender: TObject);
     procedure CodeEditorChange(Sender: TObject);
+    procedure CodeEditorKeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
     procedure CodeEditorKeyUp(Sender: TObject; var Key: word; Shift: TShiftState);
     procedure CodeEditorMouseLink(Sender: TObject; X, Y: integer;
       var AllowMouseLink: boolean);
@@ -47,7 +49,7 @@ type
     procedure CodeEditorMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: integer);
     procedure CodeExplorerCustomDrawItem(Sender: TCustomTreeView;
-      Node: TTreeNode; State: TCustomDrawState; var DefaultDraw: Boolean);
+      Node: TTreeNode; State: TCustomDrawState; var DefaultDraw: boolean);
     procedure CodeExplorerDblClick(Sender: TObject);
     procedure CompletionCodeCompletion(var Value: string; SourceValue: string;
       var SourceStart, SourceEnd: TPoint; KeyChar: TUTF8Char; Shift: TShiftState);
@@ -97,6 +99,7 @@ type
     procedure ReLoadConf;
     procedure MoveHorz(i: IntPtr);
     procedure MoveVert(i: IntPtr);
+    procedure SelectTemp(i: IntPtr);
     procedure ShowSearch;
     procedure SetFocus; override;
     procedure CodeJump(p: TPoint);
@@ -171,12 +174,12 @@ begin
       end;
       CodeEditor.SelectedColor.Background := SelCol;
       CodeEditor.SelectedColor.Foreground := SelFCol;
-      Font.Color:=TextColor;
-      SearchBar.Font.Color:=TextColor;
-      CodeExplorer.Color:=TextColor;
-      CodeExplorer.ExpandSignColor:=GetHighLightColor(TextColor);
-      CodeExplorer.TreeLineColor:=GetHighLightColor(TextColor);
-      CodeExplorer.SeparatorColor:=GetHighLightColor(TextColor);
+      Font.Color := TextColor;
+      SearchBar.Font.Color := TextColor;
+      CodeExplorer.Color := TextColor;
+      CodeExplorer.ExpandSignColor := GetHighLightColor(TextColor);
+      CodeExplorer.TreeLineColor := GetHighLightColor(TextColor);
+      CodeExplorer.SeparatorColor := GetHighLightColor(TextColor);
       CodeExplorer.Invalidate;
       if PastEOL then
         CodeEditor.Options :=
@@ -246,6 +249,27 @@ begin
       Point(Length(CodeEditor.Lines[CodeEditor.Lines.Count - 1]),
       CodeEditor.Lines.Count)] := '#13';
   CodeEditor.LogicalCaretXY := p;
+end;
+
+procedure TEditorFrame.SelectTemp(i: IntPtr);
+var
+  x: integer;
+  s, e: integer;
+  ln: string;
+begin
+  s := 0;
+  ln := CodeEditor.Lines[CodeEditor.LogicalCaretXY.y - 1];
+  for x := i to Length(ln) do
+    if ln[x] = '<' then
+      s := x
+    else if (s > 0) and (ln[x] = '>') then
+    begin
+      e := x + 1;
+      break;
+    end;
+  CodeEditor.LogicalCaretXY := Point(e, CodeEditor.LogicalCaretXY.y);
+  CodeEditor.BlockBegin := Point(s, CodeEditor.LogicalCaretXY.Y);
+  CodeEditor.BlockEnd := Point(e, CodeEditor.LogicalCaretXY.Y);
 end;
 
 function TEditorFrame.GetFont: TFont;
@@ -707,6 +731,8 @@ begin
   end;
   if (Length(Value) > 0) and not (Value[1] in ['_', 'A'..'Z', 'a'..'z', '0'..'9']) then
     Value := Copy(Value, 2, Length(Value) - 1);
+  if (Pos('<', Value) > 0) and (pos('#', Value) = 0) then
+    Application.QueueAsyncCall(@SelectTemp, SourceStart.x);
   (*rpval := Value;
   Value := Copy(ln, SourceStart.x, PosEx(Completion.CurrentString, ln, SourceStart.x))+
     Value+
@@ -784,6 +810,48 @@ begin
       begin
         CodeEditor.TextBetweenPoints[Point(0, i + 2), Point(0, i + 2)] :=
           #13 + pref + 'EndIf';
+      end;
+      Application.QueueAsyncCall(@MoveHorz, 2);
+    end
+    else if isEnd(ln, 'with') then
+    begin
+      if not GotClosed(i, 'with', 'endwith') then
+      begin
+        CodeEditor.TextBetweenPoints[Point(0, i + 2), Point(0, i + 2)] :=
+          #13 + pref + 'EndWith';
+      end;
+      Application.QueueAsyncCall(@MoveHorz, 2);
+    end
+    else if isEnd(ln, 'switch') then
+    begin
+      if not GotClosed(i, 'switch', 'endswitch') then
+      begin
+        CodeEditor.TextBetweenPoints[Point(0, i + 2), Point(0, i + 2)] :=
+          #13 + pref + 'EndSwitch';
+      end;
+      CodeEditor.TextBetweenPoints[Point(0, i + 2), Point(0, i + 2)] :=
+        pref + '  Case ';
+      Application.QueueAsyncCall(@MoveHorz, 7);
+    end
+    else if isEnd(ln, 'select') then
+    begin
+      if not GotClosed(i, 'select', 'endselect') then
+      begin
+        CodeEditor.TextBetweenPoints[Point(0, i + 2), Point(0, i + 2)] :=
+          #13 + pref + 'EndSelect';
+      end;
+      CodeEditor.TextBetweenPoints[Point(0, i + 2), Point(0, i + 2)] :=
+        pref + '  Case ';
+      Application.QueueAsyncCall(@MoveHorz, 7);
+    end
+    else if isEnd(ln, 'case') then
+      Application.QueueAsyncCall(@MoveHorz, 2)
+    else if isEnd(ln, 'do') then
+    begin
+      if not GotClosed(i, 'do', 'until') then
+      begin
+        CodeEditor.TextBetweenPoints[Point(0, i + 2), Point(0, i + 2)] :=
+          #13 + pref + 'Until <Condition>';
       end;
       Application.QueueAsyncCall(@MoveHorz, 2);
     end
@@ -1042,9 +1110,9 @@ begin
 end;
 
 procedure TEditorFrame.CodeExplorerCustomDrawItem(Sender: TCustomTreeView;
-  Node: TTreeNode; State: TCustomDrawState; var DefaultDraw: Boolean);
+  Node: TTreeNode; State: TCustomDrawState; var DefaultDraw: boolean);
 begin
-  Sender.Canvas.Font.Color:=Sender.Color;
+  Sender.Canvas.Font.Color := Sender.Color;
 end;
 
 procedure TEditorFrame.CodeExplorerDblClick(Sender: TObject);
@@ -1082,6 +1150,21 @@ begin
   if Assigned(FOnChange) then
     FOnChange(Self);
   CodeEditor.Invalidate;
+end;
+
+procedure TEditorFrame.CodeEditorKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+var ln: String;
+begin
+  if Key = 9 then
+  begin
+    ln := CodeEditor.Lines[CodeEditor.LogicalCaretXY.y - 1];
+    if (Pos('<', ln) > 0) and (pos('#', ln) = 0) then
+    begin
+      Application.QueueAsyncCall(@SelectTemp, 1);
+      Key:=0;
+    end;
+  end;
 end;
 
 
