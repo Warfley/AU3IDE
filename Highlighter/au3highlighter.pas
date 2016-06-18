@@ -569,7 +569,7 @@ begin
       FTokLen:=0;
       Break;
     end;
-    if (FTokLen = 0) then
+    if (FTokLen = 0) or (FTokLen=FTokenEnd) then
     begin
       FTokLen:=1;
       FToken:='<';   
