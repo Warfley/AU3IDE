@@ -560,19 +560,29 @@ begin
   else if (FLineText[FTokenEnd] = '<') then
   begin
     Inc(FTokenEnd);
-    FTok := tkTemp;
-    while (FTokenEnd <= l) and (FLineText[FTokenEnd] <> '>') do
+    FTokLen:=FTokenEnd;
+    while (FTokLen <= l) and (FLineText[FTokLen] <> '>') do
+    if (FLineText[FTokLen] in ['A'..'Z', 'a'..'z']) and (FTokLen<l) then
+      Inc(FTokLen)
+    else
+    begin
+      FTokLen:=0;
+      Break;
+    end;
+    if (FTokLen = 0) then
+    begin
+      FTokLen:=1;
+      FToken:='<';   
+      FTok:=tkSymbol;
+    end
+    else
+    begin   
+      FTok := tkTemp;
+      FTokenEnd:=FTokLen;
       Inc(FTokenEnd);
-    Inc(FTokenEnd);
-    FTokLen := FTokenEnd - FTokenPos;
-    FToken := copy(FLineText, FTokenPos, FTokLen);
-  end
-  else if (FLineText[FTokenEnd] = '>') then
-  begin
-    Inc(FTokenEnd);
-    FTok:=tkFunction;
-    FToken:='>';
-    FTokLen:=1;
+      FTokLen := FTokenEnd - FTokenPos;
+      FToken := copy(FLineText, FTokenPos, FTokLen);
+    end;
   end
   else if not (FLineText[FTokenEnd] in ['_', '0'..'9', 'a'..'z',
     'A'..'Z', '$', '"', '#']) then
@@ -594,7 +604,7 @@ begin
   else if FLineText[FTokenEnd] = '#' then
   begin
     FTokLen := 1;
-    while FLineText[FTokenEnd + FTokLen] in ['A'..'Z', 'a'..'z', '0'..'9', '_', '-', '<'] do
+    while FLineText[FTokenEnd + FTokLen] in ['A'..'Z', 'a'..'z', '0'..'9', '_', '-'] do
       Inc(FTokLen);
     Inc(FTokenEnd, FTokLen);
     FToken := copy(FLineText, FTokenPos, FTokLen);

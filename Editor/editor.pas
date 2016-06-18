@@ -39,8 +39,7 @@ type
     procedure CloseCodeExplorerButtonClick(Sender: TObject);
     procedure CloseSearchButtonClick(Sender: TObject);
     procedure CodeEditorChange(Sender: TObject);
-    procedure CodeEditorKeyDown(Sender: TObject; var Key: Word;
-      Shift: TShiftState);
+    procedure CodeEditorKeyDown(Sender: TObject; var Key: word; Shift: TShiftState);
     procedure CodeEditorKeyUp(Sender: TObject; var Key: word; Shift: TShiftState);
     procedure CodeEditorMouseLink(Sender: TObject; X, Y: integer;
       var AllowMouseLink: boolean);
@@ -256,20 +255,35 @@ var
   x: integer;
   s, e: integer;
   ln: string;
+  l: integer;
 begin
   s := 0;
+  e := 0;
   ln := CodeEditor.Lines[CodeEditor.LogicalCaretXY.y - 1];
-  for x := i to Length(ln) do
+  l := Length(ln);
+  x := 1;
+  while (x <= l) do
+  begin
     if ln[x] = '<' then
       s := x
-    else if (s > 0) and (ln[x] = '>') then
-    begin
-      e := x + 1;
-      break;
-    end;
-  CodeEditor.LogicalCaretXY := Point(e, CodeEditor.LogicalCaretXY.y);
-  CodeEditor.BlockBegin := Point(s, CodeEditor.LogicalCaretXY.Y);
-  CodeEditor.BlockEnd := Point(e, CodeEditor.LogicalCaretXY.Y);
+    else if (s > 0) then
+      if ln[x] = '<' then
+        s := x
+      else if ln[x] = '>' then
+      begin
+        e := x + 1;
+        Break;
+      end
+      else if not (ln[x] in ['A'..'Z', 'a'..'z']) then
+        s := 0;
+    Inc(x);
+  end;
+  if s > 0 then
+  begin
+    CodeEditor.LogicalCaretXY := Point(e, CodeEditor.LogicalCaretXY.y);
+    CodeEditor.BlockBegin := Point(s, CodeEditor.LogicalCaretXY.Y);
+    CodeEditor.BlockEnd := Point(e, CodeEditor.LogicalCaretXY.Y);
+  end;
 end;
 
 function TEditorFrame.GetFont: TFont;
@@ -1152,18 +1166,28 @@ begin
   CodeEditor.Invalidate;
 end;
 
-procedure TEditorFrame.CodeEditorKeyDown(Sender: TObject; var Key: Word;
+procedure TEditorFrame.CodeEditorKeyDown(Sender: TObject; var Key: word;
   Shift: TShiftState);
-var ln: String;
+var
+  ln: string;
+  c: char;
+  b: boolean;
 begin
   if Key = 9 then
   begin
     ln := CodeEditor.Lines[CodeEditor.LogicalCaretXY.y - 1];
-    if (Pos('<', ln) > 0) and (pos('#', ln) = 0) then
-    begin
-      Application.QueueAsyncCall(@SelectTemp, 1);
-      Key:=0;
-    end;
+    for c in ln do
+      if c = '<' then
+        b := True
+      else if b then
+        if c = '>' then
+        begin
+          Application.QueueAsyncCall(@SelectTemp, 1);
+          Key := 0;
+          Break;
+        end
+        else if not (c in ['A'..'Z', 'a'..'z']) then
+          b := False;
   end;
 end;
 
