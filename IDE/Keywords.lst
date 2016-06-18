@@ -44,3 +44,7 @@ For <Var> = <Start> To <End>
 For <Var> In <Expr>
 While <Condition>
 #include<<File>>
+#cs
+#ce
+#comments-start
+#comments-end

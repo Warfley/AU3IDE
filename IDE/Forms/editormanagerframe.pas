@@ -246,6 +246,7 @@ begin
         FileName := FName;
       if (Line > 0) and (Pos > 0) then
         CodeJump(Point(Pos, Line));
+      CodeEditor.SetFocus;
     end;
   if Assigned(FOnEditorCreated) then
     OnEditorCreated(Self, EditorIndex);
@@ -264,9 +265,12 @@ begin
     if (GetCurrentEditor is TEditorFrame) then
     begin
       if (Pos.Y > 0) and (Pos.X > 0) then
-        (GetCurrentEditor as TEditorFrame).CodeJump(Pos);
+        (GetCurrentEditor as TEditorFrame).CodeJump(Pos);      
+      GetCurrentEditor.SetFocus;
       (GetCurrentEditor as TEditorFrame).CodeEditor.SetFocus;
-    end;
+    end
+    else if GetCurrentEditor is TFormEditFrame then
+      (GetCurrentEditor as TFormEditFrame).EventEditor.Selection:=Rect(0,0,0,0);
   end;
   Result := GetCurrentEditor;
 end;

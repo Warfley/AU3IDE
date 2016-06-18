@@ -5,10 +5,7 @@ object EditorManager: TEditorManager
   Width = 916
   ClientHeight = 655
   ClientWidth = 916
-  LCLVersion = '1.7'
   TabOrder = 0
-  DesignLeft = 381
-  DesignTop = 232
   object EditorControl: TPageControl
     Left = 0
     Height = 655
