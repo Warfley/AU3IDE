@@ -1,196 +1,794 @@
-;Summary: Includes the given File
-;Param: String Const to the give File
-#include(Path)
-;Summary: Defines to only include each file once to prevent recursion
-#include-once
-;Summary: Reads one line from console window
-;Return: Returns read line
-ConsoleRead()
-;Summary: Reads one line from console window
-;Param: $string = String to write to console
-ConsoleWrite($string)
-;Summary: Returns the size of given array
-;Param: $array = Array to determine size of
-;Return: Returns size of array
-SizeOf($array)
-;Summary: Returns the size of given array
-;Param: $array = Array to determine size of
-;Return: Returns size of array
-UBound($array)
-;Summary: Returns the current system time in milliseconds
-;Return: Returns system time in ms
-Time()
-;Summary: Returns the current system time in milliseconds
-;Return: Returns system time in ms
-Timer()
-;Summary: Gets one character of a string at a given position
-;Param: $string = string to recieve characters from
-;Param: $pos = position (0 based) of character to extract
-;Return: Returns extracted character on success, otherwise if string is shorter than $pos it returns -1
-CharAt($string, $pos)
-;Summary: Gets an unique handle to the window by class (if $windowTitle="") or by title (if $windowClass="") if both is not empty the window must have given class and title
-;Param: $windowClass = Classname of window
-;Param: $windowTitle = Title of window
-;Return: Returns an unique handle to the window (this handle never changes no matter what the title of window is)
-GetWindowHandle($windowClass, $windowTitle)
-;Summary: Left clicks with mouse at a specific position in background (so mouse will not be moved)
-;Param: $WindowName = Name of the window to click in
-;Param: $x = x-position to click relative to window
-;Param: $y = y-position to click relative to window
-ClickLeftBackground($WindowName, $x, $y)
-;Summary: Loads a *.bmp file into memory to use it later on for searching pixels or similar
-;Param: $FileName = Name of file to load
-;Return: Returns an unique handle to the loaded image in memory
-LoadImageFromBMP($FileName)
-;Summary: Takes a screenshot of given window 
-;Param: $UniqueWindowHandle = Window Handle (returned by GetWindowHandle or 0) to take screenshot of (if $UniqueWindowHandle=0 then whole dekstop will be screened)
-;Return: Returns an unique handle to the image in memory
-CaptureWindow($UniqueWindowHandle)
-;Summary: Gets color in RGB-Format at a spcific position of loaded image
-;Param: $UniqueImageHandle = created by LoadImageFromBMP or CaptureWindowByName
-;Param: $x = x-position of pixel to get color of
-;Param: $y = y-position of pixel to get color of
-;Return: Returns an Array with 3 entries: [0] = red; [1] = green; [2] = blue
-GetPixelColor($UniqueImageHandle, $x, $y)
-;Summary: Sets color in RGB-Format at a spcific position of loaded image
-;Param: $UniqueImageHandle = created by LoadImageFromBMP or CaptureWindowByName
-;Param: $x = x-position of pixel to set color
-;Param: $y = y-position of pixel to set color
-;Param: $red = red value of pixel
-;Param: $green = green value of pixel
-;Param: $blue = blue value of pixel
-SetPixelColor($UniqueImageHandle, $x, $y, $red, $green, $blue)
-;Summary: Searches for a given color in an image
-;Param: $UniqueImageHandle = created by LoadImageFromBMP or CaptureWindowByName
-;Param: $x = x-position to start searching
-;Param: $y = y-position to start searching
-;Param: $red = red value of pixel to search
-;Param: $green = green value of pixel to search
-;Param: $blue = blue value of pixel to search
-;Param: $variance = variance of pixel color (use 0 for exact match)
-;Return: Returns an Array with 2 entries: [0] = x; [1] = y; If pixel could not be found [0] and [1] equals -1.
-SearchForPixel($UniqueImageHandle, $x, $y, $red, $green, $blue, $variance)
-;Summary: Searches for a given image in an other image
-;Param: $UniqueImageHandle = created by LoadImageFromBMP or CaptureWindowByName
-;Param: $UniqueImageHandleSearch = Image which should be found in $UniqueImageHandle; created by LoadImageFromBMP or CaptureWindowByName
-;Param: $x = x-position to start searching
-;Param: $y = y-position to start searching
-;Param: $variance = variance of image color (use 0 for exact match)
-;Return: Returns an Array with 2 entries: [0] = x; [1] = y; If image could not be found [0] and [1] equals -1.
-SearchForImage($UniqueImageHandle, $UniqueImageHandleSearch, $x, $y, $variance)
-;Summary: Searches for a given color in an image which is next to given position
-;Param: $UniqueImageHandle = created by LoadImageFromBMP or CaptureWindowByName
-;Param: $x = x-position to start searching
-;Param: $y = y-position to start searching
-;Param: $red = red value of pixel to search
-;Param: $green = green value of pixel to search
-;Param: $blue = blue value of pixel to search
-;Param: $variance = variance of pixel color (use 0 for exact match)
-;Return: Returns an Array with 2 entries: [0] = x; [1] = y; If pixel could not be found [0] and [1] equals -1.
-SearchForPixelNextToPosition($UniqueImageHandle, $x, $y, $red, $green, $blue, $variance)
-;Summary: Searches for a given image in an other image which is next to given position
-;Param: $UniqueImageHandle = created by LoadImageFromBMP or CaptureWindowByName
-;Param: $UniqueImageHandleSearch = Image which should be found in $UniqueImageHandle; created by LoadImageFromBMP or CaptureWindowByName
-;Param: $x = x-position to start searching
-;Param: $y = y-position to start searching
-;Param: $variance = variance of image color (use 0 for exact match)
-;Return: Returns an Array with 2 entries: [0] = x; [1] = y; If image could not be found [0] and [1] equals -1.
-SearchForImageNextToPosition($UniqueImageHandle, $UniqueImageHandleSearch, $x, $y, $variance)
-;Summary: Searches for a smilar image in an other image (similar means approximately same size and same color). This function will always find an image but the equality may differ.
-;Param: $UniqueImageHandle = created by LoadImageFromBMP or CaptureWindowByName
-;Param: $UniqueImageHandleSearch = Image which should be found in $UniqueImageHandle; created by LoadImageFromBMP or CaptureWindowByName
-;Param: $x = x-position to start searching
-;Param: $y = y-position to start searching
-;Param: $width = width of area to search in (-1 for complete image)
-;Param: $height = height of area to search in (-1 for complete image)
-;Param: $accuracy =  An number determining the accuracy of used algorithm (can only be: 4,8,16,32; Whereby using 8 or 16 is recommended; higher accuracy means less false-positive matches, but also less correct matches)
-;Param: $overlap = Overlap to use, the higher this number the higher is the chance to find best similar image but it will also take much longer (recommended is a number between 2.0 and 3.0)
-;Return: Returns an Array with 3 entries: [0] = x; [1] = y; [2] = similarity (minimum = 0.0, worst equality; maximum = 1.0, best equality)
-SearchForSimilarImage($UniqueImageHandle, $UniqueImageHandleSearch, $x, $y, $width, $height, $accuracy, $overlap)
-;Summary: Saves an given image as *.bmp
-;Param: $UniqueImageHandle = Handle of image to save to file
-;Param: $NameOfFile = Name of file to save to
-SaveImage($UniqueImageHandle, $NameOfFile)
-;Summary: Sleeps given amount of time
-;Param: $TimeInMs = Time to sleep in ms
-Sleep($TimeInMs)
-;Summary: Creates a Graphical User-Interface Window to interact with
-;Param: $Title = Title of window
-;Param: $x = Starting x-Position of window
-;Param: $y = Starting y-Position of window
-;Param: $width = Width of window
-;Param: $height = Height of window
-;Param: $style = Style of window (you normaly can leave this 0)
-;Return: Returns an unique handle to the created window
-CreateWindow($Title, $x, $y, $width, $height, $style)
-;Summary: Creates a button on a given window
-;Param: $Window = Handle to window where the control should be created on (returned by CreateWindow)
-;Param: $Title = Text of control
-;Param: $x = Starting x-Position
-;Param: $y = Starting y-Position
-;Param: $width = Width
-;Param: $height = Height
-;Param: $style = Style of control (you normaly can leave this 0)
-;Param: $styleEx = Extended style of control (you normaly can leave this 0)
-;Return: Returns an unique handle to the created control
-CreateButton($Window, $Title, $x, $y, $width, $height, $style, $styleEx)
-;Summary: Creates a label on a given window
-;Param: $Window = Handle to window where the control should be created on (returned by CreateWindow)
-;Param: $Title = Text of control
-;Param: $x = Starting x-Position
-;Param: $y = Starting y-Position
-;Param: $width = Width
-;Param: $height = Height
-;Param: $style = Style of control (you normaly can leave this 0)
-;Param: $styleEx = Extended style of control (you normaly can leave this 0)
-;Return: Returns an unique handle to the created control
-CreateLabel($Window, $Title, $x, $y, $width, $height, $style, $styleEx)
-;Summary: Creates a checkbox on a given window
-;Param: $Window = Handle to window where the control should be created on (returned by CreateWindow)
-;Param: $Title = Text of control
-;Param: $x = Starting x-Position
-;Param: $y = Starting y-Position
-;Param: $width = Width
-;Param: $height = Height
-;Param: $style = Style of control (you normaly can leave this 0)
-;Param: $styleEx = Extended style of control (you normaly can leave this 0)
-;Return: Returns an unique handle to the created control
-CreateCheckbox($Window, $Title, $x, $y, $width, $height, $style, $styleEx)
-;Summary: Creates a Inputbox on a given window
-;Param: $Window = Handle to window where the control should be created on (returned by CreateWindow)
-;Param: $Title = Text of control
-;Param: $x = Starting x-Position
-;Param: $y = Starting y-Position
-;Param: $width = Width
-;Param: $height = Height
-;Param: $style = Style of control (you normaly can leave this 0)
-;Param: $styleEx = Extended style of control (you normaly can leave this 0)
-;Return: Returns an unique handle to the created control
-CreateInputbox($Window, $Title, $x, $y, $width, $height, $style, $styleEx)
-;Summary: Sets a a function for given control which should be executed when the event happened
-;Param: $Control = Handle to a control returned by CreateCheckbox or CreateButton
-;Param: $Event = Event to react on (possible values: "onClick")
-;Param: $FunctionName = Functionname of function to call when event happened
-SetOnEvent($Control, $Event, $FunctionName)
-;Summary: Counts the character in a given string
-;Param: $string = string to count characters
-;Return: Returns length of string
-StrLen($string)
-;Summary: Extracts an substring of an given string
-;Param: $string = String to extract string from
-;Param: $position = Position to start extracting
-;Param: $length = Length of string to extract
-;Return: Returns extracted string
-StrSubStr($string, $position, $length)
-;Summary: Finds the position of first occurence of given string in another string
-;Param: $string = String to search in
-;Param: $substring = String to find in $string
-;Param: $position = Position to start searching from
-;Return: Returns -1 if string was nor found, otherwise the position of found string
-StrContains($string, $substring, $position)
-;Summary: Mainly used for debugging; prints the variable/array and its internal structure onto console
-;Param: $var = variable to print
-_Debug_Dump($var)
-;Summary: Mainly used for debugging; prints some information of given array
-;Param: $array = Array to print information for
-_Debug_ShowArrayInfo($array)
+;Summary: Calculates the absolute value of a number.
+Abs(Number)
+;Summary: Calculates the arcCosine of a number.
+ACos(Number)
+;Summary: Registers an Adlib function.
+AdlibRegister("Function", [Time = 250])
+;Summary: Unregisters an adlib function.
+AdlibUnRegister(["Function"])
+;Summary: Returns the ASCII code of a character.
+Asc("Char")
+;Summary: Returns the unicode code of a character.
+AscW("Char")
+;Summary: Calculates the arcsine of a number.
+ASin(Number)
+;Summary: Assigns a variable by name with the data.
+Assign("Varname", "Value", [Flags = 0])
+;Summary: Calculates the arctangent of a number.
+ATan(Number)
+;Summary: Changes the operation of various AutoIt functions/parameters.
+AutoItSetOption("Option", [Param])
+;Summary: Retrieves the title of the AutoIt window.
+AutoItWinGetTitle()
+;Summary: Changes the title of the AutoIt window.
+AutoItWinSetTitle("Titel")
+;Summary: Plays back a beep to the user.
+Beep([Frequency = 500], [Duration = 1000])
+;Summary: Returns the binary representation of an expression.
+Binary(Expression)
+;Summary: Returns the number of bytes in a binary variant.
+BinaryLen(Binary)
+;Summary: Extracts a number of bytes from a binary variant.
+BinaryMid(Binary, Start, [Count])
+;Summary: Converts a binary variant into a string.
+BinaryToString(Expression, [Flag = 1])
+;Summary: Performs a bitwise AND operation.
+BitAND(Val 1, Val 2, [Val ...])
+;Summary: Performs a bitwise NOT operation.
+BitNOT(Val)
+;Summary: Performs a bitwise OR operation.
+BitOR(Val 1, Val 2, [Val ...])
+;Summary: Performs a bit shifting operation, with rotation.
+BitRotate(Val, [Shift = 1], [Size = "W"])
+;Summary: Performs a bit shifting operation.
+BitShift(Val, Shift)
+;Summary: Performs a bitwise exclusive OR (XOR) operation.
+BitXOR(Val 1, Val 2, [Val ...])
+;Summary: Disable/enable the mouse and keyboard.
+BlockInput(Flag)
+;Summary: Enables or disables the users' ability to exit a script from the tray icon menu.
+Break(Mode)
+;Summary: Calls a user-defined or built-in function contained in first parameter.
+Call("Function", [Param 1 .. n])
+;Summary: Opens or closes the CD tray.
+CDTray("Drive", "Status")
+;Summary: Returns a number rounded up to the next integer.
+Ceiling(Expression)
+;Summary: Returns a character corresponding to an ASCII code.
+Chr(ASCIIVal)
+;Summary: Returns a character corresponding to a unicode code.
+ChrW(UnicodeVal)
+;Summary: Retrieves text from the clipboard.
+ClipGet()
+;Summary: Writes text to the clipboard.
+ClipPut("Value")
+;Summary: Read from the STDIN stream of the AutoIt script process.
+ConsoleRead([peek = False], [binary = False])
+;Summary: Writes data to the STDOUT stream. Some text editors can read this stream as can other programs which may be expecting data on this stream.
+ConsoleWrite("Data")
+;Summary: Writes data to the STDERR stream. Some text editors can read this stream as can other programs which may be expecting data on this stream.
+ConsoleWriteError("Data")
+;Summary: Sends a mouse click command to a given control.
+ControlClick("Title", "Text", ControlID, [button = "left"], [clicks = 1], [x], [y])
+;Summary: Sends a command to a control.
+ControlCommand("Title", "Text", ControlID, "Command", ["option"])
+;Summary: Disables or "grays-out" a control.
+ControlDisable("Title", "Text", ControlID)
+;Summary: Enables a "grayed-out" control.
+ControlEnable("Title", "Text", ControlID)
+;Summary: Sets input focus to a given control on a window.
+ControlFocus("Title", "Text", ControlID)
+;Summary: Returns the ControlRef# of the control that has keyboard focus within a specified window.
+ControlGetFocus("Titel", ["Text"])
+;Summary: Retrieves the internal handle of a control.
+ControlGetHandle("Title", "Text", ControlID)
+;Summary: Retrieves the position and size of a control relative to its window.
+ControlGetPos("Title", "Text", ControlID)
+;Summary: Retrieves text from a control.
+ControlGetText("Title", "Text", ControlID)
+;Summary: Hides a control.
+ControlHide("Title", "Text", ControlID)
+;Summary: Sends a command to a ListView32 control.
+ControlListView("Title", "Text", ControlID, "Command", [Option1], [Option2])
+;Summary: Moves a control within a window.
+ControlMove("Title", "Text", ControlID, X, Y, [width], [height])
+;Summary: Sends a string of characters to a control.
+ControlSend("Title", "Text", ControlID, "String", [flag = 0])
+;Summary: Sets text of a control.
+ControlSetText("Title", "Text", ControlID, "New text", [flag = 0])
+;Summary: Shows a control that was hidden.
+ControlShow("Title", "Text", ControlID)
+;Summary: Sends a command to a TreeView32 control.
+ControlTreeView("Title", "Text", ControlID, "Command", [Option1])
+;Summary: Calculates the cosine of a number.
+Cos(Number)
+;Summary: Returns a numeric representation of a hexadecimal string.
+Dec("Hex", [Flag = 0])
+;Summary: Copies a directory and all sub-directories and files (Similar to xcopy).
+DirCopy("Source dir", "Dest dir", [Flag = 0])
+;Summary: Creates a directory/folder.
+DirCreate("Path")
+;Summary: Returns the size in bytes of a given directory.
+DirGetSize("Path", [Flag = 0])
+;Summary: Moves a directory and all sub-directories and files.
+DirMove("Source dir", "Dest dir", [Flag = 0])
+;Summary: Deletes a directory/folder.
+DirRemove("Path", [Flag = 0])
+;Summary: Dynamically calls a function in a DLL.
+DllCall("Dll", "Return type", "Function", [Type1], [Param1], [Type ...], [Param ...])
+;Summary: Dynamically calls a function at a specific memory address.
+DllCallAddress("Return type", address, [Type1], [Param1], [Type ...], [Param ...])
+;Summary: Frees a previously created handle created with DllCallbackRegister.
+DllCallbackFree(Handle)
+;Summary: Returns the pointer to a callback function that can be passed to the Win32 API.
+DllCallbackGetPtr(Handle)
+;Summary: Creates a user-defined DLL Callback function.
+DllCallbackRegister("Function", "Return type", "Params")
+;Summary: Closes a previously opened DLL.
+DllClose(Handle)
+;Summary: Opens a DLL file for use in DllCall.
+DllOpen("Filename")
+;Summary: Creates a C/C++ style structure to be used in DllCall.
+DllStructCreate("Struct", [Pointer])
+;Summary: Returns the data of an element of the struct.
+DllStructGetData(Struct, Element, [index = Default])
+;Summary: Returns the pointer to the struct or an element in the struct.
+DllStructGetPtr(Struct, [Element])
+;Summary: Returns the size of the struct in bytes.
+DllStructGetSize(Struct)
+;Summary: Sets the data of an element in the struct.
+DllStructSetData(Struct, Element, Value , [Index])
+;Summary: Returns an array containing the enumerated drives.
+DriveGetDrive("Type")
+;Summary: Returns File System Type of a drive.
+DriveGetFileSystem("Path")
+;Summary: Returns Volume Label of a drive, if it has one.
+DriveGetLabel("Path")
+;Summary: Returns Serial Number of a drive.
+DriveGetSerial("Path")
+;Summary: Returns drive type.
+DriveGetType("Path", [operation = 1])
+;Summary: Maps a network drive.
+DriveMapAdd("Device", "Remote share", [Flags = 0], ["User"], ["Password"])
+;Summary: Disconnects a network drive.
+DriveMapDel("Drive")
+;Summary: Retrieves the details of a mapped drive.
+DriveMapGet("Device")
+;Summary: Sets the Volume Label of a drive.
+DriveSetLabel("Path", "Label")
+;Summary: Returns the free disk space of a path in Megabytes.
+DriveSpaceFree("Path")
+;Summary: Returns the total disk space of a path in Megabytes.
+DriveSpaceTotal("Path")
+;Summary: Returns the status of the drive as a string.
+DriveStatus("Path")
+;Summary: Retrieves an environment variable.
+EnvGet("EnvVar")
+;Summary: Writes an environment variable.
+EnvSet("EnvVar", ["Value"])
+;Summary: Refreshes the OS environment.
+EnvUpdate()
+;Summary: Return the value of the variable defined by a string.
+Eval("String")
+;Summary: Execute an expression.
+Execute("String")
+;Summary: Calculates e to the power of a number.
+Exp(Number)
+;Summary: Changes the current working directory.
+FileChangeDir("Path")
+;Summary: Closes a previously opened file.
+FileClose(Handle)
+;Summary: Copies one or more files.
+FileCopy("Source", "Dest", [Flag = 0])
+;Summary: Creates an NTFS hardlink to a file or a directory.
+FileCreateNTFSLink("Source", "Hardlink", [Flag = 0])
+;Summary: Creates a shortcut (.lnk) to a file.
+FileCreateShortcut("File", "lnk", ["Workdir"], ["Args"], ["Desc"], ["Icon"], ["Hotkey"], [Icon number], [State])
+;Summary: Delete one or more files.
+FileDelete("Path")
+;Summary: Checks if a file or directory exists.
+FileExists("Path")
+;Summary: Creates a search handle, defined by a path and file mask.
+FileFindFirstFile("PathMask")
+;Summary: Returns the next filename defined by the search handle.
+FileFindNextFile(Handle, [Flag = 0])
+;Summary: Flushes the file's buffer to disk.
+FileFlush(Handle)
+;Summary: Returns a code string representing a file's attributes.
+FileGetAttrib("Path")
+;Summary: Determines the text encoding used in a file.
+FileGetEncoding("Path/Handle", [Mode = 1])
+;Summary: Returns the long path+name of the path+name passed.
+FileGetLongName("Path")
+;Summary: Retrieves the current file position.
+FileGetPos(Handle)
+;Summary: Retrieves details about a shortcut.
+FileGetShortcut("lnk")
+;Summary: Returns the 8.3 short path+name of the path+name passed.
+FileGetShortName("Path", [Flag = 0])
+;Summary: Returns the size of a file in bytes.
+FileGetSize("Path")
+;Summary: Returns the time and date information for a file.
+FileGetTime("Path", [Option = 0], [Format = 0])
+;Summary: Returns version information stored in a file.
+FileGetVersion("Path", ["StringName"])
+;Summary: Include and install a file with the compiled script.
+FileInstall("Source", "Dest", [Flag = 0])
+;Summary: Moves one or more files.
+FileMove("Source", "Dest", [Flag = 0])
+;Summary: Opens a file for reading or writing.
+FileOpen("Path", [Mode = 0])
+;Summary: Initiates a Open File Dialog.
+FileOpenDialog("Title", "Init dir", "Filter", [Options = 0], ["Default name"], [HWND])
+;Summary: Read in a number of characters from a previously opened file.
+FileRead("Path/Handle", [Count])
+;Summary: Read in a line of text from a previously opened text file.
+FileReadLine("Path/Handle", [Line = 1])
+;Summary: Reads the specified file into an array.
+FileReadToArray("Path/Handle")
+;Summary: Sends a file or directory to the recycle bin.
+FileRecycle("Path")
+;Summary: Empties the recycle bin.
+FileRecycleEmpty(["source"])
+;Summary: Initiates a Save File Dialog.
+FileSaveDialog("Title", "Init dir", "Filter", [Options = 0], ["Default name"], [HWND])
+;Summary: Initiates a Browse For Folder dialog.
+FileSelectFolder("Dialog text", "Root dir", [flag = 0], ["Initial dir"], [HWND])
+;Summary: Sets the attributes of one or more files/directories.
+FileSetAttrib("File pattern", "+-RASHNOT", [recurse = 0])
+;Summary: Sets the end of the file at the current file position.
+FileSetEnd(Handle)
+;Summary: Sets the current file position.
+FileSetPos(Handle, Offset, Origin)
+;Summary: Sets the timestamp of one of more files.
+FileSetTime("File pattern", "Time", [type = 0], [recurse = 0])
+;Summary: Write text/data to the end of a previously opened file.
+FileWrite("Path/Handle", "Data")
+;Summary: Append a line of text to the end of a previously opened text file.
+FileWriteLine("Path/Handle", "Line")
+;Summary: Returns a number rounded down to the closest integer.
+Floor(Number)
+;Summary: Sets the internet proxy to use for ftp access.
+FtpSetProxy(mode = 0, ["proxy:port"], ["username"], ["password"])
+;Summary: Returns the name of a function stored in a variable.
+FuncName($Functionvariable)
+;Summary: Create a GUI window.
+GUICreate("Title", [Width], [Height], [Left = -1], [Top = -1], [Style = -1], [ExStyle = -1], [Parent = 0])
+;Summary: Creates an AVI video control for the GUI.
+GUICtrlCreateAvi("Filename", SubfileId, Left, Top, [Width], [Height], [Style = -1], [ExStyle = -1])
+;Summary: Creates a Button control for the GUI.
+GUICtrlCreateButton("Text", Left, Top, [Width], [Height], [Style = -1], [ExStyle = -1])
+;Summary: Creates a Checkbox control for the GUI.
+GUICtrlCreateCheckbox("Text", Left, Top, [Width], [Height], [Style = -1], [ExStyle = -1])
+;Summary: Creates a ComboBox control for the GUI.
+GUICtrlCreateCombo("Text", Left, Top, [Width], [Height], [Style = -1], [ExStyle = -1])
+;Summary: Creates a context menu for a control or entire GUI window.
+GUICtrlCreateContextMenu([ControlID])
+;Summary: Creates a date control for the GUI.
+GUICtrlCreateDate("Text", Left, Top, [Width], [Height], [Style = -1], [ExStyle = -1])
+;Summary: Creates a Dummy control for the GUI.
+GUICtrlCreateDummy()
+;Summary: Creates an Edit control for the GUI.
+GUICtrlCreateEdit("Text", Left, Top, [Width], [Height], [Style = -1], [ExStyle = -1])
+;Summary: Creates a Graphic control for the GUI.
+GUICtrlCreateGraphic(Left, Top, [Width], [Height], [Style])
+;Summary: Creates a Group control for the GUI.
+GUICtrlCreateGroup("Text", Left, Top, [Width], [Height], [Style = -1], [ExStyle = -1])
+;Summary: Creates an Icon control for the GUI.
+GUICtrlCreateIcon(FileName, IconName, Left, Top, [Width], [Height], [Style = -1], [ExStyle = -1])
+;Summary: Creates an Input control for the GUI.
+GUICtrlCreateInput("Text", Left, Top, [Width], [Height], [Style = -1], [ExStyle = -1])
+;Summary: Creates a static Label control for the GUI.
+GUICtrlCreateLabel("Text", Left, Top, [Width], [Height], [Style = -1], [ExStyle = -1])
+;Summary: Creates a List control for the GUI.
+GUICtrlCreateList("Text", Left, Top, [Width], [Height], [Style = -1], [ExStyle = -1])
+;Summary: Creates a ListView control for the GUI.
+GUICtrlCreateListView("Text", Left, Top, [Width], [Height], [Style = -1], [ExStyle = -1])
+;Summary: Creates a ListView item.
+GUICtrlCreateListViewItem("Text", ListViewID)
+;Summary: Creates a Menu control for the GUI.
+GUICtrlCreateMenu("SubMenuText", [MenuID = -1], [MenuEntry = -1])
+;Summary: Creates a MenuItem control for the GUI.
+GUICtrlCreateMenuItem("Text", MenuID, [MenuEntry = -1], [MenuRadioItem = 0])
+;Summary: Creates a month calendar control for the GUI.
+GUICtrlCreateMonthCal("Text", Left, Top, [Width], [Height], [Style = -1], [ExStyle = -1])
+;Summary: Creates an ActiveX control in the GUI.
+GUICtrlCreateObj(ObjVar, Left, Top , [Width], [Height])
+;Summary: Creates a Picture control for the GUI.
+GUICtrlCreatePic(FileName, Left, Top, [Width], [Height], [Style = -1], [ExStyle = -1])
+;Summary: Creates a Progress control for the GUI.
+GUICtrlCreateProgress(Left, Top, [Width], [Height], [Style = -1], [ExStyle = -1])
+;Summary: Creates a Radio button control for the GUI.
+GUICtrlCreateRadio("Text", Left, Top, [Width], [Height], [Style = -1], [ExStyle = -1])
+;Summary: Creates a Slider control for the GUI.
+GUICtrlCreateSlider(Left, Top, [Width], [Height], [Style = -1], [ExStyle = -1])
+;Summary: Creates a Tab control for the GUI.
+GUICtrlCreateTab(Left, Top, [Width], [Height], [Style = -1], [ExStyle = -1])
+;Summary: Creates a TabItem control within an existing tab control in the GUI.
+GUICtrlCreateTabItem("Text")
+;Summary: Creates a TreeView control for the GUI.
+GUICtrlCreateTreeView(Left, Top, [Width], [Height], [Style = -1], [ExStyle = -1])
+;Summary: Creates a TreeViewItem control for the GUI.
+GUICtrlCreateTreeViewItem("Text", TreeViewID)
+;Summary: Creates an UpDown control for the GUI.
+GUICtrlCreateUpdown(InputControlID, [Style = -1])
+;Summary: Deletes a control.
+GUICtrlDelete(ControlID)
+;Summary: Returns the handle for a control and some special (item) handles (Menu, ContextMenu, TreeViewItem).
+GUICtrlGetHandle(ControlID)
+;Summary: Gets the current state of a control.
+GUICtrlGetState(ControlID)
+;Summary: Read state or data of a control.
+GUICtrlRead(ControlID, [Advanced = 0])
+;Summary: Send a message to a control and retrieve information in lParam.
+GUICtrlRecvMsg(ControlID, Message, [wParam], [lParamType])
+;Summary: Register a user defined function for an internal listview sorting callback function.
+GUICtrlRegisterListViewSort(ControlID, "Function")
+;Summary: Send a message to a control.
+GUICtrlSendMsg(ControlID, Message, wParam, lParam)
+;Summary: Sends a message to a Dummy control.
+GUICtrlSendToDummy(ControlID, [State])
+;Summary: Sets the background color of a control.
+GUICtrlSetBkColor(ControlID, BackgroundColor)
+;Summary: Sets the text color of a control.
+GUICtrlSetColor(ControlID, TextColor)
+;Summary: Sets the mouse cursor icon for a particular control.
+GUICtrlSetCursor(ControlID, CursorID)
+;Summary: Modifies the data for a control.
+GUICtrlSetData(ControlID, Data, [Default])
+;Summary: Sets the default background color of all the controls of the GUI window.
+GUICtrlSetDefBkColor(DefBkColor, [WinHandle])
+;Summary: Sets the default text color of all the controls of the GUI window.
+GUICtrlSetDefColor(DefTextColor, [WindHandle])
+;Summary: Sets the font for a control.
+GUICtrlSetFont(ControlID, Size, [Weight], [Attribute], [FontName], [Quality])
+;Summary: Modifies the data for a control.
+GUICtrlSetGraphic(ControlID, Type, [Param1..Param6])
+;Summary: Sets the bitmap or icon image to use for a control.
+GUICtrlSetImage(ControlID, FileName, [IconName], [IconType])
+;Summary: Limits the number of characters/pixels for a control.
+GUICtrlSetLimit(ControlID, Max, [Min = 0])
+;Summary: Defines a user-defined function to be called when a control is clicked.
+GUICtrlSetOnEvent(ControlID, "Function")
+;Summary: Changes the position of a control within the GUI window.
+GUICtrlSetPos(ControlID, Left, [Top], [Width], [Height])
+;Summary: Defines the resizing method used by a control.
+GUICtrlSetResizing(ControlID, Resizing)
+;Summary: Changes the state of a control.
+GUICtrlSetState(ControlID, State)
+;Summary: Changes the style of a control.
+GUICtrlSetStyle(ControlID, Style, [ExStyle])
+;Summary: Sets the tip text associated with a control.
+GUICtrlSetTip(ControlID, TipText, ["Titel"], [Icon], [Options])
+;Summary: Deletes a GUI window and all controls that it contains.
+GUIDelete([WindowHandle])
+;Summary: Gets the mouse cursor position relative to GUI window.
+GUIGetCursorInfo([WindowHandle])
+;Summary: Polls the GUI to see if any events have occurred.
+GUIGetMsg([Advanced = 0])
+;Summary: Retrieves the styles of a GUI window.
+GUIGetStyle([WindowHandle])
+;Summary: Register a user defined function for a known Windows Message ID (WM_MSG).
+GUIRegisterMsg(MessageID, "Function")
+;Summary: Sets the accelerator table to be used in a GUI window.
+GUISetAccelerators(Accelerator, [WindowHandle])
+;Summary: Sets the background color of the GUI window.
+GUISetBkColor(Color, [WindowHandle])
+;Summary: Sets absolute coordinates for the next control.
+GUISetCoord(Left, Top, [Width], [Height], [WindowHandle])
+;Summary: Sets the mouse cursor icon for a GUI window.
+GUISetCursor([CursorID], [Override = 0], [WindowHandle])
+;Summary: Sets the default font for a GUI window.
+GUISetFont([Size], [Weight], [Attribute], [Fontname], [WindowHandle], [Quality])
+;Summary: Sets an executable file that will be run when F1 is pressed.
+GUISetHelp(HelpFile, [WindowHandle])
+;Summary: Sets the icon used in a GUI window.
+GUISetIcon(IconFile, [IconID], [WindowHandle])
+;Summary: Defines a user function to be called when a system button is clicked.
+GUISetOnEvent(SpecialID, "Function", [WindowHandle])
+;Summary: Changes the state of a GUI window.
+GUISetState([Flag], [WindowHandle])
+;Summary: Changes the styles of a GUI window.
+GUISetStyle(Style, [StyleEx], [WindowHandle])
+;Summary: Defines that any subsequent controls that are created will be "grouped" together.
+GUIStartGroup([WindowHandle])
+;Summary: Switches the current window used for GUI functions.
+GUISwitch(WindowHandle, [TabItemID])
+;Summary: Returns a string representation of an integer or of a binary type converted to hexadecimal.
+Hex(Expression, [Flag])
+;Summary: Sets a hotkey that calls a user function.
+HotKeySet("Key", ["Function"])
+;Summary: Sets the internet proxy to use for http access.
+HttpSetProxy(mode, ["proxy:port"], ["username"], ["password"])
+;Summary: Sets the HTTP user-agent string which is sent with all Inet requests.
+HttpSetUserAgent("UserAgent")
+;Summary: Converts an expression into an HWND handle.
+HWnd(Expression)
+;Summary: Closes a handle returned from InetGet().
+InetClose(Handle)
+;Summary: Downloads a file from the internet using the HTTP, HTTPS or FTP protocol.
+InetGet("URL", ["Filename"], [Options], [Background])
+;Summary: Returns detailed data for a handle returned from InetGet().
+InetGetInfo([Handle], [Index])
+;Summary: Returns the size (in bytes) of a file located on the internet.
+InetGetSize("URL", [Options])
+;Summary: Downloads a file from the internet using the HTTP, HTTPS or FTP protocol.
+InetRead("URL", [Options])
+;Summary: Deletes a value from a standard format .ini file.
+IniDelete("Filename", "Section", ["Key"])
+;Summary: Reads a value from a standard format .ini file.
+IniRead("Filename", "Section", "Key", "Default")
+;Summary: Reads all key/value pairs from a section in a standard format .ini file.
+IniReadSection("Filename", "Section")
+;Summary: Reads all sections in a standard format .ini file.
+IniReadSectionNames("Filenames")
+;Summary: Renames a section in a standard format .ini file.
+IniRenameSection("Filename", "Section", "New Name", [Flag])
+;Summary: Writes a value to a standard format .ini file.
+IniWrite("Filename", "Section", "Key", "Value")
+;Summary: Writes a section to a standard format .ini file.
+IniWriteSection("Filename", "Section", "Data", [Index])
+;Summary: Displays an input box to ask the user to enter a string.
+InputBox("Title", "Prompt", ["Default"], ["Password Char"], [Width], [Height], [Left], [Top], [Timeout], [HWND])
+;Summary: Returns the integer (whole number) representation of an expression.
+Int(Expression, [Flag])
+;Summary: Checks if the current user has full administrator privileges.
+IsAdmin()
+;Summary: Checks if a variable is an array type.
+IsArray()
+;Summary: Checks if a variable or expression is a binary type.
+IsBinary()
+;Summary: Checks if a variable's base type is boolean.
+IsBool()
+;Summary: Check if a variable has been declared.
+IsDeclared()
+;Summary: Checks if a variable is a DllStruct type.
+IsDllStruct()
+;Summary: Checks if the value of a variable or expression has a fractional component.
+IsFloat()
+;Summary: Checks if a variable or expression is a function type.
+IsFunc()
+;Summary: Checks if a variable's base type is a pointer and window handle.
+IsHWnd()
+;Summary: Checks if the value of a variable or expression has no fractional component.
+IsInt()
+;Summary: Checks if a variable is a keyword (for example, Default).
+IsKeyword()
+;Summary: Checks if a variable's base type is numeric.
+IsNumber()
+;Summary: Checks if a variable or expression is an object type.
+IsObj()
+;Summary: Checks if a variable's base type is a pointer.
+IsPtr()
+;Summary: Checks if a variable is a string type.
+IsString()
+;Summary: Calculates the natural logarithm of a number.
+Log()
+;Summary: Retrieves memory related information.
+MemGetStats()
+;Summary: Performs the modulus operation.
+Mod()
+;Summary: Perform a mouse click operation.
+MouseClick()
+;Summary: Perform a mouse click and drag operation.
+MouseClickDrag()
+;Summary: Perform a mouse down event at the current mouse position.
+MouseDown()
+;Summary: Returns the cursor ID Number for the current Mouse Cursor.
+MouseGetCursor()
+;Summary: Retrieves the current position of the mouse cursor.
+MouseGetPos()
+;Summary: Moves the mouse pointer.
+MouseMove()
+;Summary: Perform a mouse up event at the current mouse position.
+MouseUp()
+;Summary: Moves the mouse wheel up or down.
+MouseWheel()
+;Summary: Displays a simple message box with optional timeout.
+MsgBox()
+;Summary: Returns the numeric representation of an expression.
+Number()
+;Summary: Creates a reference to a COM object from the given classname.
+ObjCreate()
+;Summary: Creates a reference to an object from the given classname/object pointer, interface identifier and description string.
+ObjCreateInterface()
+;Summary: Handles incoming events from the given Object.
+ObjEvent()
+;Summary: Retrieves a reference to a COM object from an existing process or filename.
+ObjGet()
+;Summary: Returns the name or interface description of an Object.
+ObjName()
+;Summary: Registers a function to be called when AutoIt exits.
+OnAutoItExitRegister()
+;Summary: UnRegisters a function that was called when AutoIt exits.
+OnAutoItExitUnRegister()
+;Summary: Pings a host and returns the roundtrip-time.
+Ping()
+;Summary: Generates a checksum for a region of pixels.
+PixelChecksum()
+;Summary: Returns a pixel color according to x,y pixel coordinates.
+PixelGetColor()
+;Summary: Searches a rectangle of pixels for the pixel color provided.
+PixelSearch()
+;Summary: Terminates a named process.
+ProcessClose()
+;Summary: Checks to see if a specified process exists.
+ProcessExists()
+;Summary: Returns an array about Memory or IO infos of a running process.
+ProcessGetStats()
+;Summary: Returns an array listing the currently running processes (names and PIDs).
+ProcessList()
+;Summary: Changes the priority of a process.
+ProcessSetPriority()
+;Summary: Pauses script execution until a given process exists.
+ProcessWait()
+;Summary: Pauses script execution until a given process does not exist.
+ProcessWaitClose()
+;Summary: Turns Progress window off.
+ProgressOff()
+;Summary: Creates a customizable progress bar window.
+ProgressOn()
+;Summary: Sets the position and/or text of a previously created Progress bar window.
+ProgressSet()
+;Summary: Converts an expression into a pointer variant.
+Ptr()
+;Summary: Generates a pseudo-random float-type number.
+Random()
+;Summary: Deletes a key or value from the registry.
+RegDelete()
+;Summary: Reads the name of a subkey according to its instance.
+RegEnumKey()
+;Summary: Reads the name of a value according to its instance.
+RegEnumVal()
+;Summary: Reads a value from the registry.
+RegRead()
+;Summary: Creates a key or value in the registry.
+RegWrite()
+;Summary: Returns a number rounded to a specified number of decimal places.
+Round()
+;Summary: Runs an external program.
+Run()
+;Summary: Runs an external program under the context of a different user.
+RunAs()
+;Summary: Runs an external program under the context of a different user and pauses script execution until the program finishes.
+RunAsWait()
+;Summary: Runs an external program and pauses script execution until the program finishes.
+RunWait()
+;Summary: Sends simulated keystrokes to the active window.
+Send()
+;Summary: Attempts to keep a specified window active during Send().
+SendKeepActive()
+;Summary: Manually set the value of the @error macro (and optionally @extended, and "Return Value").
+SetError()
+;Summary: Manually set the value of the @extended macro.
+SetExtended()
+;Summary: Runs an external program using the ShellExecute API.
+ShellExecute()
+;Summary: Runs an external program using the ShellExecute API and pauses script execution until it finishes.
+ShellExecuteWait()
+;Summary: Shuts down the system.
+Shutdown()
+;Summary: Calculates the sine of a number.
+Sin()
+;Summary: Pause script execution.
+Sleep()
+;Summary: Play a sound file.
+SoundPlay()
+;Summary: Sets the system wave volume by percent.
+SoundSetWaveVolume()
+;Summary: Creates a customizable image popup window.
+SplashImageOn()
+;Summary: Turns SplashText or SplashImage off.
+SplashOff()
+;Summary: Creates a customizable text popup window.
+SplashTextOn()
+;Summary: Calculates the square-root of a number.
+Sqrt()
+;Summary: Set Seed for random number generation.
+SRandom()
+;Summary: Retrieves the text from a standard status bar control.
+StatusbarGetText()
+;Summary: Reads from the STDERR stream of a previously run child process.
+StderrRead()
+;Summary: Writes a number of characters to the STDIN stream of a previously run child process.
+StdinWrite()
+;Summary: Closes all resources associated with a process previously run with STDIO redirection.
+StdioClose()
+;Summary: Reads from the STDOUT stream of a previously run child process.
+StdoutRead()
+;Summary: Returns the string representation of an expression.
+String()
+;Summary: Takes a string and prefixes all linefeed characters ( Chr(10) ) with a carriage return character ( Chr(13) ).
+StringAddCR()
+;Summary: Compares two strings with options.
+StringCompare()
+;Summary: Returns a formatted string (similar to the C sprintf() function).
+StringFormat()
+;Summary: Converts an array of ASCII codes to a string.
+StringFromASCIIArray()
+;Summary: Checks if a string contains a given substring.
+StringInStr()
+;Summary: Checks if a string contains only alphanumeric characters.
+StringIsAlNum()
+;Summary: Checks if a string contains only alphabetic characters.
+StringIsAlpha()
+;Summary: Checks if a string contains only ASCII characters in the range 0x00 - 0x7f (0 - 127).
+StringIsASCII()
+;Summary: Checks if a string contains only digit (0-9) characters.
+StringIsDigit()
+;Summary: Checks if a string is a floating point number.
+StringIsFloat()
+;Summary: Checks if a string is an integer.
+StringIsInt()
+;Summary: Checks if a string contains only lowercase characters.
+StringIsLower()
+;Summary: Checks if a string contains only whitespace characters.
+StringIsSpace()
+;Summary: Checks if a string contains only uppercase characters.
+StringIsUpper()
+;Summary: Checks if a string contains only hexadecimal digit (0-9, A-F) characters.
+StringIsXDigit()
+;Summary: Returns a number of characters from the left-hand side of a string.
+StringLeft()
+;Summary: Returns the number of characters in a string.
+StringLen()
+;Summary: Converts a string to lowercase.
+StringLower()
+;Summary: Extracts a number of characters from a string.
+StringMid()
+;Summary: Check if a string fits a given regular expression pattern.
+StringRegExp()
+;Summary: Replace text in a string based on regular expressions.
+StringRegExpReplace()
+;Summary: Replaces substrings in a string.
+StringReplace()
+;Summary: Reverses the contents of the specified string.
+StringReverse()
+;Summary: Returns a number of characters from the right-hand side of a string.
+StringRight()
+;Summary: Splits up a string into substrings depending on the given delimiters.
+StringSplit()
+;Summary: Removes all carriage return values ( Chr(13) ) from a string.
+StringStripCR()
+;Summary: Strips the white space in a string.
+StringStripWS()
+;Summary: Converts a string to an array containing the ASCII code of each character.
+StringToASCIIArray()
+;Summary: Converts a string into binary data.
+StringToBinary()
+;Summary: Trims a number of characters from the left hand side of a string.
+StringTrimLeft()
+;Summary: Trims a number of characters from the right hand side of a string.
+StringTrimRight()
+;Summary: Converts a string to uppercase.
+StringUpper()
+;Summary: Calculates the tangent of a number.
+Tan()
+;Summary: Permits an incoming connection attempt on a socket.
+TCPAccept()
+;Summary: Closes a TCP socket.
+TCPCloseSocket()
+;Summary: Create a socket connected to an existing server.
+TCPConnect()
+;Summary: Creates a socket listening for an incoming connection.
+TCPListen()
+;Summary: Converts an Internet name to IP address.
+TCPNameToIP()
+;Summary: Receives data from a connected socket.
+TCPRecv()
+;Summary: Sends data on a connected socket.
+TCPSend()
+;Summary: Stops TCP/UDP services.
+TCPShutdown, UDPShutdown()
+;Summary: Starts TCP or UDP services.
+TCPStartup, UDPStartup()
+;Summary: Returns the difference in time from a previous call to TimerInit().
+TimerDiff()
+;Summary: Returns a handle that can be passed to TimerDiff() to calculate the difference in milliseconds.
+TimerInit()
+;Summary: Creates a tooltip anywhere on the screen.
+ToolTip()
+;Summary: Creates a menuitem control for the tray.
+TrayCreateItem()
+;Summary: Creates a menu control for the tray menu.
+TrayCreateMenu()
+;Summary: Polls the tray to see if any events have occurred.
+TrayGetMsg()
+;Summary: Deletes a menu/item control from the tray menu.
+TrayItemDelete()
+;Summary: Returns the handle for a tray menu(item).
+TrayItemGetHandle()
+;Summary: Gets the current state of a control.
+TrayItemGetState()
+;Summary: Gets the itemtext of a tray menu/item control.
+TrayItemGetText()
+;Summary: Defines a user-defined function to be called when a tray item is clicked.
+TrayItemSetOnEvent()
+;Summary: Sets the state of a tray menu/item control.
+TrayItemSetState()
+;Summary: Sets the itemtext of a tray menu/item control.
+TrayItemSetText()
+;Summary: Sets the clickmode of the tray icon - what mouseclicks will display the tray menu.
+TraySetClick()
+;Summary: Loads/Sets a specified tray icon.
+TraySetIcon()
+;Summary: Defines a user function to be called when a special tray action happens.
+TraySetOnEvent()
+;Summary: Loads/Sets a specified tray pause icon.
+TraySetPauseIcon()
+;Summary: Sets the state of the tray icon.
+TraySetState()
+;Summary: (Re)Sets the tooltip text for the tray icon.
+TraySetToolTip()
+;Summary: Displays a balloon tip from the AutoIt Icon.
+TrayTip()
+;Summary: Returns the size of array dimensions or the number of keys in a map.
+UBound()
+;Summary: Create a socket bound to an incoming connection.
+UDPBind()
+;Summary: Close a UDP socket.
+UDPCloseSocket()
+;Summary: Open a socket connected to an existing server .
+UDPOpen()
+;Summary: Receives data from an opened socket.
+UDPRecv()
+;Summary: Sends data on an opened socket.
+UDPSend()
+;Summary: Returns the internal type representation of a variant.
+VarGetType()
+;Summary: Activates (gives focus to) a window.
+WinActivate()
+;Summary: Checks to see if a specified window exists and is currently active.
+WinActive()
+;Summary: Closes a window.
+WinClose()
+;Summary: Checks to see if a specified window exists.
+WinExists()
+;Summary: Flashes a window in the taskbar.
+WinFlash()
+;Summary: Returns the coordinates of the caret in the foreground window.
+WinGetCaretPos()
+;Summary: Retrieves the classes from a window.
+WinGetClassList()
+;Summary: Retrieves the size of a given window's client area.
+WinGetClientSize()
+;Summary: Retrieves the internal handle of a window.
+WinGetHandle()
+;Summary: Retrieves the position and size of a given window.
+WinGetPos()
+;Summary: Retrieves the Process ID (PID) associated with a window.
+WinGetProcess()
+;Summary: Retrieves the state of a given window.
+WinGetState()
+;Summary: Retrieves the text from a window.
+WinGetText()
+;Summary: Retrieves the full title from a window.
+WinGetTitle()
+;Summary: Forces a window to close.
+WinKill()
+;Summary: Retrieves a list of windows.
+WinList()
+;Summary: Invokes a menu item of a window.
+WinMenuSelectItem()
+;Summary: Minimizes all windows.
+WinMinimizeAll()
+;Summary: Undoes a previous WinMinimizeAll function.
+WinMinimizeAllUndo()
+;Summary: Moves and/or resizes a window.
+WinMove()
+;Summary: Change a window's "Always On Top" attribute.
+WinSetOnTop()
+;Summary: Shows, hides, minimizes, maximizes, or restores a window.
+WinSetState()
+;Summary: Changes the title of a window.
+WinSetTitle()
+;Summary: Sets the transparency of a window.
+WinSetTrans()
+;Summary: Pauses execution of the script until the requested window exists.
+WinWait()
+;Summary: Pauses execution of the script until the requested window is active.
+WinWaitActive()
+;Summary: Pauses execution of the script until the requested window does not exist.
+WinWaitClose()
+;Summary: Pauses execution of the script until the requested window is not active.
+WinWaitNotActive()
