@@ -585,12 +585,21 @@ begin
     end;
   end
   else if not (FLineText[FTokenEnd] in ['_', '0'..'9', 'a'..'z',
-    'A'..'Z', '$', '"', '#']) then
+    'A'..'Z', '$', '"', '#', '@']) then
   begin
     Inc(FTokenEnd);
     FToken := FLineText[FTokenPos];
     FTokLen := 1;
     FTok := tkSymbol;
+  end  
+  else if FLineText[FTokenEnd] = '@' then
+  begin
+    Inc(FTokenEnd);
+    FTokenHash := HashToken(@FLineText[FTokenEnd], FTokLen);
+    Inc(FTokenEnd, FTokLen);
+    Inc(FTokLen);
+    FToken := copy(FLineText, FTokenPos, FTokLen);
+    FTok := tkNumber;
   end
   else if FLineText[FTokenEnd] = '$' then
   begin
