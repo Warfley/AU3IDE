@@ -1232,17 +1232,20 @@ procedure TEditorFrame.CodeEditorKeyDown(Sender: TObject; var Key: word;
 var
   p: TPoint;
 begin
+  FillChar(p, SizeOf(p), 0);
   if Key = 9 then
   begin
     p:=GetTemplatePos(False);
+      Key:=0;
+  end
+  else if Key=VK_BACK then
+    p:=GetTemplatePos(true);
     if p.x>0 then
     begin
       CodeEditor.BlockBegin:=Point(p.x, CodeEditor.LogicalCaretXY.Y);
       CodeEditor.BlockEnd:=Point(p.y, CodeEditor.LogicalCaretXY.Y);
       CodeEditor.LogicalCaretXY:=Point(p.y, CodeEditor.LogicalCaretXY.y);
-      Key:=0;
     end;
-  end;
 end;
 
 
