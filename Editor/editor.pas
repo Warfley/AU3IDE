@@ -750,7 +750,7 @@ begin
     begin
       if Value[p + 1] <> ')' then
         Application.QueueAsyncCall(@MoveHorz, -1);
-      if PosEx('<', Value, p + 1) = 0 then
+      if PosEx('{', Value, p + 1) = 0 then
       begin
         SetLength(Value, Pos('(', Value));
         Value := Value + ')';
