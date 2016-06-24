@@ -81,6 +81,7 @@ type
     FKeyWords: TStringList;
     FDefRanges: TObjectList;
     Parser: TUnitParser;
+    function GetTemplatePos(UseCursor: Boolean): TPoint;
     procedure LoadFuncList;
     procedure CompleteKeyDown(Sender: TObject; var Key: word; Shift: TShiftState);
     function GetCurrWord: string;
@@ -250,39 +251,59 @@ begin
   CodeEditor.LogicalCaretXY := p;
 end;
 
+function TEditorFrame.GetTemplatePos(UseCursor: Boolean): TPoint;
+var i, l, p: Integer;
+  ln: String;
+  inStr: Boolean;
+begin
+  Result.x:=0;
+  Result.y:=0;
+  p:=CodeEditor.LogicalCaretXY.x-1;
+  ln:=CodeEditor.Lines[CodeEditor.LogicalCaretXY.y-1];
+  l:=Length(ln);
+  inStr:=False;
+  for i:=1 to l do
+  begin
+    if ln[i] = '"' then inStr:=not inStr
+    else if not inStr then
+      if Result.x=0 then
+      begin
+        if (i>p+1) and UseCursor then Break;
+        if ln[i] = '{' then
+        Result.x:=i;
+      end
+      else
+      begin
+        if ln[i] = '{' then
+        begin
+          if (i>p) and UseCursor then
+            Result.x:=0
+          else Result.x:=i;
+        end
+        else if ln[i] = '}' then
+        begin
+          if (i>=p) or not UseCursor then
+          begin
+            Result.y:=i+1;
+            Break;
+          end
+          else result.x:=0;
+        end;
+      end;
+  end;
+  if Result.y=0 then Result.x:=0;
+end;
+
 procedure TEditorFrame.SelectTemp(i: IntPtr);
 var
-  x: integer;
-  s, e: integer;
-  ln: string;
-  l: integer;
+  p: TPoint;
 begin
-  s := 0;
-  e := 0;
-  ln := CodeEditor.Lines[CodeEditor.LogicalCaretXY.y - 1];
-  l := Length(ln);
-  x := 1;
-  while (x <= l) do
+  p:=GetTemplatePos(false);
+  if p.x>0 then
   begin
-    if ln[x] = '<' then
-      s := x
-    else if (s > 0) then
-      if ln[x] = '<' then
-        s := x
-      else if ln[x] = '>' then
-      begin
-        e := x + 1;
-        Break;
-      end
-      else if not (ln[x] in ['A'..'Z', 'a'..'z']) then
-        s := 0;
-    Inc(x);
-  end;
-  if s > 0 then
-  begin
-    CodeEditor.LogicalCaretXY := Point(e, CodeEditor.LogicalCaretXY.y);
-    CodeEditor.BlockBegin := Point(s, CodeEditor.LogicalCaretXY.Y);
-    CodeEditor.BlockEnd := Point(e, CodeEditor.LogicalCaretXY.Y);
+      CodeEditor.BlockBegin:=Point(p.x, CodeEditor.LogicalCaretXY.Y);
+      CodeEditor.BlockEnd:=Point(p.y, CodeEditor.LogicalCaretXY.Y);
+      CodeEditor.LogicalCaretXY:=Point(p.y, CodeEditor.LogicalCaretXY.y);
   end;
 end;
 
@@ -748,7 +769,7 @@ begin
   end;
   if (Length(Value) > 0) and not (Value[1] in ['_', 'A'..'Z', 'a'..'z', '0'..'9']) then
     Value := Copy(Value, 2, Length(Value) - 1);
-  if (Pos('<', Value) > 0) then
+  if (Pos('{', Value) > 0) then
     Application.QueueAsyncCall(@SelectTemp, SourceStart.x);
   (*rpval := Value;
   Value := Copy(ln, SourceStart.x, PosEx(Completion.CurrentString, ln, SourceStart.x))+
@@ -830,6 +851,15 @@ begin
       end;
       Application.QueueAsyncCall(@MoveHorz, 2);
     end
+    else if isEnd(ln, '#cs') then
+    begin
+      if not GotClosed(i, '#cs', '#ce') then
+      begin
+        CodeEditor.TextBetweenPoints[Point(0, i + 2), Point(0, i + 2)] :=
+          #13 + pref + '#ce';
+      end;
+      Application.QueueAsyncCall(@MoveHorz, 2);
+    end
     else if isEnd(ln, 'with') then
     begin
       if not GotClosed(i, 'with', 'endwith') then
@@ -901,8 +931,25 @@ begin
     tmp := GetCurrWord;
     p := Point(CodeEditor.CaretXPix, CodeEditor.CaretYPix + CodeEditor.LineHeight);
     p := CodeEditor.ClientToScreen(p);
-    if (Length(tmp) > 1) and (tmp[1] = '$') then
+    if (Length(tmp) > 1) and ((tmp[1] = '$') or (tmp[1] = '#')) then
       Completion.Execute(GetCurrWord, p);
+  end
+  else if Key in [VK_LEFT..VK_DOWN] then
+  begin
+    p:=GetTemplatePos(True);
+    if p.x>0 then
+    begin
+      if (CodeEditor.LogicalCaretXY.x=p.y-1) and (Key = VK_LEFT) then
+      begin
+        CodeEditor.LogicalCaretXY:=Point(p.x, CodeEditor.LogicalCaretXY.y);
+        CodeEditor.BlockBegin:=CodeEditor.LogicalCaretXY;
+        CodeEditor.BlockEnd:=CodeEditor.LogicalCaretXY;
+        Exit;
+      end;
+      CodeEditor.BlockBegin:=Point(p.x, CodeEditor.LogicalCaretXY.Y);
+      CodeEditor.BlockEnd:=Point(p.y, CodeEditor.LogicalCaretXY.Y);
+      CodeEditor.LogicalCaretXY:=Point(p.y, CodeEditor.LogicalCaretXY.y);
+    end;
   end;
 end;
 
@@ -1078,10 +1125,11 @@ procedure TEditorFrame.CodeEditorMouseUp(Sender: TObject; Button: TMouseButton;
 
 var
   sel: string;
-  i, n, l, s, e: integer;
+  i, n, l: integer;
   ln: string;
   v: TVarInfo;
   f: TFuncInfo;
+  p: TPoint;
 begin
   CodeEditor.Invalidate;
   if (Button = mbLeft) and (ssCtrl in Shift) then
@@ -1126,44 +1174,14 @@ begin
   end;
   if (Button = mbLeft) then
   begin
-    ln := CodeEditor.Lines[CodeEditor.LogicalCaretXY.y - 1];
-    l := Length(ln);
-    if l = 0 then
-      exit;
-    i := CodeEditor.LogicalCaretXY.x - 1;
-    s := 0;
-    e := 0;
-    if i = 0 then
-      i := 1;
-    while (i > 0) and (ln[i] in ['A'..'Z', 'a'..'z']) do
-      Dec(i);
-    if i = 0 then
-      exit
-    else if ln[i] = '<' then
-      s := i
-    else if ln[CodeEditor.LogicalCaretXY.x] = '<' then
+    p:=GetTemplatePos(True);
+    if p.x>0 then
     begin
-      i := CodeEditor.LogicalCaretXY.x;
-      s := i;
-    end;
-    if s > 0 then
-    begin
-      Inc(i);
-      if i = l then
-        exit;
-      while (i < l) and (ln[i] in ['A'..'Z', 'a'..'z']) do
-        Inc(i);
-      if ln[i] = '>' then
-        e := i + 1;
-      if (s > 0) and (e > 0) then
-      begin
-        CodeEditor.BlockBegin := Point(s, CodeEditor.LogicalCaretXY.y);
-        CodeEditor.BlockEnd := Point(e, CodeEditor.LogicalCaretXY.y);
-        CodeEditor.LogicalCaretXY := Point(e, CodeEditor.LogicalCaretXY.y);
-      end;
+      CodeEditor.BlockBegin:=Point(p.x, CodeEditor.LogicalCaretXY.y);
+      CodeEditor.BlockEnd:=Point(p.y, CodeEditor.LogicalCaretXY.y);
+      CodeEditor.LogicalCaretXY:=Point(p.y, CodeEditor.LogicalCaretXY.y);
     end;
   end;
-
 end;
 
 procedure TEditorFrame.CodeExplorerCustomDrawItem(Sender: TCustomTreeView;
@@ -1212,72 +1230,17 @@ end;
 procedure TEditorFrame.CodeEditorKeyDown(Sender: TObject; var Key: word;
   Shift: TShiftState);
 var
-  ln: string;
-  c: char;
-  b: boolean;
-  l, i, s, e: integer;
+  p: TPoint;
 begin
   if Key = 9 then
   begin
-    ln := CodeEditor.Lines[CodeEditor.LogicalCaretXY.y - 1];
-    for c in ln do
-      if c = '<' then
-        b := True
-      else if b then
-        if c = '>' then
-        begin
-          Application.QueueAsyncCall(@SelectTemp, 1);
-          Key := 0;
-          Break;
-        end
-        else if not (c in ['A'..'Z', 'a'..'z']) then
-          b := False;
-  end
-  else if Key in [VK_LEFT..VK_DOWN] then
-  begin
-    ln := CodeEditor.Lines[CodeEditor.LogicalCaretXY.y - 1];
-    l := Length(ln);
-    if l = 0 then
-      exit;
-    i := CodeEditor.LogicalCaretXY.x - 1;
-    s := 0;
-    e := 0;
-    if i = 0 then
-      i := 1;
-    if (ln[i] = '>') and (i > 1) and (key = VK_LEFT) then
-      Dec(i);
-    while (i > 0) and (ln[i] in ['A'..'Z', 'a'..'z']) do
-      Dec(i);
-    if i = 0 then
-      exit
-    else if ln[i] = '<' then
-      s := i
-    else if (ln[CodeEditor.LogicalCaretXY.x] = '<') and (Key = VK_RIGHT) then
+    p:=GetTemplatePos(False);
+    if p.x>0 then
     begin
-      i := CodeEditor.LogicalCaretXY.x;
-      s := i;
-    end;
-    if s > 0 then
-    begin
-      Inc(i);
-      if i = l then
-        exit;
-      while (i < l) and (ln[i] in ['A'..'Z', 'a'..'z']) do
-        Inc(i);
-      if ln[i] = '>' then
-        e := i + 1;
-      if (s > 0) and (e > 0) then
-      begin
-        if (CodeEditor.BlockBegin.x = s) and (CodeEditor.BlockEnd.x = e) then
-          CodeEditor.LogicalCaretXY := CodeEditor.BlockBegin
-        else
-        begin
-          CodeEditor.BlockBegin := Point(s, CodeEditor.LogicalCaretXY.y);
-          CodeEditor.BlockEnd := Point(e, CodeEditor.LogicalCaretXY.y);
-          CodeEditor.LogicalCaretXY := Point(e, CodeEditor.LogicalCaretXY.y);
-        end;
-        Key := 0;
-      end;
+      CodeEditor.BlockBegin:=Point(p.x, CodeEditor.LogicalCaretXY.Y);
+      CodeEditor.BlockEnd:=Point(p.y, CodeEditor.LogicalCaretXY.Y);
+      CodeEditor.LogicalCaretXY:=Point(p.y, CodeEditor.LogicalCaretXY.y);
+      Key:=0;
     end;
   end;
 end;

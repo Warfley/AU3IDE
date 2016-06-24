@@ -38,17 +38,13 @@ While
 WEnd
 With
 EndWith
-If <Condition> Then
-ElseIf <Condition> Then
-For <Var> = <Start> To <End>
-For <Var> In <Expr>
-While <Condition>
 #cs
 #ce
 #comments-start
 #comments-end
-#include< <File> >
-Step <Val>
-For <Var> = <Start> To <End> Step <Step>
-Func <Name>()
-Func <Name>(<Params>)
+If {Condition} Then
+For {Var} = {Start} To {End}
+While {Condition}
+Func {Name}()
+Func {Name}({Params})
+#include<{File}>

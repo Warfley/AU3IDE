@@ -848,7 +848,8 @@ begin
   for i := 0 to FormControlView.Items.Count - 1 do
     if FormControlView.Items[i].Selected then
       LoadControlData(TControl(FormControlView.Items[i].Data));
-  FormControlView.SetFocus;
+  if Self.IsVisible then
+    FormControlView.SetFocus;
   EditorScrollBox.Invalidate;
 end;
 

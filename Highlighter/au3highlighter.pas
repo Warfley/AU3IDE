@@ -557,22 +557,16 @@ begin
     FTokLen := l - FTokenPos + 1;
     FToken := Copy(FLineText, FTokenPos, FTokLen);
   end
-  else if (FLineText[FTokenEnd] = '<') then
+  else if (FLineText[FTokenEnd] = '{') then
   begin
     Inc(FTokenEnd);
     FTokLen:=FTokenEnd;
-    while (FTokLen <= l) and (FLineText[FTokLen] <> '>') do
-    if (FLineText[FTokLen] in ['A'..'Z', 'a'..'z']) and (FTokLen<l) then
-      Inc(FTokLen)
-    else
-    begin
-      FTokLen:=0;
-      Break;
-    end;
-    if (FTokLen = 0) or (FTokLen=FTokenEnd) then
+    while (FTokLen <= l) and (FLineText[FTokLen] <> '}') do
+      Inc(FTokLen);
+    if (FTokLen > l) then
     begin
       FTokLen:=1;
-      FToken:='<';   
+      FToken:='{';
       FTok:=tkSymbol;
     end
     else
