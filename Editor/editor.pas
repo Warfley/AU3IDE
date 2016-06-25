@@ -9,7 +9,7 @@ uses
   au3Highlighter, Types, contnrs, LCLType, ExtCtrls, au3Types, UnitParser,
   Dialogs, Graphics, StdCtrls, Buttons, ComCtrls, strutils, CodeFormatter,
   ToolTip, ListRecords, SynEditTypes, Math, SynGutterBase, SynGutterChanges,
-  GraphUtil;
+  GraphUtil, Project;
 
 type
 
@@ -63,6 +63,9 @@ type
     procedure ToolTipTimerTimer(Sender: TObject);
     procedure UpdateTimerTimer(Sender: TObject);
   private
+    FIncludeFiles: TStringList;
+    FIncludePath: string;
+    FProject: Tau3Project;
     FOpenEditor: TOpenEditorEvent;
     topl: integer;
     FToolTip: TEditorToolTip;
@@ -81,7 +84,7 @@ type
     FKeyWords: TStringList;
     FDefRanges: TObjectList;
     Parser: TUnitParser;
-    function GetTemplatePos(UseCursor: Boolean): TPoint;
+    function GetTemplatePos(UseCursor: boolean): TPoint;
     procedure LoadFuncList;
     procedure CompleteKeyDown(Sender: TObject; var Key: word; Shift: TShiftState);
     function GetCurrWord: string;
@@ -120,12 +123,21 @@ type
     property OpenEditor: TOpenEditorEvent read FOpenEditor write FOpenEditor;
     property Highlighter: Tau3SynHighlight read Highlight;
     property ToolTip: TEditorToolTip read FToolTip;
+    property Project: Tau3Project read FProject write FProject;
+    property IncludePath: string read FIncludePath write FIncludePath;
     { public declarations }
   end;
 
 implementation
 
 {$R *.lfm}
+
+function IncludeContainsFile(Filename: String; i: String): Boolean;
+begin
+  if isEnd(i, '#include') then
+    Delete(i, 1, Pos('<', i));
+  Result:=(Pos(i, Filename)=1) or (Length(Filename) =0);
+end;
 
 procedure TEditorFrame.LoadGeneralConf(FileName: string);
 var
@@ -251,59 +263,65 @@ begin
   CodeEditor.LogicalCaretXY := p;
 end;
 
-function TEditorFrame.GetTemplatePos(UseCursor: Boolean): TPoint;
-var i, l, p: Integer;
-  ln: String;
-  inStr: Boolean;
+function TEditorFrame.GetTemplatePos(UseCursor: boolean): TPoint;
+var
+  i, l, p: integer;
+  ln: string;
+  inStr: boolean;
 begin
-  Result.x:=0;
-  Result.y:=0;
-  p:=CodeEditor.LogicalCaretXY.x-1;
-  ln:=CodeEditor.Lines[CodeEditor.LogicalCaretXY.y-1];
-  l:=Length(ln);
-  inStr:=False;
-  for i:=1 to l do
+  Result.x := 0;
+  Result.y := 0;
+  p := CodeEditor.LogicalCaretXY.x - 1;
+  ln := CodeEditor.Lines[CodeEditor.LogicalCaretXY.y - 1];
+  l := Length(ln);
+  inStr := False;
+  for i := 1 to l do
   begin
-    if ln[i] = '"' then inStr:=not inStr
+    if ln[i] = '"' then
+      inStr := not inStr
     else if not inStr then
-      if Result.x=0 then
+      if Result.x = 0 then
       begin
-        if (i>p+1) and UseCursor then Break;
+        if (i > p + 1) and UseCursor then
+          Break;
         if ln[i] = '{' then
-        Result.x:=i;
+          Result.x := i;
       end
       else
       begin
         if ln[i] = '{' then
         begin
-          if (i>p) and UseCursor then
-            Result.x:=0
-          else Result.x:=i;
+          if (i > p) and UseCursor then
+            Result.x := 0
+          else
+            Result.x := i;
         end
         else if ln[i] = '}' then
         begin
-          if (i>=p) or not UseCursor then
+          if (i >= p) or not UseCursor then
           begin
-            Result.y:=i+1;
+            Result.y := i + 1;
             Break;
           end
-          else result.x:=0;
+          else
+            Result.x := 0;
         end;
       end;
   end;
-  if Result.y=0 then Result.x:=0;
+  if Result.y = 0 then
+    Result.x := 0;
 end;
 
 procedure TEditorFrame.SelectTemp(i: IntPtr);
 var
   p: TPoint;
 begin
-  p:=GetTemplatePos(false);
-  if p.x>0 then
+  p := GetTemplatePos(False);
+  if p.x > 0 then
   begin
-      CodeEditor.BlockBegin:=Point(p.x, CodeEditor.LogicalCaretXY.Y);
-      CodeEditor.BlockEnd:=Point(p.y, CodeEditor.LogicalCaretXY.Y);
-      CodeEditor.LogicalCaretXY:=Point(p.y, CodeEditor.LogicalCaretXY.y);
+    CodeEditor.BlockBegin := Point(p.x, CodeEditor.LogicalCaretXY.Y);
+    CodeEditor.BlockEnd := Point(p.y, CodeEditor.LogicalCaretXY.Y);
+    CodeEditor.LogicalCaretXY := Point(p.y, CodeEditor.LogicalCaretXY.y);
   end;
 end;
 
@@ -380,6 +398,7 @@ begin
   FRequiredFiles := TStringList.Create;
   ReLoadConf;
   UpdateTimerTimer(nil);
+  FIncludeFiles := TStringList.Create;
   currWord := '';
 end;
 
@@ -414,13 +433,15 @@ begin
       else
         Inc(i);
     for i := 0 to FRequiredFiles.Count - 1 do
-      with CodeExplorer.Items.AddChild(CodeExplorer.Items.FindNodeWithText('Includes'),
-          FRequiredFiles[i]) do
-      begin
-        ImageIndex := 1;
-        SelectedIndex := 1;
-        Data := Pointer(i);
-      end;
+      if FileExistsUTF8(GetFullPath(FRequiredFiles[i], FIncludePath,
+        ExtractFilePath(FFileName), FProject.Paths)) then
+        with CodeExplorer.Items.AddChild(CodeExplorer.Items.FindNodeWithText('Includes'),
+            FRequiredFiles[i]) do
+        begin
+          ImageIndex := 1;
+          SelectedIndex := 1;
+          Data := Pointer(i);
+        end;
     for i := 0 to FFunctions.Count - 1 do
       with CodeExplorer.Items.AddChild(CodeExplorer.Items.FindNodeWithText('Funktionen'),
           FFunctions[i].Name) do
@@ -443,8 +464,10 @@ begin
       FOnParserFinished(Self);
     for i := FS to FFunctions.Count - 1 do
     begin
-      p := CodeExplorer.Items.FindNodeWithText(CreateRelativePath(
-        FFunctions[i].FileName, ExtractFilePath(FFileName), True));
+      { Anpassen an PATH variablen }
+      p := CodeExplorer.Items.FindNodeWithText(GetRelInclude(
+        FFunctions[i].FileName, IncludePath, ExtractFilePath(FFileName),
+        FProject.Paths));
       if Assigned(p) then
         with CodeExplorer.Items.AddChild(p, FFunctions[i].Name) do
         begin
@@ -455,8 +478,8 @@ begin
     end;
     for i := VS to FVars.Count - 1 do
     begin
-      p := CodeExplorer.Items.FindNodeWithText(CreateRelativePath(
-        FVars[i].FileName, ExtractFilePath(FFileName), True));
+      p := CodeExplorer.Items.FindNodeWithText(GetRelInclude(
+        FVars[i].FileName, FIncludePath, ExtractFilePath(FFileName), FProject.Paths));
       if Assigned(p) then
         with CodeExplorer.Items.AddChild(p, FVars[i].Name) do
         begin
@@ -493,7 +516,43 @@ procedure TEditorFrame.CompletionExecute(Sender: TObject);
 
 var
   i, x: integer;
+  sl: TStringList;
 begin
+  if isEnd(CodeEditor.Lines[CodeEditor.LogicalCaretXY.y - 1], '#include') then
+  begin
+    Completion.ItemList.Clear;
+    FIncludeFiles.Clear;
+    FIncludeFiles.Duplicates := dupIgnore;
+    sl := TStringList.Create;
+    try
+      FindAllFiles(sl, ExtractFilePath(FFileName), '*.au3');
+      FIncludeFiles.AddStrings(sl);
+      sl.Clear;
+      FindAllFiles(sl, ExtractFilePath(FFileName), '*.afm');
+      FIncludeFiles.AddStrings(sl);
+      sl.Clear;
+      FindAllFiles(sl, IncludePath, '*.au3');
+      FIncludeFiles.AddStrings(sl);
+      sl.Clear;
+      for i := 0 to FProject.Paths.Count - 1 do
+      begin
+        FindAllFiles(sl, FProject.Paths[i], '*.au3');
+        FIncludeFiles.AddStrings(sl);
+        sl.Clear;
+        FindAllFiles(sl, FProject.Paths[i], '*.afm');
+        FIncludeFiles.AddStrings(sl);
+        sl.Clear;
+      end;
+    finally
+      sl.Free;
+    end;
+    for i:=0 to FIncludeFiles.Count-1 do
+      FIncludeFiles[i]:=GetRelInclude(FIncludeFiles[i], IncludePath, ExtractFilePath(FFileName), FProject.Paths);
+    for i:=0 to FIncludeFiles.Count-1 do
+      if IncludeContainsFile(FIncludeFiles[i], Completion.CurrentString) then
+        Completion.ItemList.Add(FIncludeFiles[i]);
+    Exit;
+  end;
   Completion.ItemList.Clear;
   if Length(Completion.CurrentString) = 0 then
   begin
@@ -595,6 +654,14 @@ procedure TEditorFrame.CompletionSearchPosition(var APosition: integer);
 var
   i, x: integer;
 begin
+  if isEnd(CodeEditor.Lines[CodeEditor.LogicalCaretXY.y - 1], '#include') then
+  begin
+    Completion.ItemList.Clear;
+     for i:=0 to FIncludeFiles.Count-1 do
+      if IncludeContainsFile(FIncludeFiles[i], Completion.CurrentString) then
+        Completion.ItemList.Add(FIncludeFiles[i]);
+    Exit;
+  end;
   Completion.ItemList.Clear;
   if Length(Completion.CurrentString) = 0 then
   begin
@@ -722,7 +789,7 @@ procedure TEditorFrame.CompletionCodeCompletion(var Value: string;
   Shift: TShiftState);
 var
   p: integer;
-  ln, rpval: string;
+  ln: string;
 begin
   ln := CodeEditor.Lines[SourceStart.y - 1];
   moveright := False;
@@ -764,7 +831,7 @@ begin
     else if (pos(Completion.CurrentString, ln) > 0) and
       (not ((pos(Completion.CurrentString, ln) + Length(Completion.CurrentString) <=
       length(ln)) and (ln[pos(Completion.CurrentString, ln) +
-      Length(Completion.CurrentString)] in [#0..#32]))) then
+      Length(Completion.CurrentString)] in [#0..#32]))) and not isEnd(ln, '#include') then
       Value := Value + ' ';
   end;
   if (Length(Value) > 0) and not (Value[1] in ['_', 'A'..'Z', 'a'..'z', '0'..'9']) then
@@ -936,19 +1003,19 @@ begin
   end
   else if Key in [VK_LEFT..VK_DOWN] then
   begin
-    p:=GetTemplatePos(True);
-    if p.x>0 then
+    p := GetTemplatePos(True);
+    if p.x > 0 then
     begin
-      if (CodeEditor.LogicalCaretXY.x=p.y-1) and (Key = VK_LEFT) then
+      if (CodeEditor.LogicalCaretXY.x = p.y - 1) and (Key = VK_LEFT) then
       begin
-        CodeEditor.LogicalCaretXY:=Point(p.x, CodeEditor.LogicalCaretXY.y);
-        CodeEditor.BlockBegin:=CodeEditor.LogicalCaretXY;
-        CodeEditor.BlockEnd:=CodeEditor.LogicalCaretXY;
+        CodeEditor.LogicalCaretXY := Point(p.x, CodeEditor.LogicalCaretXY.y);
+        CodeEditor.BlockBegin := CodeEditor.LogicalCaretXY;
+        CodeEditor.BlockEnd := CodeEditor.LogicalCaretXY;
         Exit;
       end;
-      CodeEditor.BlockBegin:=Point(p.x, CodeEditor.LogicalCaretXY.Y);
-      CodeEditor.BlockEnd:=Point(p.y, CodeEditor.LogicalCaretXY.Y);
-      CodeEditor.LogicalCaretXY:=Point(p.y, CodeEditor.LogicalCaretXY.y);
+      CodeEditor.BlockBegin := Point(p.x, CodeEditor.LogicalCaretXY.Y);
+      CodeEditor.BlockEnd := Point(p.y, CodeEditor.LogicalCaretXY.Y);
+      CodeEditor.LogicalCaretXY := Point(p.y, CodeEditor.LogicalCaretXY.y);
     end;
   end;
 end;
@@ -1174,12 +1241,12 @@ begin
   end;
   if (Button = mbLeft) then
   begin
-    p:=GetTemplatePos(True);
-    if p.x>0 then
+    p := GetTemplatePos(True);
+    if p.x > 0 then
     begin
-      CodeEditor.BlockBegin:=Point(p.x, CodeEditor.LogicalCaretXY.y);
-      CodeEditor.BlockEnd:=Point(p.y, CodeEditor.LogicalCaretXY.y);
-      CodeEditor.LogicalCaretXY:=Point(p.y, CodeEditor.LogicalCaretXY.y);
+      CodeEditor.BlockBegin := Point(p.x, CodeEditor.LogicalCaretXY.y);
+      CodeEditor.BlockEnd := Point(p.y, CodeEditor.LogicalCaretXY.y);
+      CodeEditor.LogicalCaretXY := Point(p.y, CodeEditor.LogicalCaretXY.y);
     end;
   end;
 end;
@@ -1196,24 +1263,24 @@ begin
     Exit;
   case CodeExplorer.Selected.ImageIndex of
     1: if Assigned(FOpenEditor) then
-        OpenEditor(CreateAbsolutePath(FRequiredFiles[IntPtr(CodeExplorer.Selected.Data)],
-          ExtractFilePath(FFileName)), Point(0, 0));
+        OpenEditor(GetFullPath(FRequiredFiles[IntPtr(CodeExplorer.Selected.Data)],
+          IncludePath, ExtractFilePath(FFileName), FProject.Paths), Point(0, 0));
     2:
       if CodeExplorer.Selected.Parent.ImageIndex = 0 then
         CodeJump(Point(1, FFunctions[IntPtr(CodeExplorer.Selected.Data)].Line + 1))
       else if Assigned(FOpenEditor) then
-        OpenEditor(CreateAbsolutePath(
+        OpenEditor(GetFullPath(
           FRequiredFiles[IntPtr(CodeExplorer.Selected.Parent.Data)],
-          ExtractFilePath(FFileName)),
+          FIncludePath, ExtractFilePath(FFileName), FProject.Paths),
           Point(1, FFunctions[IntPtr(CodeExplorer.Selected.Data)].Line + 1));
     3:
       if CodeExplorer.Selected.Parent.ImageIndex = 0 then
         CodeJump(Point(FVars[IntPtr(CodeExplorer.Selected.Data)].Pos,
           FVars[IntPtr(CodeExplorer.Selected.Data)].Line + 1))
       else if Assigned(FOpenEditor) then
-        OpenEditor(CreateAbsolutePath(
+        OpenEditor(GetFullPath(
           FRequiredFiles[IntPtr(CodeExplorer.Selected.Parent.Data)],
-          ExtractFilePath(FFileName)),
+          FIncludePath, ExtractFilePath(FFileName), FProject.Paths),
           Point(FVars[IntPtr(CodeExplorer.Selected.Data)].Pos,
           FVars[IntPtr(CodeExplorer.Selected.Data)].Line + 1));
   end;
@@ -1235,17 +1302,17 @@ begin
   FillChar(p, SizeOf(p), 0);
   if Key = 9 then
   begin
-    p:=GetTemplatePos(False);
-      Key:=0;
+    p := GetTemplatePos(False);
+    Key := 0;
   end
-  else if Key=VK_BACK then
-    p:=GetTemplatePos(true);
-    if p.x>0 then
-    begin
-      CodeEditor.BlockBegin:=Point(p.x, CodeEditor.LogicalCaretXY.Y);
-      CodeEditor.BlockEnd:=Point(p.y, CodeEditor.LogicalCaretXY.Y);
-      CodeEditor.LogicalCaretXY:=Point(p.y, CodeEditor.LogicalCaretXY.y);
-    end;
+  else if Key = VK_BACK then
+    p := GetTemplatePos(True);
+  if p.x > 0 then
+  begin
+    CodeEditor.BlockBegin := Point(p.x, CodeEditor.LogicalCaretXY.Y);
+    CodeEditor.BlockEnd := Point(p.y, CodeEditor.LogicalCaretXY.Y);
+    CodeEditor.LogicalCaretXY := Point(p.y, CodeEditor.LogicalCaretXY.y);
+  end;
 end;
 
 
@@ -1506,6 +1573,7 @@ begin
   FKeyWords.Free;
   CodeEditor.Highlighter := nil;
   Highlight.Free;
+  FIncludeFiles.Free;
   inherited;
 end;
 

@@ -9,7 +9,7 @@ object SampleForm: TSampleForm
   ClientWidth = 444
   OnShow = FormShow
   Position = poScreenCenter
-  LCLVersion = '1.7'
+  LCLVersion = '1.6.0.4'
   Visible = False
   object ListBox1: TListBox
     Left = 0

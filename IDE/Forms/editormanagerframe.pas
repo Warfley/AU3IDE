@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Types, FileUtil, Forms, Controls, ComCtrls, Editor, FormEditor,
-  Dialogs, au3Types;
+  Dialogs, au3Types, Project;
 
 type
   TCloseEditorEvent = procedure(Sender: TObject; Editor: integer;
@@ -22,6 +22,8 @@ type
       Shift: TShiftState; X, Y: integer);
   private
     { Fields }
+    FProject: Tau3Project;
+    FIncludePath: string;
     FOnEditorClose: TCloseEditorEvent;
     FOnEditorCreated: TEditorNotifyEvent;
     FOnEditorChanged: TNotifyEvent;
@@ -29,6 +31,7 @@ type
     FEnterFunc: TOpenFunctionEvent;
     FOnParserFinished: TNotifyEvent;
     { Functions & Procedures }
+    procedure SetIncludePath(s: string);
     function FindTextEditor(FileName: string): TEditorFrame;
     function FindFormEditor(FileName: string): TFormEditFrame;
     function FindEditor(FileName: string): integer;
@@ -61,6 +64,8 @@ type
     property EditorFiles[i: integer]: string read GetFileName write SetFileName;
     property Count: integer read GetCount;
     property EditorCaret[i: integer]: TPoint read GetEditorCaret write SetEditorCaret;
+    property Project: Tau3Project read FProject write FProject;
+    property IncludePath: string read FIncludePath write SetIncludePath;
 
     { Events }
     property OnEditorClose: TCloseEditorEvent read FOnEditorClose write FOnEditorClose;
@@ -90,6 +95,16 @@ procedure TEditorManager.EditorControlChange(Sender: TObject);
 begin
   if Assigned(FOnEditorChanged) then
     FOnEditorChanged(Self);
+end;
+
+procedure TEditorManager.SetIncludePath(s: string);
+var
+  i: integer;
+begin
+  FIncludePath := s;
+  for i := 0 to Count - 1 do
+    if Editors[i] is TEditorFrame then
+      (Editors[i] as TEditorFrame).IncludePath := s;
 end;
 
 function TEditorManager.FindTextEditor(FileName: string): TEditorFrame;
@@ -237,8 +252,10 @@ begin
       Parent := tmp;
       Visible := True;
       CodeEditor.SetFocus;
+      IncludePath:=FIncludePath;
       OpenEditor := FOpenEditor;
       OnChange := @EditorChanged;
+      Project := FProject;
       OnParserFinished := FOnParserFinished;
       if FileExists(FName) then
         Load(FName)
@@ -265,12 +282,12 @@ begin
     if (GetCurrentEditor is TEditorFrame) then
     begin
       if (Pos.Y > 0) and (Pos.X > 0) then
-        (GetCurrentEditor as TEditorFrame).CodeJump(Pos);      
+        (GetCurrentEditor as TEditorFrame).CodeJump(Pos);
       GetCurrentEditor.SetFocus;
       (GetCurrentEditor as TEditorFrame).CodeEditor.SetFocus;
     end
     else if GetCurrentEditor is TFormEditFrame then
-      (GetCurrentEditor as TFormEditFrame).EventEditor.Selection:=Rect(0,0,0,0);
+      (GetCurrentEditor as TFormEditFrame).EventEditor.Selection := Rect(0, 0, 0, 0);
   end;
   Result := GetCurrentEditor;
 end;

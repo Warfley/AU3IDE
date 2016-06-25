@@ -1,4 +1,4 @@
-#include("Form1.AU31")
+#include<Form1.au3>
 
 
 while (1)

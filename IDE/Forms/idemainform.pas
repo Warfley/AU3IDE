@@ -165,6 +165,9 @@ type
 var
   MainForm: TMainForm;
 
+  const
+    IncludePath = 'C:\Program Files (x86)\AutoIt3\Include';
+
 implementation
 
 {$R *.lfm}
@@ -367,6 +370,7 @@ begin
     FCurrentProject.ReadFromFile(StartupScreen.SelectedPath);
     FCurrentProject.CheckInclude := @CheckInclude;
     FCurrentProject.AddInclude := @AddInclude;
+    EditorManager1.Project:=FCurrentProject;
     ProjectInspector1.Project := FCurrentProject;
     Openau3FileDialog.InitialDir := FCurrentProject.ProjectDir;
     Saveau3FileDialog.InitialDir := FCurrentProject.ProjectDir;
@@ -383,6 +387,7 @@ begin
     EditorManager1.OnEditorClose := @EditorClosing;
     EditorManager1.OnEditorChanged := @EditorChanged;
     EditorManager1.OnEditorCreated := @EditorCreated;
+    EditorManager1.IncludePath:=IncludePath;
   end
   else
     Close;
@@ -546,17 +551,17 @@ var
   sl: TStringList;
 begin
   if FilenameIsAbsolute(IncludeFile) then
-    IncludeFile := CreateRelativePath(IncludeFile, ExtractFilePath(FileName), True);
+    IncludeFile := GetRelInclude(IncludeFile, IncludePath, ExtractFilePath(FileName), FCurrentProject.Paths);
   e := EditorManager1.TextEditor[FileName];
   if Assigned(e) then
     e.CodeEditor.TextBetweenPoints[Point(1, 1), Point(1, 1)] :=
-      Format('#include("%s")'#13, [IncludeFile])
+      Format('#include<%s>'#13, [IncludeFile])
   else if FileExists(FileName) then
   begin
     sl := TStringList.Create;
     try
       sl.LoadFromFile(FileName);
-      sl.Insert(0, Format('#include("%s")', [IncludeFile]));
+      sl.Insert(0, Format('#include<%s>', [IncludeFile]));
       sl.SaveToFile(FileName);
     finally
       sl.Free;
@@ -599,10 +604,10 @@ begin
     begin
       if isEnd(e.CodeEditor.Lines[i], '#include') then
       begin
-        fname := ExtractBetween(e.CodeEditor.Lines[i], '"', '"');
+        fname := ExtractBetween(e.CodeEditor.Lines[i], '<', '>');
         Result := IncludeFile = fname;
         if not FilenameIsAbsolute(fname) then
-          fname := CreateAbsolutePath(fname, ExtractFilePath(FileName));
+          fname := GetFullPath(fname, IncludePath, ExtractFilePath(FileName), FCurrentProject.Paths);
         Result := Result or (IncludeFile = fname);
         if not (FileExists(fname) or (EditorManager1.Editor[fname] >= 0)) then
         begin
@@ -627,10 +632,10 @@ begin
       begin
         if isEnd(sl[i], '#include') then
         begin
-          fname := ExtractBetween(sl[i], '"', '"');
+          fname := ExtractBetween(sl[i], '<', '>');
           Result := IncludeFile = fname;
           if not FilenameIsAbsolute(fname) then
-            fname := CreateAbsolutePath(fname, ExtractFilePath(FileName));
+            fname := GetFullPath(fname, IncludePath, ExtractFilePath(FileName), FCurrentProject.Paths);
           Result := Result or (IncludeFile = fname);
           if not (FileExists(fname) or (EditorManager1.Editor[fname] >= 0)) then
           begin
@@ -800,9 +805,10 @@ begin
     for i := 0 to FFileData[idx].RequiredFiles.Count - 1 do
     begin
       req := FFileData[idx].RequiredFiles[i];
+      { Anpassen an PATH variablen }
       if not FilenameIsAbsolute(req) then
-        req := CreateAbsolutePath(FFileData[idx].RequiredFiles[i],
-          ExtractFilePath((Sender as TEditorFrame).FileName) + PathDelim);
+        req := GetFullPath(FFileData[idx].RequiredFiles[i], IncludePath,
+          ExtractFilePath((Sender as TEditorFrame).FileName) + PathDelim, FCurrentProject.Paths);
       f := FFileData.FileIndex[req];
       if f >= 0 then
       begin

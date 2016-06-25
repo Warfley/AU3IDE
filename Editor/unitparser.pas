@@ -207,16 +207,17 @@ begin
       else
       if isEnd(ln, '#include') then
       begin
-        if pos('"', ln) > 0 then
+        if pos('<', ln) > 0 then
         begin
           str := ln;
-          Delete(str, 1, pos('"', str));
-          if pos('"', str) = 0 then
+          Delete(str, 1, pos('<', str));
+          if pos('>', str) = 0 then
           begin
             Inc(i);
             Continue;
           end;
-          Delete(str, Pos('"', str), length(str));
+          Delete(str, Pos('>', str), length(str));
+          str:=Trim(str);
           if not StringsContain(FMyRequiredFiles, str) then
             FMyRequiredFiles.Add(str);
         end;

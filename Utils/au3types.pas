@@ -5,7 +5,7 @@ unit au3Types;
 interface
 
 uses
-  Classes, SysUtils, fgl, ListRecords, Graphics;
+  Classes, SysUtils, fgl, ListRecords, Graphics, LazFileUtils;
 
 type
   TTokenType = (tkComment, tkIdentifier, tkFunction, tkSymbol, tkNumber, tkSpace,
@@ -13,16 +13,16 @@ type
   PHashInfo = ^THashInfo;
 
   TOpenEditorEvent = procedure(Filename: string; Pos: TPoint) of object;
-  TCloseEditorEvent = procedure(Filename: String) of object;
-  TCheckIncludeEvent = function(FileName, IncludeFile: String): Boolean of object;
-  TAddIncludeEvent = procedure(FileName, IncludeFile: String) of object;
-  TChangeMainFormEvent = procedure(FileName: String) of Object;
+  TCloseEditorEvent = procedure(Filename: string) of object;
+  TCheckIncludeEvent = function(FileName, IncludeFile: string): boolean of object;
+  TAddIncludeEvent = procedure(FileName, IncludeFile: string) of object;
+  TChangeMainFormEvent = procedure(FileName: string) of object;
 
-  TOpenFunctionEvent = function(FileName, FuncName: string; Params: String;
-    CreateNew: Boolean): string of object;
+  TOpenFunctionEvent = function(FileName, FuncName: string; Params: string;
+    CreateNew: boolean): string of object;
 
   TEditorConfig = packed record
-    CERight: Boolean;
+    CERight: boolean;
     BGCol: TColor;
     EditBGCol: TColor;
     GutterCol: TColor;
@@ -32,9 +32,9 @@ type
     SelCol: TColor;
     SelFCol: TColor;
     TextColor: TColor;
-    PastEOL: Boolean;
-    CaretAV: Boolean;
-    TabWidth: Integer;
+    PastEOL: boolean;
+    CaretAV: boolean;
+    TabWidth: integer;
     TTipColor: TColor;
     TTipFont: TColor;
     EditorFont: TFontData;
@@ -42,14 +42,14 @@ type
   end;
 
   TFormEditorConfig = packed record
-    OIRight: Boolean;
+    OIRight: boolean;
     BGCol: TColor;
     ForeCol: TColor;
     TBCol: TColor;
-    UseHelpLines: Boolean;
-    UseRaster: Boolean;
-    RasterSize: Integer;
-    DoubleBuffer: Boolean;
+    UseHelpLines: boolean;
+    UseRaster: boolean;
+    RasterSize: integer;
+    DoubleBuffer: boolean;
   end;
 
   THashInfo = record
@@ -91,26 +91,31 @@ function FuncInfo(Name: string; Line: integer; Inf: string = '';
   FName: string = ''): TFuncInfo;
 function SelectedItem(Line, Pos: integer): TSelectedItem;
 function VarInfo(Name: string; Line, Position: integer; FName: string = ''): TVarInfo;
-function isEnd(s, endTok: string; ex: Boolean=false): boolean;
-function StringsContain(s: TStrings; str: String): Boolean;
+function isEnd(s, endTok: string; ex: boolean = False): boolean;
+function StringsContain(s: TStrings; str: string): boolean;
+function GetFullPath(Filename, IncludePath, FPath: string;
+  Paths: TStringList): string;
+function GetRelInclude(FullPath, IncludePath, FPath: string;
+  Paths: TStringList): string;
 
 implementation
-function StringsContain(s: TStrings; str: String): Boolean;
+
+function StringsContain(s: TStrings; str: string): boolean;
 var
-  i: Integer;
+  i: integer;
 begin
-  str:=LowerCase(str);
-  Result:=False;
-  for i:=0 to s.Count-1 do
-    if LowerCase(s[i])=str then
+  str := LowerCase(str);
+  Result := False;
+  for i := 0 to s.Count - 1 do
+    if LowerCase(s[i]) = str then
     begin
-      Result:=True;
+      Result := True;
       exit;
     end;
 end;
 
 
-function isEnd(s, endTok: string; ex: Boolean=false): boolean;
+function isEnd(s, endTok: string; ex: boolean = False): boolean;
 
   function getFirstTok(str: string): string;
   var
@@ -121,17 +126,17 @@ function isEnd(s, endTok: string; ex: Boolean=false): boolean;
     begin
       i := 2;
       if ex then
-      while (str[i] in ['0'..'9', 'A'..'Z', 'a'..'z', '_', '-', '#','.',',']) do
-      begin
-        Inc(i);
-        Inc(len);
-      end
+        while (str[i] in ['0'..'9', 'A'..'Z', 'a'..'z', '_', '-', '#', '.', ',']) do
+        begin
+          Inc(i);
+          Inc(len);
+        end
       else
-      while (str[i] in ['0'..'9', 'A'..'Z', 'a'..'z', '_']) do
-      begin
-        Inc(i);
-        Inc(len);
-      end;
+        while (str[i] in ['0'..'9', 'A'..'Z', 'a'..'z', '_']) do
+        begin
+          Inc(i);
+          Inc(len);
+        end;
     end;
     Result := Copy(str, 1, len);
   end;
@@ -184,6 +189,43 @@ begin
   Result.Line := Line;
   Result.Pos := Position;
   Result.FileName := FName;
+end;
+
+function GetFullPath(Filename, IncludePath, FPath: string;
+  Paths: TStringList): string;
+var
+  p: string;
+begin
+  Result := CreateAbsoluteSearchPath(Filename, FPath);
+  if FileExistsUTF8(Result) then
+    exit;
+  Result := CreateAbsoluteSearchPath(Filename, IncludePath);
+  if FileExistsUTF8(Result) then
+    exit;
+  for p in Paths do
+  begin
+    Result := CreateAbsoluteSearchPath(Filename, p);
+    if FileExistsUTF8(Result) then
+      Exit;
+  end;
+  Result:='';
+end;
+
+function GetRelInclude(FullPath, IncludePath, FPath: string;
+  Paths: TStringList): string;
+var
+  p, p2: string;
+begin
+  Result := CreateRelativePath(FullPath, FPath, True);
+  p := CreateRelativePath(FullPath, IncludePath, True);
+  if Length(p) < Length(Result) then
+    Result := p;
+  for p2 in Paths do
+  begin
+    p := CreateRelativePath(FullPath, p2, True);
+    if Length(p) < Length(Result) then
+      Result := p;
+  end;
 end;
 
 constructor TDefRange.Create;

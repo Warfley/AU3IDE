@@ -1,1 +1,1 @@
-#include("Form1.afm")
+#include<Form1.afm>

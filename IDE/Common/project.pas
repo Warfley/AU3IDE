@@ -10,6 +10,7 @@ uses
 type
   Tau3Project = class
   private
+    FPaths: TStringList;
     FFiles: TStringList;
     FMainFile: string;
     FProjectDir: string;
@@ -22,6 +23,7 @@ type
     FOnChange: TNotifyEvent;
     FCheckInclude: TCheckIncludeEvent;
     FAddInclude: TAddIncludeEvent;
+    procedure SetPaths(s:TStringList);
     procedure SetMainFile(f: string);
     function GetMainFile: string;
     procedure SetMainForm(s: string);
@@ -57,6 +59,7 @@ type
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
     property CheckInclude: TCheckIncludeEvent read FCheckInclude write FCheckInclude;
     property AddInclude: TAddIncludeEvent read FAddInclude write FAddInclude;
+    property Paths: TStringList read FPaths write SetPaths;
   end;
 
 implementation
@@ -84,6 +87,11 @@ begin
   FChanged := True;
   if Assigned(FOnChange) then
     FOnChange(Self);
+end;
+
+procedure Tau3Project.SetPaths(s:TStringList);
+begin
+  FPaths.Assign(s);
 end;
 
 procedure Tau3Project.SetMainForm(s: string);
@@ -194,6 +202,7 @@ constructor Tau3Project.Create;
 begin
   FFiles := TStringList.Create;
   FOpendFiles := TOpendFileList.Create;
+  FPaths:=TStringList.Create;
   FFiles.OnChange := @FilesChange;
 end;
 
@@ -201,6 +210,7 @@ destructor Tau3Project.Destroy;
 begin
   FFiles.Free;
   FOpendFiles.Free;
+  FPaths.Free;
   inherited;
 end;
 
@@ -237,6 +247,15 @@ begin
           FFiles.Add(FilesNode.ChildNodes.Item[i].TextContent);
     finally
       FFiles.EndUpdate;
+    end;
+    FilesNode := ProjFile.DocumentElement.FindNode('Paths');
+    FPaths.BeginUpdate;
+    try
+      for i := 0 to FilesNode.ChildNodes.Count - 1 do
+        if FilesNode.ChildNodes.Item[i].NodeName = 'Path' then
+          FPaths.Add(FilesNode.ChildNodes.Item[i].TextContent);
+    finally
+      FPaths.EndUpdate;
     end;
     FilesNode := ProjFile.DocumentElement.FindNode('OpendFiles');
     FFocusedFile := 0;
@@ -303,6 +322,18 @@ begin
       tmp := ProjFile.CreateElement('File');
       FilesNode.AppendChild(tmp);
       t := ProjFile.CreateTextNode(FFiles[i]);
+      tmp.AppendChild(t);
+    end;
+    // Createing Path Nodes
+    FilesNode := ProjFile.CreateElement('Paths');
+    ProjFile.DocumentElement.AppendChild(FilesNode);
+    if FPaths.Count = 0 then
+      FilesNode.AppendChild(ProjFile.CreateTextNode(' '));
+    for i := 0 to FPaths.Count - 1 do
+    begin
+      tmp := ProjFile.CreateElement('File');
+      FilesNode.AppendChild(tmp);
+      t := ProjFile.CreateTextNode(FPaths[i]);
       tmp.AppendChild(t);
     end;
     // Createing OpendFile Nodes
