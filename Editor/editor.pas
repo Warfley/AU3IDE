@@ -43,8 +43,6 @@ type
     procedure CodeEditorKeyUp(Sender: TObject; var Key: word; Shift: TShiftState);
     procedure CodeEditorMouseLink(Sender: TObject; X, Y: integer;
       var AllowMouseLink: boolean);
-    procedure CodeEditorMouseMove(Sender: TObject; Shift: TShiftState;
-      X, Y: integer);
     procedure CodeEditorMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: integer);
     procedure CodeExplorerCustomDrawItem(Sender: TCustomTreeView;
@@ -93,7 +91,6 @@ type
     procedure SetRanges(l: TObjectList);
     procedure SetFunc(l: TFuncList);
     procedure SetVar(l: TVarList);
-    function GetAtCursor(x, y: integer): string;
     function GetAtPoint(p: TPoint): string;
     procedure ParserHasFinished(Sender: TObject);
     procedure LoadGeneralConf(FileName: string);
@@ -132,11 +129,11 @@ implementation
 
 {$R *.lfm}
 
-function IncludeContainsFile(Filename: String; i: String): Boolean;
+function IncludeContainsFile(Filename: string; i: string): boolean;
 begin
   if isEnd(i, '#include') then
     Delete(i, 1, Pos('<', i));
-  Result:=(Pos(i, Filename)=1) or (Length(Filename) =0);
+  Result := (Pos(i, Filename) = 1) or (Length(Filename) = 0);
 end;
 
 procedure TEditorFrame.LoadGeneralConf(FileName: string);
@@ -411,89 +408,104 @@ end;
 procedure TEditorFrame.ParserHasFinished(Sender: TObject);
 var
   i: integer;
-  FE, VE, IE: boolean;
   FS, VS: integer;
-  InE: array of boolean;
-  p: TTreeNode;
+  p, ni, nv, nf, tmp: TTreeNode;
+  s: string;
 begin
   CodeExplorer.BeginUpdate;
   try
-    FE := CodeExplorer.Items.FindNodeWithText('Funktionen').Expanded;
-    IE := CodeExplorer.Items.FindNodeWithText('Includes').Expanded;
-    VE := CodeExplorer.Items.FindNodeWithText('Variablen').Expanded;
-    SetLength(InE, FRequiredFiles.Count);
-    FillChar(InE[0], SizeOf(boolean) * FRequiredFiles.Count, $00);
-    for i := 0 to FRequiredFiles.Count - 1 do
-      if Assigned(CodeExplorer.Items.FindNodeWithText(FRequiredFiles[i])) then
-        InE[i] := CodeExplorer.Items.FindNodeWithText(FRequiredFiles[i]).Expanded;
-    i := 0;
-    while CodeExplorer.Items.Count > 3 do
-      if CodeExplorer.Items[i].ImageIndex <> 0 then
-        CodeExplorer.Items.Delete(CodeExplorer.Items[i])
-      else
-        Inc(i);
+    for i := 0 to CodeExplorer.Items.Count - 1 do
+      if CodeExplorer.Items[i].ImageIndex > 0 then
+        CodeExplorer.Items[i].ImageIndex := -1;
+    ni := CodeExplorer.Items.FindNodeWithText('Includes');
+    nf := CodeExplorer.Items.FindNodeWithText('Funktionen');
+    nv := CodeExplorer.Items.FindNodeWithText('Variablen');
+
     for i := 0 to FRequiredFiles.Count - 1 do
       if FileExistsUTF8(GetFullPath(FRequiredFiles[i], FIncludePath,
         ExtractFilePath(FFileName), FProject.Paths)) then
-        with CodeExplorer.Items.AddChild(CodeExplorer.Items.FindNodeWithText('Includes'),
-            FRequiredFiles[i]) do
+      begin
+        tmp := CodeExplorer.Items.FindNodeWithText(FRequiredFiles[i]);
+        if not Assigned(tmp) then
+          tmp := CodeExplorer.Items.AddChild(ni, FRequiredFiles[i]);
+        with tmp do
         begin
           ImageIndex := 1;
           SelectedIndex := 1;
           Data := Pointer(i);
         end;
+      end;
     for i := 0 to FFunctions.Count - 1 do
-      with CodeExplorer.Items.AddChild(CodeExplorer.Items.FindNodeWithText('Funktionen'),
-          FFunctions[i].Name) do
+    begin
+      tmp := CodeExplorer.Items.FindNodeWithText(FFunctions[i].Name);
+      if not Assigned(tmp) then
+        tmp := CodeExplorer.Items.AddChild(nf, FFunctions[i].Name);
+      with tmp do
       begin
         ImageIndex := 2;
         SelectedIndex := 2;
         Data := Pointer(i);
       end;
+    end;
     for i := 0 to FVars.Count - 1 do
-      with CodeExplorer.Items.AddChild(CodeExplorer.Items.FindNodeWithText('Variablen'),
-          FVars[i].Name) do
+    begin
+      tmp := CodeExplorer.Items.FindNodeWithText(FVars[i].Name);
+      if not Assigned(tmp) then
+        tmp := CodeExplorer.Items.AddChild(nv, FVars[i].Name);
+      with tmp do
       begin
         ImageIndex := 3;
         SelectedIndex := 3;
         Data := Pointer(i);
       end;
+    end;
     FS := FFunctions.Count;
     VS := FVars.Count;
     if Assigned(FOnParserFinished) then
       FOnParserFinished(Self);
-    for i := FS to FFunctions.Count - 1 do
+    {for i := FS to FFunctions.Count - 1 do
     begin
-      { Anpassen an PATH variablen }
-      p := CodeExplorer.Items.FindNodeWithText(GetRelInclude(
-        FFunctions[i].FileName, IncludePath, ExtractFilePath(FFileName),
-        FProject.Paths));
-      if Assigned(p) then
-        with CodeExplorer.Items.AddChild(p, FFunctions[i].Name) do
+      s := GetRelInclude(FFunctions[i].FileName, IncludePath,
+        ExtractFilePath(FFileName), FProject.Paths);
+      p := CodeExplorer.Items.FindNodeWithText(s);
+      if not Assigned(p) then
+        p := CodeExplorer.Items.AddChild(ni, s);
+        with p do
         begin
-          ImageIndex := 2;
-          SelectedIndex := 2;
-          Data := Pointer(i);
+          ImageIndex := 1;
+          SelectedIndex := 1;
+          Data := Pointer(-1);
         end;
+      tmp := p.FindNode(FFunctions[i].Name);
+      if not Assigned(tmp) then
+        tmp := CodeExplorer.Items.AddChild(p, FFunctions[i].Name);
+      with tmp do
+      begin
+        ImageIndex := 2;
+        SelectedIndex := 2;
+        Data := Pointer(i);
+      end;
     end;
     for i := VS to FVars.Count - 1 do
     begin
-      p := CodeExplorer.Items.FindNodeWithText(GetRelInclude(
-        FVars[i].FileName, FIncludePath, ExtractFilePath(FFileName), FProject.Paths));
-      if Assigned(p) then
-        with CodeExplorer.Items.AddChild(p, FVars[i].Name) do
+      s := GetRelInclude(FVars[i].FileName, IncludePath,
+        ExtractFilePath(FFileName), FProject.Paths);
+      p := CodeExplorer.Items.FindNodeWithText(s);
+      if not Assigned(p) then
+        p := CodeExplorer.Items.AddChild(ni, s);
+        with p do
         begin
-          ImageIndex := 3;
-          SelectedIndex := 3;
-          Data := Pointer(i);
+          ImageIndex := 1;
+          SelectedIndex := 1;
+          Data := Pointer(-1);
         end;
-    end;
-    CodeExplorer.Items.FindNodeWithText('Funktionen').Expanded := FE;
-    CodeExplorer.Items.FindNodeWithText('Includes').Expanded := IE;
-    CodeExplorer.Items.FindNodeWithText('Variablen').Expanded := VE;
-    for i := 0 to FRequiredFiles.Count - 1 do
-      if Assigned(CodeExplorer.Items.FindNodeWithText(FRequiredFiles[i])) then
-        CodeExplorer.Items.FindNodeWithText(FRequiredFiles[i]).Expanded := InE[i];
+    end;  }
+    i := 0;
+    while i < CodeExplorer.Items.Count do
+      if CodeExplorer.Items[i].ImageIndex = -1 then
+        CodeExplorer.Items[i].Free
+      else
+        Inc(i);
   finally
     CodeExplorer.EndUpdate;
   end;
@@ -546,9 +558,10 @@ begin
     finally
       sl.Free;
     end;
-    for i:=0 to FIncludeFiles.Count-1 do
-      FIncludeFiles[i]:=GetRelInclude(FIncludeFiles[i], IncludePath, ExtractFilePath(FFileName), FProject.Paths);
-    for i:=0 to FIncludeFiles.Count-1 do
+    for i := 0 to FIncludeFiles.Count - 1 do
+      FIncludeFiles[i] := GetRelInclude(FIncludeFiles[i], IncludePath,
+        ExtractFilePath(FFileName), FProject.Paths);
+    for i := 0 to FIncludeFiles.Count - 1 do
       if IncludeContainsFile(FIncludeFiles[i], Completion.CurrentString) then
         Completion.ItemList.Add(FIncludeFiles[i]);
     Exit;
@@ -657,7 +670,7 @@ begin
   if isEnd(CodeEditor.Lines[CodeEditor.LogicalCaretXY.y - 1], '#include') then
   begin
     Completion.ItemList.Clear;
-     for i:=0 to FIncludeFiles.Count-1 do
+    for i := 0 to FIncludeFiles.Count - 1 do
       if IncludeContainsFile(FIncludeFiles[i], Completion.CurrentString) then
         Completion.ItemList.Add(FIncludeFiles[i]);
     Exit;
@@ -831,7 +844,8 @@ begin
     else if (pos(Completion.CurrentString, ln) > 0) and
       (not ((pos(Completion.CurrentString, ln) + Length(Completion.CurrentString) <=
       length(ln)) and (ln[pos(Completion.CurrentString, ln) +
-      Length(Completion.CurrentString)] in [#0..#32]))) and not isEnd(ln, '#include') then
+      Length(Completion.CurrentString)] in [#0..#32]))) and not
+      isEnd(ln, '#include') then
       Value := Value + ' ';
   end;
   if (Length(Value) > 0) and not (Value[1] in ['_', 'A'..'Z', 'a'..'z', '0'..'9']) then
@@ -1056,6 +1070,22 @@ procedure TEditorFrame.CodeEditorMouseLink(Sender: TObject; X, Y: integer;
     end;
   end;
 
+  function GetCurrInclude(out s: string): boolean;
+  var
+    ln: string;
+  begin
+    Result := False;
+    ln := CodeEditor.Lines[CodeEditor.PixelsToLogicalPos(Point(x, y)).y - 1];
+    if isEnd(ln, '#include') then
+    begin
+      if pos('<', ln) > 0 then
+        s := Trim(ExtractBetween(ln, '<', '>'))
+      else if pos('"', ln) > 0 then
+        s := Trim(ExtractBetween(ln, '"', '"'));
+    end;
+    Result := Length(s) > 0;
+  end;
+
 var
   l, i, n: integer;
   sel: string;
@@ -1070,7 +1100,7 @@ begin
   end;
   l := y - 1;
   sel := GetAtPoint(Point(X, Y));
-  if GetCurrFunc(sel, f) or GetCurrVar(sel, v) then
+  if GetCurrFunc(sel, f) or GetCurrVar(sel, v) or GetCurrInclude(sel) then
   begin
     AllowMouseLink := True;
     Exit;
@@ -1136,17 +1166,6 @@ begin
 
 end;
 
-function TEditorFrame.GetAtCursor(x, y: integer): string;
-begin
-
-end;
-
-procedure TEditorFrame.CodeEditorMouseMove(Sender: TObject; Shift: TShiftState;
-  X, Y: integer);
-begin
-  GetAtPoint(CodeEditor.PixelsToLogicalPos(Point(X, Y)));
-end;
-
 procedure TEditorFrame.CodeJump(p: TPoint);
 begin
   CodeEditor.LogicalCaretXY := p;
@@ -1190,10 +1209,25 @@ procedure TEditorFrame.CodeEditorMouseUp(Sender: TObject; Button: TMouseButton;
     end;
   end;
 
+  function GetCurrInclude(out s: string): boolean;
+  var
+    ln: string;
+  begin
+    s := '';
+    ln := CodeEditor.Lines[CodeEditor.PixelsToLogicalPos(Point(x, y)).y - 1];
+    if isEnd(ln, '#include') then
+    begin
+      if pos('<', ln) > 0 then
+        s := Trim(ExtractBetween(ln, '<', '>'))
+      else if pos('"', ln) > 0 then
+        s := Trim(ExtractBetween(ln, '"', '"'));
+    end;
+    Result := Length(s) > 0;
+  end;
+
 var
   sel: string;
   i, n, l: integer;
-  ln: string;
   v: TVarInfo;
   f: TFuncInfo;
   p: TPoint;
@@ -1222,6 +1256,12 @@ begin
       end
       else if Assigned(FOpenEditor) then
         FOpenEditor(v.FileName, Point(v.Pos + 1, v.Line + 1));
+    end
+    else if GetCurrInclude(sel) then
+    begin
+      sel := GetFullPath(sel, FIncludePath, ExtractFilePath(FFileName), FProject.Paths);
+      if (sel <> '') and Assigned(OpenEditor) then
+        OpenEditor(sel, Point(0, 0));
     end
     else
     begin
@@ -1303,7 +1343,8 @@ begin
   if Key = 9 then
   begin
     p := GetTemplatePos(False);
-    Key := 0;
+    if p.x > 0 then
+      Key := 0;
   end
   else if Key = VK_BACK then
     p := GetTemplatePos(True);

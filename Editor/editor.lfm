@@ -97,7 +97,6 @@ object EditorFrame: TEditorFrame
     TabOrder = 1
     OnKeyDown = CodeEditorKeyDown
     OnKeyUp = CodeEditorKeyUp
-    OnMouseMove = CodeEditorMouseMove
     OnMouseUp = CodeEditorMouseUp
     OnMouseLink = CodeEditorMouseLink
     Gutter.Width = 67

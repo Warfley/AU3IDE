@@ -5,7 +5,8 @@ unit IDEMainForm;
 interface
 
 uses
-  Classes, SysUtils, LazFileUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
+  Classes, SysUtils, LazFileUtils, FileUtil, Forms, Controls, Graphics,
+  Dialogs, StdCtrls,
   Menus, ComCtrls, Buttons, ExtCtrls, PairSplitter, Project, IDEStartupScreen,
   ProjectInspector, EditorManagerFrame, au3Types, FormEditor, Editor,
   au3FileInfo, strutils, CompilerOptions, au3Compiler, EditorOptions, FormEditorOptions,
@@ -165,8 +166,8 @@ type
 var
   MainForm: TMainForm;
 
-  const
-    IncludePath = 'C:\Program Files (x86)\AutoIt3\Include';
+const
+  IncludePath = 'C:\Program Files (x86)\AutoIt3\Include';
 
 implementation
 
@@ -180,7 +181,7 @@ var
   f: TFPHTTPClient;
 begin
   sl := TStringList.Create;
-  f:=TFPHTTPClient.Create(nil);
+  f := TFPHTTPClient.Create(nil);
   try
     sl.Text := f.Get(SUpdateURL + 'Update.txt');
     Result := sl[0] <> Version;
@@ -370,7 +371,7 @@ begin
     FCurrentProject.ReadFromFile(StartupScreen.SelectedPath);
     FCurrentProject.CheckInclude := @CheckInclude;
     FCurrentProject.AddInclude := @AddInclude;
-    EditorManager1.Project:=FCurrentProject;
+    EditorManager1.Project := FCurrentProject;
     ProjectInspector1.Project := FCurrentProject;
     Openau3FileDialog.InitialDir := FCurrentProject.ProjectDir;
     Saveau3FileDialog.InitialDir := FCurrentProject.ProjectDir;
@@ -387,7 +388,7 @@ begin
     EditorManager1.OnEditorClose := @EditorClosing;
     EditorManager1.OnEditorChanged := @EditorChanged;
     EditorManager1.OnEditorCreated := @EditorCreated;
-    EditorManager1.IncludePath:=IncludePath;
+    EditorManager1.IncludePath := IncludePath;
   end
   else
     Close;
@@ -551,7 +552,8 @@ var
   sl: TStringList;
 begin
   if FilenameIsAbsolute(IncludeFile) then
-    IncludeFile := GetRelInclude(IncludeFile, IncludePath, ExtractFilePath(FileName), FCurrentProject.Paths);
+    IncludeFile := GetRelInclude(IncludeFile, IncludePath,
+      ExtractFilePath(FileName), FCurrentProject.Paths);
   e := EditorManager1.TextEditor[FileName];
   if Assigned(e) then
     e.CodeEditor.TextBetweenPoints[Point(1, 1), Point(1, 1)] :=
@@ -604,10 +606,14 @@ begin
     begin
       if isEnd(e.CodeEditor.Lines[i], '#include') then
       begin
-        fname := ExtractBetween(e.CodeEditor.Lines[i], '<', '>');
+        if pos('<', e.CodeEditor.Lines[i]) > 0 then
+          fname := ExtractBetween(e.CodeEditor.Lines[i], '<', '>')
+        else
+          fname := ExtractBetween(e.CodeEditor.Lines[i], '"', '"');
         Result := IncludeFile = fname;
         if not FilenameIsAbsolute(fname) then
-          fname := GetFullPath(fname, IncludePath, ExtractFilePath(FileName), FCurrentProject.Paths);
+          fname := GetFullPath(fname, IncludePath, ExtractFilePath(FileName),
+            FCurrentProject.Paths);
         Result := Result or (IncludeFile = fname);
         if not (FileExists(fname) or (EditorManager1.Editor[fname] >= 0)) then
         begin
@@ -632,10 +638,14 @@ begin
       begin
         if isEnd(sl[i], '#include') then
         begin
-          fname := ExtractBetween(sl[i], '<', '>');
+          if pos('<', sl[i]) > 0 then
+            fname := ExtractBetween(sl[i], '<', '>')
+          else
+            fname := ExtractBetween(sl[i], '"', '"');
           Result := IncludeFile = fname;
           if not FilenameIsAbsolute(fname) then
-            fname := GetFullPath(fname, IncludePath, ExtractFilePath(FileName), FCurrentProject.Paths);
+            fname := GetFullPath(fname, IncludePath, ExtractFilePath(FileName),
+              FCurrentProject.Paths);
           Result := Result or (IncludeFile = fname);
           if not (FileExists(fname) or (EditorManager1.Editor[fname] >= 0)) then
           begin
@@ -763,10 +773,38 @@ begin
 end;
 
 procedure TMainForm.EditorParserFinished(Sender: TObject);
+
+  procedure AddReq(req: string; sl: TStringList);
+  var
+    f, n: integer;
+  begin           ;
+
+    { Anpassen an PATH variablen }
+    if not FilenameIsAbsolute(req) then
+      req := GetFullPath(req, IncludePath,
+        ExtractFilePath((Sender as TEditorFrame).FileName) + PathDelim,
+        FCurrentProject.Paths);
+    if StringsContain(sl, req) then
+      exit;
+    sl.Add(req);
+    f := FFileData.FileIndex[req];
+    if f >= 0 then
+    begin
+      for n := 0 to FFileData[f].Variables.Count - 1 do
+        (Sender as TEditorFrame).VariableList.Add(FFileData[f].Variables[n]);
+      for n := 0 to FFileData[f].Functions.Count - 1 do
+        (Sender as TEditorFrame).FunctionList.Add(FFileData[f].Functions[n]);
+      for n := 0 to FFileData[f].RequiredFiles.Count - 1 do
+        AddReq(FFileData[f].RequiredFiles[n], sl);
+    end
+    else
+      FFileData.LoadFile(req);
+  end;
+
 var
-  i, n, idx, f: integer;
-  req: string;
+  i, idx: integer;
   e: TFormEditFrame;
+  sl: TStringList;
 begin
   if Sender is TFormEditFrame then
   begin
@@ -802,45 +840,17 @@ begin
     FFileData[idx].Functions := (Sender as TEditorFrame).FunctionList;
     FFileData[idx].RequiredFiles := (Sender as TEditorFrame).RequiredFiles;
     FFileData[idx].Variables := (Sender as TEditorFrame).VariableList;
+    sl:=TStringList.Create;
+    try
     for i := 0 to FFileData[idx].RequiredFiles.Count - 1 do
-    begin
-      req := FFileData[idx].RequiredFiles[i];
-      { Anpassen an PATH variablen }
-      if not FilenameIsAbsolute(req) then
-        req := GetFullPath(FFileData[idx].RequiredFiles[i], IncludePath,
-          ExtractFilePath((Sender as TEditorFrame).FileName) + PathDelim, FCurrentProject.Paths);
-      f := FFileData.FileIndex[req];
-      if f >= 0 then
-      begin
-        for n := 0 to FFileData[f].Variables.Count - 1 do
-          (Sender as TEditorFrame).VariableList.Add(FFileData[f].Variables[n]);
-        for n := 0 to FFileData[f].Functions.Count - 1 do
-          (Sender as TEditorFrame).FunctionList.Add(FFileData[f].Functions[n]);
-      end
-      else
-        FFileData.LoadFile(req);
+      AddReq(FFileData[idx].RequiredFiles[i], sl);
+    finally
+      sl.Free
     end;
   end;
 end;
 
 procedure TMainForm.ChangeMainForm(FileName: string);
-
-  function ExtractBetween(const Value, A, B: string): string;
-  var
-    aPos, bPos: integer;
-  begin
-    Result := '';
-    aPos := Pos(A, Value);
-    if aPos > 0 then
-    begin
-      aPos := aPos + Length(A);
-      bPos := PosEx(B, Value, aPos);
-      if bPos > 0 then
-      begin
-        Result := Copy(Value, aPos, bPos - aPos);
-      end;
-    end;
-  end;
 
 var
   sl: TStringList;
@@ -858,7 +868,7 @@ begin
           ChangeFileExt(FCurrentProject.MainForm, '.au3') then
           e.CodeEditor.TextBetweenPoints[Point(1, i + 1),
             Point(Length(e.CodeEditor.Lines[i]) + 1, i + 1)] :=
-            Format('#include("%s")', [FileName]);
+            Format('#include<%s>', [FileName]);
   end
   else if FileExists(FCurrentProject.MainFile) then
   begin
@@ -869,7 +879,7 @@ begin
         if isEnd(sl[i], '#include') then
           if ExtractBetween(sl[i], '"', '"') = ChangeFileExt(
             FCurrentProject.MainForm, '.au3') then
-            sl[i] := Format('#include("%s")', [FileName]);
+            sl[i] := Format('#include<%s>', [FileName]);
     finally
       sl.Free;
     end;

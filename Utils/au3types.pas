@@ -5,7 +5,7 @@ unit au3Types;
 interface
 
 uses
-  Classes, SysUtils, fgl, ListRecords, Graphics, LazFileUtils;
+  Classes, SysUtils, fgl, ListRecords, Graphics, LazFileUtils, strutils;
 
 type
   TTokenType = (tkComment, tkIdentifier, tkFunction, tkSymbol, tkNumber, tkSpace,
@@ -93,12 +93,30 @@ function SelectedItem(Line, Pos: integer): TSelectedItem;
 function VarInfo(Name: string; Line, Position: integer; FName: string = ''): TVarInfo;
 function isEnd(s, endTok: string; ex: boolean = False): boolean;
 function StringsContain(s: TStrings; str: string): boolean;
-function GetFullPath(Filename, IncludePath, FPath: string;
-  Paths: TStringList): string;
+function GetFullPath(Filename, IncludePath, FPath: string; Paths: TStringList): string;
 function GetRelInclude(FullPath, IncludePath, FPath: string;
   Paths: TStringList): string;
+function ExtractBetween(const Value, A, B: string): string;
 
 implementation
+
+
+function ExtractBetween(const Value, A, B: string): string;
+var
+  aPos, bPos: integer;
+begin
+  Result := '';
+  aPos := Pos(A, Value);
+  if aPos > 0 then
+  begin
+    aPos := aPos + Length(A);
+    bPos := PosEx(B, Value, aPos);
+    if bPos > 0 then
+    begin
+      Result := Copy(Value, aPos, bPos - aPos);
+    end;
+  end;
+end;
 
 function StringsContain(s: TStrings; str: string): boolean;
 var
@@ -191,8 +209,7 @@ begin
   Result.FileName := FName;
 end;
 
-function GetFullPath(Filename, IncludePath, FPath: string;
-  Paths: TStringList): string;
+function GetFullPath(Filename, IncludePath, FPath: string; Paths: TStringList): string;
 var
   p: string;
 begin
@@ -208,7 +225,9 @@ begin
     if FileExistsUTF8(Result) then
       Exit;
   end;
-  Result:='';
+  Result := '';
+
+
 end;
 
 function GetRelInclude(FullPath, IncludePath, FPath: string;
