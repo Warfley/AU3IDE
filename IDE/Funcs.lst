@@ -21,7 +21,7 @@ AutoItSetOption("Option", [Param])
 ;Summary: Retrieves the title of the AutoIt window.
 AutoItWinGetTitle()
 ;Summary: Changes the title of the AutoIt window.
-AutoItWinSetTitle("Titel")
+AutoItWinSetTitle("Title")
 ;Summary: Plays back a beep to the user.
 Beep([Frequency = 500], [Duration = 1000])
 ;Summary: Returns the binary representation of an expression.
@@ -79,7 +79,7 @@ ControlEnable("Title", "Text", ControlID)
 ;Summary: Sets input focus to a given control on a window.
 ControlFocus("Title", "Text", ControlID)
 ;Summary: Returns the ControlRef# of the control that has keyboard focus within a specified window.
-ControlGetFocus("Titel", ["Text"])
+ControlGetFocus("Title", ["Text"])
 ;Summary: Retrieves the internal handle of a control.
 ControlGetHandle("Title", "Text", ControlID)
 ;Summary: Retrieves the position and size of a control relative to its window.
@@ -359,7 +359,7 @@ GUICtrlSetState(ControlID, State)
 ;Summary: Changes the style of a control.
 GUICtrlSetStyle(ControlID, Style, [ExStyle])
 ;Summary: Sets the tip text associated with a control.
-GUICtrlSetTip(ControlID, TipText, ["Titel"], [Icon], [Options])
+GUICtrlSetTip(ControlID, TipText, ["Title"], [Icon], [Options])
 ;Summary: Deletes a GUI window and all controls that it contains.
 GUIDelete([WindowHandle])
 ;Summary: Gets the mouse cursor position relative to GUI window.
@@ -435,360 +435,364 @@ Int(Expression, [Flag])
 ;Summary: Checks if the current user has full administrator privileges.
 IsAdmin()
 ;Summary: Checks if a variable is an array type.
-IsArray()
+IsArray(Variable)
 ;Summary: Checks if a variable or expression is a binary type.
-IsBinary()
+IsBinary(Expr)
 ;Summary: Checks if a variable's base type is boolean.
-IsBool()
+IsBool(Variable)
 ;Summary: Check if a variable has been declared.
-IsDeclared()
+IsDeclared(Expression)
 ;Summary: Checks if a variable is a DllStruct type.
-IsDllStruct()
+IsDllStruct(Variable)
 ;Summary: Checks if the value of a variable or expression has a fractional component.
-IsFloat()
+IsFloat(Variable)
 ;Summary: Checks if a variable or expression is a function type.
-IsFunc()
+IsFunc(Expression)
 ;Summary: Checks if a variable's base type is a pointer and window handle.
-IsHWnd()
+IsHWnd(Variable)
 ;Summary: Checks if the value of a variable or expression has no fractional component.
-IsInt()
+IsInt(Variable)
 ;Summary: Checks if a variable is a keyword (for example, Default).
-IsKeyword()
+IsKeyword(Variable)
 ;Summary: Checks if a variable's base type is numeric.
-IsNumber()
+IsNumber(Variable)
 ;Summary: Checks if a variable or expression is an object type.
-IsObj()
+IsObj(Variable)
 ;Summary: Checks if a variable's base type is a pointer.
-IsPtr()
+IsPtr(Variable)
 ;Summary: Checks if a variable is a string type.
-IsString()
+IsString(Variable)
 ;Summary: Calculates the natural logarithm of a number.
-Log()
+Log(Expression)
 ;Summary: Retrieves memory related information.
 MemGetStats()
 ;Summary: Performs the modulus operation.
-Mod()
+Mod(Value1, Value2)
 ;Summary: Perform a mouse click operation.
-MouseClick()
+MouseClick("Button", [X], [Y], [Clicks = 1], [Speed = 10])
 ;Summary: Perform a mouse click and drag operation.
-MouseClickDrag()
+MouseClickDrag("Button", X1, Y1, X2, Y2, [Speed = 10])
 ;Summary: Perform a mouse down event at the current mouse position.
-MouseDown()
+MouseDown("Button")
 ;Summary: Returns the cursor ID Number for the current Mouse Cursor.
 MouseGetCursor()
 ;Summary: Retrieves the current position of the mouse cursor.
-MouseGetPos()
+MouseGetPos([Dimension])
 ;Summary: Moves the mouse pointer.
-MouseMove()
+MouseMove(X, Y, [Speed = 10])
 ;Summary: Perform a mouse up event at the current mouse position.
-MouseUp()
+MouseUp(Button)
 ;Summary: Moves the mouse wheel up or down.
-MouseWheel()
+MouseWheel("Direction", [Clicks = 1])
 ;Summary: Displays a simple message box with optional timeout.
-MsgBox()
+MsgBox(Flag, "Title", "Text", [Timeout = 0], [HWND])
 ;Summary: Returns the numeric representation of an expression.
-Number()
+Number(Expression, [Flag])
 ;Summary: Creates a reference to a COM object from the given classname.
-ObjCreate()
+ObjCreate("Classname", ["Server"], ["Username"], ["Password"])
 ;Summary: Creates a reference to an object from the given classname/object pointer, interface identifier and description string.
-ObjCreateInterface()
+ObjCreateInterface("CLSID" , "IID", ["Interface_description"], [Flag = True])
 ;Summary: Handles incoming events from the given Object.
-ObjEvent()
+ObjEvent($ObjectVar, "Functionprefix", ["Interface name"])
 ;Summary: Retrieves a reference to a COM object from an existing process or filename.
-ObjGet()
+ObjGet("Filename", ["Classname"], [Instance])
 ;Summary: Returns the name or interface description of an Object.
-ObjName()
+ObjName($Objectvariable, [Flag = 1])
 ;Summary: Registers a function to be called when AutoIt exits.
-OnAutoItExitRegister()
+OnAutoItExitRegister("Function")
 ;Summary: UnRegisters a function that was called when AutoIt exits.
-OnAutoItExitUnRegister()
+OnAutoItExitUnRegister("Function")
 ;Summary: Pings a host and returns the roundtrip-time.
-Ping()
+Ping("Host", [Timeout = 4000])
 ;Summary: Generates a checksum for a region of pixels.
-PixelChecksum()
+PixelChecksum(Left, Top, Right, Bottom, [Step = 1], [HWND], [Mode = 0])
 ;Summary: Returns a pixel color according to x,y pixel coordinates.
-PixelGetColor()
+PixelGetColor(X, Y, [HWND])
 ;Summary: Searches a rectangle of pixels for the pixel color provided.
-PixelSearch()
+PixelSearch(Left, Top, Right, Bottom, Color, [Shade-variation = 0], [Step = 1], [HWND])
 ;Summary: Terminates a named process.
-ProcessClose()
+ProcessClose("Process")
 ;Summary: Checks to see if a specified process exists.
-ProcessExists()
+ProcessExists("Process")
 ;Summary: Returns an array about Memory or IO infos of a running process.
-ProcessGetStats()
+ProcessGetStats(["Process"], [Type = 0])
 ;Summary: Returns an array listing the currently running processes (names and PIDs).
-ProcessList()
+ProcessList(["Name"])
 ;Summary: Changes the priority of a process.
-ProcessSetPriority()
+ProcessSetPriority("Process", Priority)
 ;Summary: Pauses script execution until a given process exists.
-ProcessWait()
+ProcessWait("Process", [Timeout = 0])
 ;Summary: Pauses script execution until a given process does not exist.
-ProcessWaitClose()
+ProcessWaitClose("Process", [Timeout = 0])
 ;Summary: Turns Progress window off.
 ProgressOff()
 ;Summary: Creates a customizable progress bar window.
-ProgressOn()
+ProgressOn("Title", "Maintext", ["Subtext"], [X], [Y], [Opt])
 ;Summary: Sets the position and/or text of a previously created Progress bar window.
-ProgressSet()
+ProgressSet("Percent", ["Subtext"], ["Maintext"])
 ;Summary: Converts an expression into a pointer variant.
-Ptr()
+Ptr(Expression)
 ;Summary: Generates a pseudo-random float-type number.
-Random()
+Random([Min = 0], [Max = 1], [Flag = 0])
 ;Summary: Deletes a key or value from the registry.
-RegDelete()
+RegDelete("Keyname", ["Valuename"])
 ;Summary: Reads the name of a subkey according to its instance.
-RegEnumKey()
+RegEnumKey("Keyname", Instance)
 ;Summary: Reads the name of a value according to its instance.
-RegEnumVal()
+RegEnumVal("Keyname", Instance)
 ;Summary: Reads a value from the registry.
-RegRead()
+RegRead("Keyname", "Valuename")
 ;Summary: Creates a key or value in the registry.
-RegWrite()
+RegWrite("Keyname", ["Valuename"], ["Type"], [value])
 ;Summary: Returns a number rounded to a specified number of decimal places.
-Round()
+Round(Expression, [Decimalplaces])
 ;Summary: Runs an external program.
-Run()
+Run("Program", ["Workingdir"], [ShowFlag], [OptFlag])
 ;Summary: Runs an external program under the context of a different user.
-RunAs()
+RunAs("Username", "Domain", "Password", LogonFlag, "Program", ["Workingdir"], [ShowFlag], [OptFlag])
 ;Summary: Runs an external program under the context of a different user and pauses script execution until the program finishes.
-RunAsWait()
+RunAsWait("Username", "Domain", "Password", LogonFlag, "Program", ["Workingdir"], [ShowFlag], [OptFlag])
 ;Summary: Runs an external program and pauses script execution until the program finishes.
-RunWait()
+RunWait("Program", ["Workingdir"], [ShowFlag], [OptFlag])
 ;Summary: Sends simulated keystrokes to the active window.
-Send()
+Send("Keys", [Flag = 0])
 ;Summary: Attempts to keep a specified window active during Send().
-SendKeepActive()
+SendKeepActive("Title", ["Text"])
 ;Summary: Manually set the value of the @error macro (and optionally @extended, and "Return Value").
-SetError()
+SetError(Code, [Extended = 0], [return Value])
 ;Summary: Manually set the value of the @extended macro.
-SetExtended()
+SetExtended(Code, [return Value])
 ;Summary: Runs an external program using the ShellExecute API.
-ShellExecute()
+ShellExecute("Filename", ["Parameter"], ["WorkingDirectory"], ["Verb"], [ShowFlag])
 ;Summary: Runs an external program using the ShellExecute API and pauses script execution until it finishes.
-ShellExecuteWait()
+ShellExecuteWait("Filename", ["Parameter"], ["WorkingDirectory"], ["Verb"], [ShowFlag])
 ;Summary: Shuts down the system.
-Shutdown()
+Shutdown(Code)
 ;Summary: Calculates the sine of a number.
-Sin()
+Sin(Number)
 ;Summary: Pause script execution.
-Sleep()
+Sleep(Delay)
 ;Summary: Play a sound file.
-SoundPlay()
+SoundPlay("Filename", [Wait = 0])
 ;Summary: Sets the system wave volume by percent.
-SoundSetWaveVolume()
+SoundSetWaveVolume(Percent)
 ;Summary: Creates a customizable image popup window.
-SplashImageOn()
+SplashImageOn("Title", "File", [Width], [Height], [X], [Y], [Opt])
 ;Summary: Turns SplashText or SplashImage off.
 SplashOff()
 ;Summary: Creates a customizable text popup window.
-SplashTextOn()
+SplashTextOn("Title", "Text", [Width = 500], [Height = 400], [X], [Y], [Opt = 0], ["Fontname"], [FontSz = 12], [FontWt])
 ;Summary: Calculates the square-root of a number.
-Sqrt()
+Sqrt(Number)
 ;Summary: Set Seed for random number generation.
-SRandom()
+SRandom(Seed)
 ;Summary: Retrieves the text from a standard status bar control.
-StatusbarGetText()
+StatusbarGetText("Title", ["Text"], [Part = 1])
 ;Summary: Reads from the STDERR stream of a previously run child process.
-StderrRead()
+StderrRead(PID, [Peek = False], [Binary = False])
 ;Summary: Writes a number of characters to the STDIN stream of a previously run child process.
-StdinWrite()
+StdinWrite(PID, [Data])
 ;Summary: Closes all resources associated with a process previously run with STDIO redirection.
-StdioClose()
+StdioClose(PID)
 ;Summary: Reads from the STDOUT stream of a previously run child process.
-StdoutRead()
+StdoutRead(PID, [Peek = False], [Binary = False])
 ;Summary: Returns the string representation of an expression.
-String()
+String(Expression)
 ;Summary: Takes a string and prefixes all linefeed characters ( Chr(10) ) with a carriage return character ( Chr(13) ).
-StringAddCR()
+StringAddCR("String")
 ;Summary: Compares two strings with options.
-StringCompare()
+StringCompare("String1", "String2", [Casesense = 0])
 ;Summary: Returns a formatted string (similar to the C sprintf() function).
-StringFormat()
+StringFormat("Format", Var1, [... Var32])
 ;Summary: Converts an array of ASCII codes to a string.
-StringFromASCIIArray()
+StringFromASCIIArray(Array, [Start = 0], [End = -1], [Encoding = 0])
 ;Summary: Checks if a string contains a given substring.
-StringInStr()
+StringInStr("String", "Substring", [Casesense = 0], [Occurrence = 1], [Start = 1], [Count])
 ;Summary: Checks if a string contains only alphanumeric characters.
-StringIsAlNum()
+StringIsAlNum("String")
 ;Summary: Checks if a string contains only alphabetic characters.
-StringIsAlpha()
+StringIsAlpha("String")
 ;Summary: Checks if a string contains only ASCII characters in the range 0x00 - 0x7f (0 - 127).
-StringIsASCII()
+StringIsASCII("String")
 ;Summary: Checks if a string contains only digit (0-9) characters.
-StringIsDigit()
+StringIsDigit("String")
 ;Summary: Checks if a string is a floating point number.
-StringIsFloat()
+StringIsFloat("String")
 ;Summary: Checks if a string is an integer.
-StringIsInt()
+StringIsInt("String")
 ;Summary: Checks if a string contains only lowercase characters.
-StringIsLower()
+StringIsLower("String")
 ;Summary: Checks if a string contains only whitespace characters.
-StringIsSpace()
+StringIsSpace("String")
 ;Summary: Checks if a string contains only uppercase characters.
-StringIsUpper()
+StringIsUpper("String")
 ;Summary: Checks if a string contains only hexadecimal digit (0-9, A-F) characters.
-StringIsXDigit()
+StringIsXDigit("String")
 ;Summary: Returns a number of characters from the left-hand side of a string.
-StringLeft()
+StringLeft("String", Count)
 ;Summary: Returns the number of characters in a string.
-StringLen()
+StringLen("String")
 ;Summary: Converts a string to lowercase.
-StringLower()
+StringLower("String")
 ;Summary: Extracts a number of characters from a string.
-StringMid()
+StringMid("String", Start, [Count = -1])
 ;Summary: Check if a string fits a given regular expression pattern.
-StringRegExp()
+StringRegExp("String", "Pattern", [Flag = 0], [Offset = 1])
 ;Summary: Replace text in a string based on regular expressions.
-StringRegExpReplace()
+StringRegExpReplace("String", "Pattern", "Replace", [Count = 0])
 ;Summary: Replaces substrings in a string.
-StringReplace()
+StringReplace("String", "OldString", "NewString", [Occurance = 0], [Casesense = 0])
 ;Summary: Reverses the contents of the specified string.
-StringReverse()
+StringReverse("String", [Flag = 0])
 ;Summary: Returns a number of characters from the right-hand side of a string.
-StringRight()
+StringRight("String", Count)
 ;Summary: Splits up a string into substrings depending on the given delimiters.
-StringSplit()
+StringSplit("String", "Delimiter", [Flag = 0])
 ;Summary: Removes all carriage return values ( Chr(13) ) from a string.
-StringStripCR()
+StringStripCR("String")
 ;Summary: Strips the white space in a string.
-StringStripWS()
+StringStripWS("String", Flag)
 ;Summary: Converts a string to an array containing the ASCII code of each character.
-StringToASCIIArray()
+StringToASCIIArray("String", [Start = 0], [End], [Encoding = 0])
 ;Summary: Converts a string into binary data.
-StringToBinary()
+StringToBinary(Expression, [Flag = 1])
 ;Summary: Trims a number of characters from the left hand side of a string.
-StringTrimLeft()
+StringTrimLeft("String", Count)
 ;Summary: Trims a number of characters from the right hand side of a string.
-StringTrimRight()
+StringTrimRight("String", Count)
 ;Summary: Converts a string to uppercase.
-StringUpper()
+StringUpper("String")
 ;Summary: Calculates the tangent of a number.
-Tan()
+Tan(Number)
 ;Summary: Permits an incoming connection attempt on a socket.
-TCPAccept()
+TCPAccept(Socket)
 ;Summary: Closes a TCP socket.
-TCPCloseSocket()
+TCPCloseSocket(Socket)
 ;Summary: Create a socket connected to an existing server.
-TCPConnect()
+TCPConnect(IP, Port)
 ;Summary: Creates a socket listening for an incoming connection.
-TCPListen()
+TCPListen(IP, Port, [MaxPending])
 ;Summary: Converts an Internet name to IP address.
-TCPNameToIP()
+TCPNameToIP(Name)
 ;Summary: Receives data from a connected socket.
-TCPRecv()
+TCPRecv(Socket, MaxLen, [Flag = 0])
 ;Summary: Sends data on a connected socket.
-TCPSend()
-;Summary: Stops TCP/UDP services.
-TCPShutdown, UDPShutdown()
-;Summary: Starts TCP or UDP services.
-TCPStartup, UDPStartup()
+TCPSend(Socket, Data)
+;Summary: Stops TCP services.
+TCPShutdown()
+;Summary: Stops UDP services.
+UDPShutdown()
+;Summary: Starts TCP services.
+TCPStartup()
+;Summary: Starts UDP services.
+UDPStartup()
 ;Summary: Returns the difference in time from a previous call to TimerInit().
-TimerDiff()
+TimerDiff(Handle)
 ;Summary: Returns a handle that can be passed to TimerDiff() to calculate the difference in milliseconds.
 TimerInit()
 ;Summary: Creates a tooltip anywhere on the screen.
-ToolTip()
+ToolTip("Text", [X], [Y], ["Title"], [Options])
 ;Summary: Creates a menuitem control for the tray.
-TrayCreateItem()
+TrayCreateItem("Text", [MenuID = -1], [MenuEntry = -1], [MenuRadio = 0])
 ;Summary: Creates a menu control for the tray menu.
-TrayCreateMenu()
+TrayCreateMenu("MenuText", [MenuID = -1], [Menuentry = -1])
 ;Summary: Polls the tray to see if any events have occurred.
 TrayGetMsg()
 ;Summary: Deletes a menu/item control from the tray menu.
-TrayItemDelete()
+TrayItemDelete(ControlID)
 ;Summary: Returns the handle for a tray menu(item).
-TrayItemGetHandle()
+TrayItemGetHandle(ControlID)
 ;Summary: Gets the current state of a control.
-TrayItemGetState()
+TrayItemGetState([ControlID])
 ;Summary: Gets the itemtext of a tray menu/item control.
-TrayItemGetText()
+TrayItemGetText(ControlID)
 ;Summary: Defines a user-defined function to be called when a tray item is clicked.
-TrayItemSetOnEvent()
+TrayItemSetOnEvent(ItemID, "Function")
 ;Summary: Sets the state of a tray menu/item control.
-TrayItemSetState()
+TrayItemSetState(ControlID, State)
 ;Summary: Sets the itemtext of a tray menu/item control.
-TrayItemSetText()
+TrayItemSetText(ControlID, "Text")
 ;Summary: Sets the clickmode of the tray icon - what mouseclicks will display the tray menu.
-TraySetClick()
+TraySetClick(Flag)
 ;Summary: Loads/Sets a specified tray icon.
-TraySetIcon()
+TraySetIcon([FileName], [IconID])
 ;Summary: Defines a user function to be called when a special tray action happens.
-TraySetOnEvent()
+TraySetOnEvent(SpecialID, "Function")
 ;Summary: Loads/Sets a specified tray pause icon.
-TraySetPauseIcon()
+TraySetPauseIcon([Filename], [IconID])
 ;Summary: Sets the state of the tray icon.
-TraySetState()
+TraySetState([Flag = 1])
 ;Summary: (Re)Sets the tooltip text for the tray icon.
-TraySetToolTip()
+TraySetToolTip([Text])
 ;Summary: Displays a balloon tip from the AutoIt Icon.
-TrayTip()
+TrayTip("Title", "Text", Timeout, [Option = 0])
 ;Summary: Returns the size of array dimensions or the number of keys in a map.
-UBound()
+UBound(Variable, [Dimension = 1])
 ;Summary: Create a socket bound to an incoming connection.
-UDPBind()
+UDPBind(IP, Port)
 ;Summary: Close a UDP socket.
-UDPCloseSocket()
+UDPCloseSocket(Socket)
 ;Summary: Open a socket connected to an existing server .
-UDPOpen()
+UDPOpen(IP, Port, [Flag = 0])
 ;Summary: Receives data from an opened socket.
-UDPRecv()
+UDPRecv(Socket, MaxLen, [Flag = 0])
 ;Summary: Sends data on an opened socket.
-UDPSend()
+UDPSend(Socket, Data)
 ;Summary: Returns the internal type representation of a variant.
-VarGetType()
+VarGetType(Expression)
 ;Summary: Activates (gives focus to) a window.
-WinActivate()
+WinActivate("Title", ["Text"])
 ;Summary: Checks to see if a specified window exists and is currently active.
-WinActive()
+WinActive("Title", ["Text"])
 ;Summary: Closes a window.
-WinClose()
+WinClose("Title", ["Text"])
 ;Summary: Checks to see if a specified window exists.
-WinExists()
+WinExists("Title", ["Text"])
 ;Summary: Flashes a window in the taskbar.
-WinFlash()
+WinFlash("Title", ["Text"], [Flashes = 4], [Delau = 500])
 ;Summary: Returns the coordinates of the caret in the foreground window.
 WinGetCaretPos()
 ;Summary: Retrieves the classes from a window.
-WinGetClassList()
+WinGetClassList("Title", ["Text"])
 ;Summary: Retrieves the size of a given window's client area.
-WinGetClientSize()
+WinGetClientSize("Title", ["Text"])
 ;Summary: Retrieves the internal handle of a window.
-WinGetHandle()
+WinGetHandle("Title", ["Text"])
 ;Summary: Retrieves the position and size of a given window.
-WinGetPos()
+WinGetPos("Title", ["Text"])
 ;Summary: Retrieves the Process ID (PID) associated with a window.
-WinGetProcess()
+WinGetProcess("Title", ["Text"])
 ;Summary: Retrieves the state of a given window.
-WinGetState()
+WinGetState("Title", ["Text"])
 ;Summary: Retrieves the text from a window.
-WinGetText()
+WinGetText("Title", ["Text"])
 ;Summary: Retrieves the full title from a window.
-WinGetTitle()
+WinGetTitle("Title", ["Text"])
 ;Summary: Forces a window to close.
-WinKill()
+WinKill("Title", ["Text"])
 ;Summary: Retrieves a list of windows.
-WinList()
+WinList(["Title"], ["Text"])
 ;Summary: Invokes a menu item of a window.
-WinMenuSelectItem()
+WinMenuSelectItem("Title", "Text", "Item", [... "Item7"])
 ;Summary: Minimizes all windows.
 WinMinimizeAll()
 ;Summary: Undoes a previous WinMinimizeAll function.
 WinMinimizeAllUndo()
 ;Summary: Moves and/or resizes a window.
-WinMove()
+WinMove("Title", "Text", X, Y, [Width], [Height], [Speed])
 ;Summary: Change a window's "Always On Top" attribute.
-WinSetOnTop()
+WinSetOnTop("Title", "Text", Flag)
 ;Summary: Shows, hides, minimizes, maximizes, or restores a window.
-WinSetState()
+WinSetState("Title", "Text", Flag)
 ;Summary: Changes the title of a window.
-WinSetTitle()
+WinSetTitle("Title", "Text", "NewTitle")
 ;Summary: Sets the transparency of a window.
-WinSetTrans()
+WinSetTrans("Title", "Text", Transparency)
 ;Summary: Pauses execution of the script until the requested window exists.
-WinWait()
+WinWait("Title", ["Text"], [Timeout = 0])
 ;Summary: Pauses execution of the script until the requested window is active.
-WinWaitActive()
+WinWaitActive("Title", ["Text"], [Timeout = 0])
 ;Summary: Pauses execution of the script until the requested window does not exist.
-WinWaitClose()
+WinWaitClose("Title", ["Text"], [Timeout = 0])
 ;Summary: Pauses execution of the script until the requested window is not active.
-WinWaitNotActive()
+WinWaitNotActive("Title", ["Text"], [Timeout = 0])
