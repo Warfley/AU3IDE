@@ -62,6 +62,7 @@ type
     procedure PickListClick(Sender: TObject);
   private
     FFormular: Tau3Form;
+    MovingControl: TControl;
     FChangeProps: boolean;
     FFileName: string;
     FConf: TFormEditorConfig;
@@ -429,17 +430,17 @@ begin
     end
     else
     begin
-      case (Sender as TControl).Cursor of
+      case MovingControl.Cursor of
         crSizeNWSE:
         begin
-          (Sender as TControl).Width :=
+          MovingControl.Width :=
             X div (FConf.RasterSize div 2) * (FConf.RasterSize div 2);
-          (Sender as TControl).Height :=
+          MovingControl.Height :=
             Y div (FConf.RasterSize div 2) * (FConf.RasterSize div 2);
           Moved := True;
           b := False;
           if FConf.UseHelpLines then
-            with Sender as TControl do
+            with MovingControl do
               for n := 0 to Parent.ControlCount - 1 do
               begin
                 if (Left + Width < Parent.Controls[n].Left +
@@ -469,11 +470,11 @@ begin
         end;
         crSizeNS:
         begin
-          (Sender as TControl).Height :=
+          MovingControl.Height :=
             Y div (FConf.RasterSize div 2) * (FConf.RasterSize div 2);
           Moved := True;
           if FConf.UseHelpLines then
-            with Sender as TControl do
+            with MovingControl do
               for n := 0 to Parent.ControlCount - 1 do
               begin
 
@@ -492,11 +493,11 @@ begin
         end;
         crSizeWE:
         begin
-          (Sender as TControl).Width :=
+          MovingControl.Width :=
             X div (FConf.RasterSize div 2) * (FConf.RasterSize div 2);
           Moved := True;
           if FConf.UseHelpLines then
-            with Sender as TControl do
+            with MovingControl do
               for n := 0 to Parent.ControlCount - 1 do
               begin
                 if (Left + Width < Parent.Controls[n].Left +
@@ -516,12 +517,12 @@ begin
         begin
           if Sender <> FFormular then
           begin
-            (Sender as TControl).Left :=
-              (FFormular.ScreenToClient(
+            MovingControl.Left :=
+              ((Sender as TControl).Parent.ScreenToClient(
               (Sender as TControl).ClientToScreen(Point(X, Y))).X - FMousePoint.X) div
               (FConf.RasterSize div 2) * (FConf.RasterSize div 2);
-            (Sender as TControl).Top :=
-              (FFormular.ScreenToClient(
+            MovingControl.Top :=
+              ((Sender as TControl).Parent.ScreenToClient(
               (Sender as TControl).ClientToScreen(Point(X, Y))).Y - FMousePoint.y) div
               (FConf.RasterSize div 2) * (FConf.RasterSize div 2);
             Moved := True;
@@ -529,16 +530,16 @@ begin
               if (i >= 0) and (i < FormControlView.Items.Count) and
                 FormControlView.Items[i].Selected and
                 (FormControlView.Items[i].Data <> Pointer(FFormular)) and
-                (FormControlView.Items[i].Data <> Pointer(Sender)) then
+                (FormControlView.Items[i].Data <> Pointer(MovingControl)) then
                 with TControl(FormControlView.Items[i].Data) do
                 begin
-                  Left := Left + ((Sender as TControl).Left - FOldLeft);
-                  Top := Top + ((Sender as TControl).Top - FOldTop);
+                  Left := Left + (MovingControl.Left - FOldLeft);
+                  Top := Top + (MovingControl.Top - FOldTop);
                 end;
-            FOldLeft := (Sender as TControl).Left;
-            FOldTop := (Sender as TControl).Top;
+            FOldLeft := MovingControl.Left;
+            FOldTop := MovingControl.Top;
             if FConf.UseHelpLines then
-              with Sender as TControl do
+              with MovingControl as TControl do
                 for n := 0 to Parent.ControlCount - 1 do
                 begin
                   if (Left < Parent.Controls[n].Left + FConf.RasterSize) and
@@ -578,7 +579,7 @@ begin
                   FDrawLines := False;
                 end;
           end;
-          if ToolSelect.ItemIndex >= 0 then
+          if (ToolSelect.ItemIndex >= 0) and (Sender is TWinControl) then
           begin
             FSelPoint := FFormular.ScreenToClient(
               (Sender as TControl).ClientToScreen(Point(X, Y)));
@@ -814,6 +815,7 @@ var
 begin
   if Button = mbLeft then
   begin
+    MovingControl:=Sender as TControl;
     FMousePoint := Point(X, Y);
     FPanelMousePoint := FFormular.ScreenToClient(
       (Sender as TControl).ClientToScreen(Point(X, Y)));
