@@ -143,6 +143,7 @@ var
   sl: TStringList;
   path, preset, mf: string;
   i: integer;
+  co: TCompOptions;
 begin
   if NewProjectView.ItemIndex < 0 then
   begin
@@ -212,10 +213,17 @@ begin
     end;
     CopyFile(preset + mf, path + p.Name + '.apr');
     p.MainFile := path + p.Name + '.apr';
+    with co do
+    begin
+      PackUPX:=false;
+      Compression:=TCompressionMode(2);
+      IconPath:='';
+    end;
+    p.CompilerOptions:=co;
     if p.OpendFiles[p.FocusedFile].Name = mf then
       p.OpendFiles[p.FocusedFile] := OpendFileInfo(p.GetMainFileRel);
-    p.Save;
     FPath := path + p.Name + '.au3proj';
+    p.WriteToFile(FPath);
   finally
     p.Free;
   end;

@@ -785,7 +785,7 @@ object MainForm: TMainForm
         object RunBtn: TSpeedButton
           Left = 0
           Height = 32
-          Hint = 'Ausführen Debug (F5)'
+          Hint = 'Ausführen (F5)'
           Top = 0
           Width = 32
           Align = alLeft
@@ -970,15 +970,15 @@ object MainForm: TMainForm
           ItemHeight = 25
           ItemIndex = 0
           Items.Strings = (
-            'Debug'
-            'Release'
+            'x86'
+            'x64'
           )
           OnChange = SelectModeBoxChange
           ParentShowHint = False
           ShowHint = True
           Style = csDropDownList
           TabOrder = 0
-          Text = 'Debug'
+          Text = 'x86'
         end
       end
     end
@@ -1078,30 +1078,18 @@ object MainForm: TMainForm
         ShortCut = 16452
       end
     end
-    object RunMenuItem: TMenuItem
+    object RunMenu: TMenuItem
       Caption = 'Start'
       GlyphShowMode = gsmNever
-      object CompDebMenuItem: TMenuItem
-        Caption = 'Debug Kompilieren'
-        GlyphShowMode = gsmNever
-        OnClick = CompDebMenuItemClick
-      end
-      object CompRelMenuItem: TMenuItem
-        Caption = 'Release Kompilieren'
-        GlyphShowMode = gsmNever
-        OnClick = CompRelMenuItemClick
-      end
-      object RunDebugMenuItem: TMenuItem
-        Caption = 'Debug Ausführen'
-        GlyphShowMode = gsmNever
+      object RunMenuItem: TMenuItem
+        Caption = 'Ausführen'
         ShortCut = 116
-        OnClick = RunDebugMenuItemClick
+        OnClick = RunMenuItemClick
       end
-      object RenReleaseMenuItem: TMenuItem
-        Caption = 'Release Ausführen'
-        GlyphShowMode = gsmNever
-        ShortCut = 16466
-        OnClick = RenReleaseMenuItemClick
+      object CompileMenuItem: TMenuItem
+        Caption = 'Kompilieren'
+        ShortCut = 16450
+        OnClick = CompileMenuItemClick
       end
     end
     object ExtrasMenuItem: TMenuItem

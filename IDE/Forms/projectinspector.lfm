@@ -7,8 +7,6 @@ object ProjectInspector: TProjectInspector
   ClientWidth = 347
   OnResize = FrameResize
   TabOrder = 0
-  DesignLeft = 561
-  DesignTop = 188
   object ProjectFileTreeView: TTreeView
     Left = 0
     Height = 239
@@ -87,6 +85,16 @@ object ProjectInspector: TProjectInspector
       OnClick = SetMainFormButtonClick
       TabOrder = 3
       Visible = False
+    end
+    object Button1: TButton
+      Left = 8
+      Height = 33
+      Top = 139
+      Width = 128
+      Anchors = [akLeft, akBottom]
+      Caption = 'Einstellungen'
+      OnClick = Button1Click
+      TabOrder = 4
     end
   end
   object Label1: TLabel

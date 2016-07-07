@@ -3,6 +3,7 @@ object StartupScreen: TStartupScreen
   Height = 325
   Top = 168
   Width = 605
+  ActiveControl = LastOpendBox
   BorderStyle = bsToolWindow
   Caption = 'AU3 IDE'
   ClientHeight = 325

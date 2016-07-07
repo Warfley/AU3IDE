@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, TreeFilterEdit, Forms, Controls, ComCtrls,
-  ExtCtrls, StdCtrls, Project, Dialogs, au3Types;
+  ExtCtrls, StdCtrls, Project, Dialogs, au3Types, ProjectConfForm;
 
 type
 
@@ -14,6 +14,7 @@ type
 
   TProjectInspector = class(TFrame)
     AddButton: TButton;
+    Button1: TButton;
     Openau3FileDialog: TOpenDialog;
     SetMainFormButton: TButton;
     RenameButton: TButton;
@@ -25,6 +26,7 @@ type
     ProjectFileTreeView: TTreeView;
     TreeFilterEdit1: TTreeFilterEdit;
     procedure AddButtonClick(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
     procedure DeleteButtonClick(Sender: TObject);
     procedure FrameResize(Sender: TObject);
     procedure ProjectFileTreeViewClick(Sender: TObject);
@@ -123,6 +125,41 @@ begin
           exit;
       FProject.AddFile(Openau3FileDialog.FileName);
     end;
+  end;
+end;
+
+procedure TProjectInspector.Button1Click(Sender: TObject);
+var
+  co: TCompOptions;
+begin
+  ProjectSettings.NameEdit.Text := FProject.Name;
+  ProjectSettings.DirEdit.Directory := FProject.ProjectDir;
+  ProjectSettings.GUIBox.Checked := FProject.GUIBased;
+  ProjectSettings.CompileEdit.FileName :=
+    CreateAbsolutePath(FProject.CompilerOptions.OutPath, FProject.ProjectDir);
+  ProjectSettings.IconEdit.FileName := FProject.CompilerOptions.IconPath;
+  ProjectSettings.CompTrackBar.Position := Ord(FProject.CompilerOptions.Compression);
+  ProjectSettings.UPXBox.Checked := FProject.CompilerOptions.PackUPX;
+  ProjectSettings.ParamBox.Items.Assign(FProject.RunParams);
+  if ProjectSettings.ShowModal = mrOk then
+  begin
+    FProject.WriteToFile(IncludeTrailingPathDelimiter(
+      ProjectSettings.DirEdit.Directory) + ProjectSettings.NameEdit.Text +
+      '.au3proj');
+    FProject.GUIBased := ProjectSettings.GUIBox.Checked;
+    with co do
+    begin
+      if CreateRelativePath(ProjectSettings.CompileEdit.FileName,
+        FProject.ProjectDir, True) <> FProject.CompilerOptions.OutPath then
+        OutPath := CreateRelativePath(ProjectSettings.CompileEdit.FileName,
+          FProject.ProjectDir, True);
+      IconPath := ProjectSettings.IconEdit.FileName;
+      Compression := TCompressionMode(ProjectSettings.CompTrackBar.Position);
+      PackUPX := ProjectSettings.UPXBox.Checked;
+    end;
+    FProject.CompilerOptions := co;
+    FProject.RunParams.Assign(ProjectSettings.ParamBox.Items);
+    FProject.Save;
   end;
 end;
 

@@ -8,6 +8,14 @@ uses
   Classes, SysUtils, DOM, XMLRead, XMLWrite, LazFileUtils, FileUtil, Dialogs, au3Types, ListRecords;
 
 type
+  TCompressionMode = (cmNone=0, cmLow=1, cmNormal=2, cmHigh=3, cmMax=4);
+  TCompOptions = record
+    Compression: TCompressionMode;
+    IconPath: String;
+    PackUPX: Boolean;
+    OutPath: String;
+  end;
+
   Tau3Project = class
   private
     FPaths: TStringList;
@@ -16,8 +24,10 @@ type
     FProjectDir: string;
     FChanged: boolean;
     FName: string;
+    FCompOptions: TCompOptions;
     FGUIBased: boolean;
     FMainForm: string;
+    FRunParams: TStringList;
     FFocusedFile: integer;
     FOpendFiles: TOpendFileList;
     FOnChange: TNotifyEvent;
@@ -25,6 +35,7 @@ type
     FAddInclude: TAddIncludeEvent;
     procedure SetPaths(s:TStringList);
     procedure SetMainFile(f: string);
+    procedure SetCompOptions(c: TCompOptions);
     function GetMainFile: string;
     procedure SetMainForm(s: string);
     procedure SetOpendFiles(s: TOpendFileList);
@@ -32,6 +43,7 @@ type
     function GetAbsoluteFileName(i: integer): string;
     procedure SetAbsoluteFileName(i: integer; f: string);
     procedure FilesChange(Sender: TObject);
+    procedure SetRunParams(p: TStringList);
   public
     function GetAbsPath(Rel: string): string;
     function GetRelPath(Rel: string): string;
@@ -48,6 +60,7 @@ type
     property MainFile: string read GetMainFile write SetMainFile;
     property FilePath[i: integer]: string read GetAbsoluteFileName
       write SetAbsoluteFileName;
+    property CompilerOptions: TCompOptions read FCompOptions write SetCompOptions;
     property Files: TStringList read FFiles;
     property ProjectDir: string read FProjectDir write SetProjectDir;
     property Changed: boolean read FChanged write FChanged;
@@ -59,10 +72,27 @@ type
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
     property CheckInclude: TCheckIncludeEvent read FCheckInclude write FCheckInclude;
     property AddInclude: TAddIncludeEvent read FAddInclude write FAddInclude;
+    property RunParams: TStringList read FRunParams write SetRunParams;
     property Paths: TStringList read FPaths write SetPaths;
   end;
 
 implementation
+
+    procedure Tau3Project.SetRunParams(p: TStringList);
+    begin
+  FChanged := True;
+      FRunParams.Assign(p);
+  if Assigned(FOnChange) then
+    FOnChange(Self);
+    end;
+
+    procedure Tau3Project.SetCompOptions(c: TCompOptions);
+    begin
+  FChanged := True;
+      FCompOptions:=c;
+  if Assigned(FOnChange) then
+    FOnChange(Self);
+    end;
 
 procedure Tau3Project.SetProjectDir(p: string);
 var
@@ -92,6 +122,8 @@ end;
 procedure Tau3Project.SetPaths(s:TStringList);
 begin
   FPaths.Assign(s);
+  if Assigned(FOnChange) then
+  FOnChange(Self);
 end;
 
 procedure Tau3Project.SetMainForm(s: string);
@@ -107,6 +139,8 @@ end;
 procedure Tau3Project.SetOpendFiles(s: TOpendFileList);
 begin
   FOpendFiles.Assign(s);
+  if Assigned(FOnChange) then
+  FOnChange(Self);
 end;
 
 procedure Tau3Project.SetMainFile(f: string);
@@ -204,6 +238,8 @@ begin
   FOpendFiles := TOpendFileList.Create;
   FPaths:=TStringList.Create;
   FFiles.OnChange := @FilesChange;
+  FRunParams:=TStringList.Create;
+  FRunParams.OnChange :=@FilesChange;
 end;
 
 destructor Tau3Project.Destroy;
@@ -211,6 +247,7 @@ begin
   FFiles.Free;
   FOpendFiles.Free;
   FPaths.Free;
+  FRunParams.Free;
   inherited;
 end;
 
@@ -239,18 +276,39 @@ begin
     FGUIBased := ProjFile.DocumentElement.FindNode('Apptype').TextContent = 'GUI';
     if FGUIBased then
       FMainForm := ProjFile.DocumentElement.FindNode('MainForm').TextContent;
+    // Load Compiler Options
+    FilesNode := ProjFile.DocumentElement.FindNode('CompilerOptions');
+    FCompOptions.Compression:=TCompressionMode(StrToInt(FilesNode.FindNode('Compression').TextContent));
+    FCompOptions.IconPath:=Trim(FilesNode.FindNode('Icon').TextContent);
+    FCompOptions.OutPath:=FilesNode.FindNode('OutPath').TextContent;
+    FCompOptions.PackUPX:=FilesNode.FindNode('UPX').TextContent='True';
+    // Load Params
+    FilesNode := ProjFile.DocumentElement.FindNode('RunParams');
+    FRunParams.BeginUpdate;
+    try
+      FRunParams.Clear;
+      for i := 0 to FilesNode.ChildNodes.Count - 1 do
+        if FilesNode.ChildNodes.Item[i].NodeName = 'Param' then
+          FRunParams.Add(FilesNode.ChildNodes.Item[i].TextContent);
+    finally
+    FRunParams.EndUpdate;
+    end;
+    // Load Files
     FilesNode := ProjFile.DocumentElement.FindNode('Files');
     FFiles.BeginUpdate;
     try
+      FFiles.Clear;
       for i := 0 to FilesNode.ChildNodes.Count - 1 do
         if FilesNode.ChildNodes.Item[i].NodeName = 'File' then
           FFiles.Add(FilesNode.ChildNodes.Item[i].TextContent);
     finally
       FFiles.EndUpdate;
     end;
+    // Load Paths
     FilesNode := ProjFile.DocumentElement.FindNode('Paths');
     FPaths.BeginUpdate;
     try
+      FPaths.Clear;
       for i := 0 to FilesNode.ChildNodes.Count - 1 do
         if FilesNode.ChildNodes.Item[i].NodeName = 'Path' then
           FPaths.Add(FilesNode.ChildNodes.Item[i].TextContent);
@@ -312,6 +370,36 @@ begin
       t := ProjFile.CreateTextNode(FMainForm);
       tmp.AppendChild(t);
     end;
+    // Createing ParamNode
+    FilesNode:=ProjFile.CreateElement('RunParams');
+    ProjFile.DocumentElement.AppendChild(FilesNode);
+    if FRunParams.Count = 0 then
+      FilesNode.AppendChild(ProjFile.CreateTextNode(' '));
+    for i := 0 to FRunParams.Count - 1 do
+    begin
+      tmp := ProjFile.CreateElement('Param');
+      FilesNode.AppendChild(tmp);
+      t := ProjFile.CreateTextNode(FRunParams[i]);
+      tmp.AppendChild(t);
+    end;
+    // Create Compiler Options Node
+    FilesNode:=ProjFile.CreateElement('CompilerOptions');
+    ProjFile.DocumentElement.AppendChild(FilesNode);
+    tmp:=ProjFile.CreateElement('Compression');
+    FilesNode.AppendChild(tmp);
+    tmp.AppendChild(ProjFile.CreateTextNode(IntToStr(ord(FCompOptions.Compression))));
+
+    tmp:=ProjFile.CreateElement('UPX');
+    FilesNode.AppendChild(tmp);
+    tmp.AppendChild(ProjFile.CreateTextNode(BoolToStr(FCompOptions.PackUPX, 'True', 'False')));
+
+    tmp:=ProjFile.CreateElement('OutPath');
+    FilesNode.AppendChild(tmp);
+    tmp.AppendChild(ProjFile.CreateTextNode(FCompOptions.OutPath));
+
+    tmp:=ProjFile.CreateElement('Icon');
+    FilesNode.AppendChild(tmp);
+    tmp.AppendChild(ProjFile.CreateTextNode(FCompOptions.IconPath));
     // Createing file Nodes
     FilesNode := ProjFile.CreateElement('Files');
     ProjFile.DocumentElement.AppendChild(FilesNode);
@@ -375,6 +463,7 @@ procedure Tau3Project.WriteToFile(f: string);
 begin
   SetProjectDir(ExtractFilePath(f));
   FName := ExtractFileName(ExtractFileNameWithoutExt(f));
+  FCompOptions.OutPath:=Format('bin/%s.exe', [FName]);
   Save;
   if Assigned(FOnChange) then
     FOnChange(self);

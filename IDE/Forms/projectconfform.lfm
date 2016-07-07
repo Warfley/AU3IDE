@@ -1,0 +1,237 @@
+object ProjectSettings: TProjectSettings
+  Left = 0
+  Height = 354
+  Top = 0
+  Width = 366
+  ActiveControl = PageControl1
+  BorderStyle = bsSingle
+  Caption = 'Projekteinstellungen'
+  ClientHeight = 354
+  ClientWidth = 366
+  OnShow = FormShow
+  Position = poMainFormCenter
+  LCLVersion = '1.6.0.4'
+  Visible = False
+  object PageControl1: TPageControl
+    Left = 0
+    Height = 312
+    Top = 0
+    Width = 366
+    ActivePage = Allgemein
+    Align = alClient
+    TabIndex = 0
+    TabOrder = 0
+    object Allgemein: TTabSheet
+      Caption = 'Allgemein'
+      ClientHeight = 274
+      ClientWidth = 358
+      object Label1: TLabel
+        Left = 0
+        Height = 25
+        Top = 8
+        Width = 47
+        Caption = 'Name'
+        ParentColor = False
+      end
+      object NameEdit: TEdit
+        Left = 16
+        Height = 33
+        Top = 40
+        Width = 192
+        TabOrder = 0
+      end
+      object DirEdit: TDirectoryEdit
+        Left = 16
+        Height = 33
+        Top = 112
+        Width = 192
+        ShowHidden = False
+        ButtonWidth = 23
+        NumGlyphs = 1
+        MaxLength = 0
+        TabOrder = 1
+      end
+      object Label2: TLabel
+        Left = 0
+        Height = 25
+        Top = 80
+        Width = 86
+        Caption = 'Verzeichnis'
+        ParentColor = False
+      end
+      object GUIBox: TCheckBox
+        Left = 0
+        Height = 29
+        Top = 160
+        Width = 160
+        Caption = 'GUI Anwendung'
+        TabOrder = 2
+      end
+    end
+    object Compiler: TTabSheet
+      Caption = 'Compiler'
+      ClientHeight = 274
+      ClientWidth = 358
+      object CompTrackBar: TTrackBar
+        Left = 16
+        Height = 25
+        Top = 200
+        Width = 220
+        Max = 4
+        OnChange = CompTrackBarChange
+        Position = 0
+        TabOrder = 0
+      end
+      object Label3: TLabel
+        Left = 0
+        Height = 25
+        Top = 8
+        Width = 151
+        Caption = 'Compiler Ausgabe:'
+        ParentColor = False
+      end
+      object CompileEdit: TFileNameEdit
+        Left = 16
+        Height = 33
+        Top = 40
+        Width = 320
+        Filter = 'Executeable|*.exe'
+        FilterIndex = 0
+        HideDirectories = False
+        ButtonWidth = 23
+        NumGlyphs = 1
+        MaxLength = 0
+        TabOrder = 1
+      end
+      object IconEdit: TFileNameEdit
+        Left = 16
+        Height = 33
+        Top = 112
+        Width = 320
+        Filter = 'Icon|*.ico'
+        FilterIndex = 0
+        HideDirectories = False
+        ButtonWidth = 23
+        NumGlyphs = 1
+        MaxLength = 0
+        TabOrder = 2
+      end
+      object UPXBox: TCheckBox
+        Left = 0
+        Height = 29
+        Top = 240
+        Width = 180
+        Caption = 'UPX Komprimieren'
+        TabOrder = 3
+      end
+      object Label4: TLabel
+        Left = 0
+        Height = 25
+        Top = 80
+        Width = 38
+        Caption = 'Icon:'
+        ParentColor = False
+      end
+      object Label5: TLabel
+        Left = 0
+        Height = 25
+        Top = 152
+        Width = 108
+        Caption = 'Kompression:'
+        ParentColor = False
+      end
+      object CompLabel: TLabel
+        Left = 240
+        Height = 1
+        Top = 200
+        Width = 1
+        ParentColor = False
+      end
+    end
+    object TabSheet1: TTabSheet
+      Caption = 'Start Parameter'
+      ClientHeight = 274
+      ClientWidth = 358
+      object ParamBox: TListBox
+        Left = 0
+        Height = 240
+        Top = 0
+        Width = 358
+        Align = alClient
+        ItemHeight = 0
+        TabOrder = 0
+      end
+      object Panel2: TPanel
+        Left = 0
+        Height = 34
+        Top = 240
+        Width = 358
+        Align = alBottom
+        BevelOuter = bvNone
+        ClientHeight = 34
+        ClientWidth = 358
+        TabOrder = 1
+        object AddParamBtn: TButton
+          Left = 283
+          Height = 34
+          Top = 0
+          Width = 75
+          Align = alRight
+          Caption = '+'
+          OnClick = AddParamBtnClick
+          TabOrder = 0
+        end
+        object DeleteParamBtn: TButton
+          Left = 208
+          Height = 34
+          Top = 0
+          Width = 75
+          Align = alRight
+          Caption = '-'
+          OnClick = DeleteParamBtnClick
+          TabOrder = 1
+        end
+        object ParamEdit: TEdit
+          Left = 0
+          Height = 34
+          Top = 0
+          Width = 208
+          Align = alClient
+          OnKeyDown = ParamEditKeyDown
+          TabOrder = 2
+        end
+      end
+    end
+  end
+  object Panel1: TPanel
+    Left = 0
+    Height = 42
+    Top = 312
+    Width = 366
+    Align = alBottom
+    BevelOuter = bvNone
+    ClientHeight = 42
+    ClientWidth = 366
+    TabOrder = 1
+    object CancelButton: TButton
+      Left = 152
+      Height = 42
+      Top = 0
+      Width = 107
+      Align = alRight
+      Caption = 'Abbruch'
+      ModalResult = 2
+      TabOrder = 0
+    end
+    object SaveButton: TButton
+      Left = 259
+      Height = 42
+      Top = 0
+      Width = 107
+      Align = alRight
+      Caption = 'Speichern'
+      ModalResult = 1
+      TabOrder = 1
+    end
+  end
+end

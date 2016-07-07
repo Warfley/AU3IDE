@@ -6,27 +6,20 @@ interface
 
 uses
   Classes, SysUtils, Project, DOM, XMLRead, XMLWrite, AsyncProcess, process, strutils,
-  Dialogs;
+  Dialogs, LazFileUtils;
 
 type
-  TCompilerMode = (cmDebug, cmRelease);
+  TCompileArch = (cax86, ca64);
   TOutputEvent = procedure(Sender: TObject; FileName: string; Output: string) of object;
 
   Tau3Compiler = class
   private
     FCurrentProject: Tau3Project;
-    FCurrentMode: TCompilerMode;
+    FArch: TCompileArch;
     FOutput: TStringList;
-    FCompilerRelease: string;
+    FPath: string;
+    FSaveIntData: boolean;
     FCProcess: TAsyncProcess;
-    FCompilerDebug: string;
-    FInterpreaterRelease: string;
-    FInterpreaterDebug: string;
-    FCompilerOutput: string;
-    FInterpreaterOutput: string;
-    FPrintCompilerOutput: boolean;
-    FAdvancedCompilerOutput: boolean;
-    FPrintInterpreaterOutput: boolean;
     FIsCompiling: boolean;
     FSTDOptions: TProcessOptions;
     FOnOutput: TOutputEvent;
@@ -36,33 +29,18 @@ type
     function isRunning: boolean;
     procedure ReadData(Sender: TObject);
     procedure ProcTerm(Sender: TObject);
-    procedure DoRun(Sender: TObject);
   public
     constructor Create;
     destructor Destroy; override;
     procedure Stop;
-    procedure CompileAndRun(P: Tau3Project; Mode: TCompilerMode);
+    procedure Run(P: Tau3Project; Arch: TCompileArch);
     procedure ReadConf(Path: string);
     procedure WriteConf(Path: string);
-    procedure Compile(P: Tau3Project; Mode: TCompilerMode);
-    procedure Run(Path: string; Mode: TCompilerMode);
+    procedure Compile(P: Tau3Project; Arch: TCompileArch);
 
     property Active: boolean read isRunning;
-    property CompilerReleasePath: string read FCompilerRelease write FCompilerRelease;
-    property CompilerDebugPath: string read FCompilerDebug write FCompilerDebug;
-    property InterpreterReleasePath: string
-      read FInterpreaterRelease write FInterpreaterRelease;
-    property InterpreterDebugPath: string read FInterpreaterDebug
-      write FInterpreaterDebug;
-    property InterpreterOutputPath: string read FInterpreaterOutput
-      write FInterpreaterOutput;
-    property CompilerOutputPath: string read FCompilerOutput write FCompilerOutput;
-    property PrintCompilerOutput: boolean read FPrintCompilerOutput
-      write FPrintCompilerOutput;
-    property AdvancedCompilerOutput: boolean
-      read FAdvancedCompilerOutput write FAdvancedCompilerOutput;
-    property PrintInterpreaterOutput: boolean
-      read FPrintInterpreaterOutput write FPrintInterpreaterOutput;
+    property Path: string read FPath write FPath;
+    property SaveIntData: boolean read FSaveIntData write FSaveIntData;
     property OnOutput: TOutputEvent read FOnOutput write FOnOutput;
     property OnFinishedRunning: TNotifyEvent read FOnFinishedRun write FOnFinishedRun;
     property OnFinishedCompiling: TNotifyEvent
@@ -79,17 +57,11 @@ var
 begin
   try
     ReadXMLFile(doc, Path);
-    tmpNode := doc.DocumentElement.FindNode('Compiler');
-    FCompilerDebug := tmpNode.FindNode('Debug').TextContent;
-    FCompilerRelease := tmpNode.FindNode('Release').TextContent;
-    FCompilerOutput := tmpNode.FindNode('Output').TextContent;
-    FPrintCompilerOutput := tmpNode.FindNode('PrintOutput').TextContent = 'True';
-    FAdvancedCompilerOutput := tmpNode.FindNode('FullOutput').TextContent = 'True';
-    tmpNode := doc.DocumentElement.FindNode('Interpret');
-    FInterpreaterDebug := tmpNode.FindNode('Debug').TextContent;
-    FInterpreaterRelease := tmpNode.FindNode('Release').TextContent;
-    FInterpreaterOutput := tmpNode.FindNode('Output').TextContent;
-    FPrintInterpreaterOutput := tmpNode.FindNode('PrintOutput').TextContent = 'True';
+    tmpNode := doc.DocumentElement.FindNode('Path');
+    FPath := tmpNode.TextContent;
+    tmpNode := doc.DocumentElement.FindNode('SaveOutput');
+    FSaveIntData:=tmpNode.TextContent='True';
+    FSaveIntData := tmpNode.TextContent = 'True';
   finally
     doc.Free;
   end;
@@ -98,99 +70,71 @@ end;
 procedure Tau3Compiler.WriteConf(Path: string);
 var
   doc: TXMLDocument;
-  tmpNode, tmp, rootnode: TDOMNode;
+  tmpNode, rootnode: TDOMNode;
 begin
   doc := TXMLDocument.Create;
   try
     rootnode := doc.CreateElement('CompilerConfig');
     doc.AppendChild(rootnode);
-    tmpNode := doc.CreateElement('Compiler');
+    tmpNode := doc.CreateElement('Path');
     rootnode.AppendChild(tmpNode);
-    // Write Compiler Debug Path
-    tmp := doc.CreateElement('Debug');
-    tmpNode.AppendChild(tmp);
-    tmp.AppendChild(doc.CreateTextNode(FCompilerDebug));
-    // Write Compiler Release Path
-    tmp := doc.CreateElement('Release');
-    tmpNode.AppendChild(tmp);
-    tmp.AppendChild(doc.CreateTextNode(FCompilerRelease));
-    // Write Compiler Output Path
-    tmp := doc.CreateElement('Output');
-    tmpNode.AppendChild(tmp);
-    tmp.AppendChild(doc.CreateTextNode(FCompilerOutput));
-    // Write Compiler Printinfo
-    tmp := doc.CreateElement('PrintOutput');
-    tmpNode.AppendChild(tmp);
-    tmp.AppendChild(doc.CreateTextNode(BoolToStr(FPrintCompilerOutput, True)));
-    // Write Compiler Fulloutput
-    tmp := doc.CreateElement('FullOutput');
-    tmpNode.AppendChild(tmp);
-    tmp.AppendChild(doc.CreateTextNode(BoolToStr(FAdvancedCompilerOutput, True)));
+    // Write Path
+    tmpNode.AppendChild(doc.CreateTextNode(FPath));
 
-    tmpNode := doc.CreateElement('Interpret');
+    tmpNode := doc.CreateElement('SaveOutput');
     rootnode.AppendChild(tmpNode);
-    // Write Compiler Debug Path
-    tmp := doc.CreateElement('Debug');
-    tmpNode.AppendChild(tmp);
-    tmp.AppendChild(doc.CreateTextNode(FInterpreaterDebug));
-    // Write Compiler Release Path
-    tmp := doc.CreateElement('Release');
-    tmpNode.AppendChild(tmp);
-    tmp.AppendChild(doc.CreateTextNode(FInterpreaterRelease));
-    // Write Compiler Output Path
-    tmp := doc.CreateElement('Output');
-    tmpNode.AppendChild(tmp);
-    tmp.AppendChild(doc.CreateTextNode(FInterpreaterOutput));
-    // Write Compiler Printinfo
-    tmp := doc.CreateElement('PrintOutput');
-    tmpNode.AppendChild(tmp);
-    tmp.AppendChild(doc.CreateTextNode(BoolToStr(FPrintInterpreaterOutput, True)));
+    // Write SaveData
+    tmpNode.AppendChild(doc.CreateTextNode(IfThen(FSaveIntData, 'True', 'False')));
+
     WriteXML(doc, Path);
   finally
     doc.Free;
   end;
 end;
 
-procedure Tau3Compiler.Compile(P: Tau3Project; Mode: TCompilerMode);
+procedure Tau3Compiler.Compile(P: Tau3Project; Arch: TCompileArch);
 begin
   Stop;
-  FCurrentMode := Mode;
+  FArch := Arch;
   FCurrentProject := P;
   FOutput.Clear;
   FIsCompiling := True;
   FCProcess.OnTerminate := @ProcTerm;
-  FCProcess.Options := FSTDOptions + [poUsePipes, poStderrToOutPut{, poNoConsole}];
-  if Mode = cmDebug then
-    FCProcess.Executable := FCompilerDebug
-  else
-    FCProcess.Executable := FCompilerRelease;
-  FCProcess.Parameters.Clear;
-  FCProcess.Parameters.Add(P.MainFile);
-  ForceDirectories(IncludeTrailingPathDelimiter(P.ProjectDir) + 'bin' + PathDelim);
-  FCProcess.Parameters.Add(IncludeTrailingPathDelimiter(P.ProjectDir) +
-    'bin' + PathDelim + 'out.bin');
-  FCProcess.Parameters.Add(IncludeTrailingPathDelimiter(P.ProjectDir));
-  FCProcess.Execute;
-end;
-
-procedure Tau3Compiler.Run(Path: string; Mode: TCompilerMode);
-begin
-  Stop;
-  FCProcess.OnTerminate := @ProcTerm;
   FCProcess.Options := FSTDOptions + [poUsePipes, poStderrToOutPut];
-  (*if FCurrentProject.GUIBased and (not FPrintInterpreaterOutput) then
-    FCProcess.Options:=FCProcess.Options+[poNoConsole]
-  else
-    FCProcess.Options:=FCProcess.Options-[poNoConsole]; *)
-  FCurrentMode := Mode;
-  FIsCompiling := False;
-  if mode = cmDebug then
-    FCProcess.Executable := FInterpreaterDebug
-  else
-    FCProcess.Executable := FInterpreaterRelease;
-  FOutput.Clear;
+
+  FCProcess.Executable := IncludeTrailingPathDelimiter(FPath) + 'Aut2Exe' +
+    PathDelim + 'Aut2exe.exe';
+
   FCProcess.Parameters.Clear;
-  FCProcess.CurrentDirectory:=ExtractFilePath(Path);
+  FCProcess.Parameters.Add('/in');
+  FCProcess.Parameters.Add(P.MainFile);
+  if Length(FCurrentProject.CompilerOptions.OutPath)>0 then
+  begin
+  FCProcess.Parameters.Add('/out');
+  FCProcess.Parameters.Add(CreateAbsoluteSearchPath(
+    FCurrentProject.CompilerOptions.OutPath, FCurrentProject.ProjectDir));
+  end;
+  if Length(FCurrentProject.CompilerOptions.IconPath) > 0 then
+  begin
+    FCProcess.Parameters.Add('/icon');
+    FCProcess.Parameters.Add(FCurrentProject.CompilerOptions.IconPath);
+  end;
+  FCProcess.Parameters.Add('/comp');
+  FCProcess.Parameters.Add(IntToStr(Ord(FCurrentProject.CompilerOptions.Compression)));
+  if FCurrentProject.CompilerOptions.PackUPX then
+    FCProcess.Parameters.Add('/pack');
+  if FCurrentProject.GUIBased then
+    FCProcess.Parameters.Add('/gui')
+  else
+    FCProcess.Parameters.Add('/console');
+  if Arch = cax86 then
+    FCProcess.Parameters.Add('/x86')
+  else
+    FCProcess.Parameters.Add('/x64');
+
+  ForceDirectory(ExtractFilePath(CreateAbsoluteSearchPath(
+    FCurrentProject.CompilerOptions.OutPath, FCurrentProject.ProjectDir)));
+
   FCProcess.Execute;
 end;
 
@@ -209,11 +153,8 @@ begin
     sl.LoadFromStream(FCProcess.Output);
     FOutput.AddStrings(sl);
     for i := 0 to sl.Count - 1 do
-      if (FIsCompiling and FPrintCompilerOutput) or (not FIsCompiling and FPrintInterpreaterOutput) then
-      if AnsiContainsStr(sl[i], '[Line ') or AnsiContainsStr(sl[i], 'left:') or
-        AnsiEndsStr('ms', sl[i]) or (not FIsCompiling) or (FAdvancedCompilerOutput) then
-        if Assigned(FOnOutput) then
-          FOnOutput(Self, FCurrentProject.MainFile, sl[i]);
+      if Assigned(FOnOutput) then
+        FOnOutput(Self, FCurrentProject.MainFile, sl[i]);
   finally
     sl.Free;
   end;
@@ -221,51 +162,21 @@ end;
 
 procedure Tau3Compiler.ProcTerm(Sender: TObject);
 begin
-  if FIsCompiling then
-  begin
-    ForceDirectories(ExtractFilePath(AnsiReplaceStr(FCompilerOutput,
-      '($ProjDir)', ExcludeTrailingPathDelimiter(FCurrentProject.ProjectDir))));
-    FOutput.SaveToFile(AnsiReplaceStr(FCompilerOutput, '($ProjDir)',
-      ExcludeTrailingPathDelimiter(FCurrentProject.ProjectDir)));
-  end
-  else
-  begin
-    ForceDirectories(ExtractFilePath(AnsiReplaceStr(FInterpreaterOutput,
-      '($ProjDir)', ExcludeTrailingPathDelimiter(FCurrentProject.ProjectDir))));
-    FOutput.SaveToFile(AnsiReplaceStr(FInterpreaterOutput, '($ProjDir)',
-      ExcludeTrailingPathDelimiter(FCurrentProject.ProjectDir)));
-  end;
+  if not FIsCompiling and FSaveIntData then
+    FOutput.SaveToFile(IncludeTrailingPathDelimiter(
+      FCurrentProject.ProjectDir) + 'Run.log');
   if FIsCompiling and Assigned(FOnFinishedCompiling) then
     FOnFinishedCompiling(Self)
   else if not FIsCompiling and Assigned(FOnFinishedRun) then
     FOnFinishedRun(Self);
 end;
 
-procedure Tau3Compiler.DoRun(Sender: TObject);
-begin
-  ForceDirectories(ExtractFilePath(AnsiReplaceStr(FCompilerOutput,
-    '($ProjDir)', ExcludeTrailingPathDelimiter(FCurrentProject.ProjectDir))));
-  FOutput.SaveToFile(AnsiReplaceStr(FCompilerOutput, '($ProjDir)',
-    ExcludeTrailingPathDelimiter(FCurrentProject.ProjectDir)));
-  if AnsiContainsStr(FOutput.Text, '[Line') then
-  begin
-    if Assigned(FOnCompileError) then
-      FOnCompileError(Self);
-  end
-  else
-  Run(IncludeTrailingPathDelimiter(FCurrentProject.ProjectDir) +
-    'bin' + PathDelim, FCurrentMode);
-end;
-
 constructor Tau3Compiler.Create;
 begin
-  FCompilerOutput:='($ProjDir)\Output\Compile.txt';
-  FInterpreaterOutput:='($ProjDir)\Output\Interpreter.txt';
-  FPrintCompilerOutput:=True;
   FCProcess := TAsyncProcess.Create(nil);
   FOutput := TStringList.Create;
   FCProcess.OnReadData := @ReadData;
-  FSTDOptions:=FCProcess.Options;
+  FSTDOptions := FCProcess.Options;
 end;
 
 destructor Tau3Compiler.Destroy;
@@ -281,25 +192,26 @@ begin
     FCProcess.Terminate(-1);
 end;
 
-procedure Tau3Compiler.CompileAndRun(P: Tau3Project; Mode: TCompilerMode);
+procedure Tau3Compiler.Run(P: Tau3Project; Arch: TCompileArch);
 begin
   Stop;
-  FCurrentMode := Mode;
+  FArch := Arch;
   FCurrentProject := P;
   FOutput.Clear;
-  FIsCompiling := True;
-  FCProcess.OnTerminate := @DoRun;
-  FCProcess.Options := FSTDOptions + [poUsePipes, poStderrToOutPut{, poNoConsole}];
-  if Mode = cmDebug then
-    FCProcess.Executable := FCompilerDebug
+  FIsCompiling := False;
+  FCProcess.OnTerminate := @ProcTerm;
+  FCProcess.Options := FSTDOptions + [poUsePipes, poStderrToOutPut];
+
+  if Arch = cax86 then
+  FCProcess.Executable := IncludeTrailingPathDelimiter(FPath) + 'AutoIt3.exe'
   else
-    FCProcess.Executable := FCompilerRelease;
+  FCProcess.Executable := IncludeTrailingPathDelimiter(FPath) + 'AutoIt3_x64.exe';
+
   FCProcess.Parameters.Clear;
+  FCProcess.Parameters.Add('/ErrorStdOut');
   FCProcess.Parameters.Add(P.MainFile);
-  ForceDirectories(IncludeTrailingPathDelimiter(P.ProjectDir) + 'bin' + PathDelim);
-  FCProcess.Parameters.Add(IncludeTrailingPathDelimiter(P.ProjectDir) +
-    'bin' + PathDelim + 'out.au3.bin');
-  FCProcess.Parameters.Add(IncludeTrailingPathDelimiter(P.ProjectDir));
+  FCProcess.Parameters.AddStrings(FCurrentProject.RunParams);
+
   FCProcess.Execute;
 end;
 

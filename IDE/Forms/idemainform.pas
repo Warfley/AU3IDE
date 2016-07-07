@@ -42,6 +42,8 @@ type
     FormOptionsItem: TMenuItem;
     IDEOptionItem: TMenuItem;
     ExtrasMenuItem: TMenuItem;
+    CompileMenuItem: TMenuItem;
+    RunMenuItem: TMenuItem;
     UpdateMenuItem: TMenuItem;
     InfoMenuItem: TMenuItem;
     SampeButton: TMenuItem;
@@ -58,16 +60,12 @@ type
     CloseAllItem: TMenuItem;
     EditMenuItem: TMenuItem;
     FormatMenuItem: TMenuItem;
-    CompDebMenuItem: TMenuItem;
-    CompRelMenuItem: TMenuItem;
     ConfigMenuItem: TMenuItem;
     CompOptionMenuItem: TMenuItem;
     ToolbarSplit1: TPairSplitter;
     PairSplitterSide1: TPairSplitterSide;
     PairSplitterSide2: TPairSplitterSide;
-    RenReleaseMenuItem: TMenuItem;
-    RunDebugMenuItem: TMenuItem;
-    RunMenuItem: TMenuItem;
+    RunMenu: TMenuItem;
     Openau3FileDialog: TOpenDialog;
     ProjectInspector1: TProjectInspector;
     SaveAsItem: TMenuItem;
@@ -97,9 +95,8 @@ type
     NewProjectItem: TMenuItem;
     procedure CloseAllItemClick(Sender: TObject);
     procedure CloseFileItemClick(Sender: TObject);
-    procedure CompDebMenuItemClick(Sender: TObject);
+    procedure CompileMenuItemClick(Sender: TObject);
     procedure CompOptionMenuItemClick(Sender: TObject);
-    procedure CompRelMenuItemClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -111,9 +108,8 @@ type
     procedure NewFileItemClick(Sender: TObject);
     procedure NewFormItemClick(Sender: TObject);
     procedure NewProjectItemClick(Sender: TObject);
-    procedure RenReleaseMenuItemClick(Sender: TObject);
     procedure RunBtnClick(Sender: TObject);
-    procedure RunDebugMenuItemClick(Sender: TObject);
+    procedure RunMenuItemClick(Sender: TObject);
     procedure SampeButtonClick(Sender: TObject);
     procedure SaveAllItemClick(Sender: TObject);
     procedure SaveAsItemClick(Sender: TObject);
@@ -297,26 +293,12 @@ end;
 function TMainForm.ShowCompilerOptions: boolean;
 begin
   Result := False;
-  CompilerOptionsForm.CDebugFileEdit.FileName := FCompiler.CompilerDebugPath;
-  CompilerOptionsForm.CReleaseFileEdit.FileName := FCompiler.CompilerReleasePath;
-  CompilerOptionsForm.CLogEdit.Text := FCompiler.CompilerOutputPath;
-  CompilerOptionsForm.COutputBox.Checked := FCompiler.PrintCompilerOutput;
-  CompilerOptionsForm.CAdvOutputBox.Checked := FCompiler.AdvancedCompilerOutput;
-  CompilerOptionsForm.IDebugFileEdit.FileName := FCompiler.InterpreterDebugPath;
-  CompilerOptionsForm.IReleaseFileEdit.FileName := FCompiler.InterpreterReleasePath;
-  CompilerOptionsForm.ILogEdit.Text := FCompiler.InterpreterOutputPath;
-  CompilerOptionsForm.IOutputBox.Checked := FCompiler.PrintInterpreaterOutput;
+  CompilerOptionsForm.PathEdit.Directory := FCompiler.Path;
+  CompilerOptionsForm.SaveIntBox.Checked := FCompiler.SaveIntData;
   if CompilerOptionsForm.ShowModal = mrOk then
   begin
-    FCompiler.CompilerDebugPath := CompilerOptionsForm.CDebugFileEdit.FileName;
-    FCompiler.CompilerReleasePath := CompilerOptionsForm.CReleaseFileEdit.FileName;
-    FCompiler.CompilerOutputPath := CompilerOptionsForm.CLogEdit.Text;
-    FCompiler.PrintCompilerOutput := CompilerOptionsForm.COutputBox.Checked;
-    FCompiler.AdvancedCompilerOutput := CompilerOptionsForm.CAdvOutputBox.Checked;
-    FCompiler.InterpreterDebugPath := CompilerOptionsForm.IDebugFileEdit.FileName;
-    FCompiler.InterpreterReleasePath := CompilerOptionsForm.IReleaseFileEdit.FileName;
-    FCompiler.InterpreterOutputPath := CompilerOptionsForm.ILogEdit.Text;
-    FCompiler.PrintInterpreaterOutput := CompilerOptionsForm.IOutputBox.Checked;
+    FCompiler.Path := CompilerOptionsForm.PathEdit.Directory;
+    FCompiler.SaveIntData := CompilerOptionsForm.SaveIntBox.Checked;
     FCompiler.WriteConf(IncludeTrailingPathDelimiter(
       ExtractFilePath(ParamStr(0))) + 'compiler.cfg');
     Result := True;
@@ -456,23 +438,19 @@ begin
   EditorManager1.CloseEditor(EditorManager1.EditorIndex);
 end;
 
-procedure TMainForm.CompDebMenuItemClick(Sender: TObject);
+procedure TMainForm.CompileMenuItemClick(Sender: TObject);
 begin
-  SaveAllItemClick(SaveAllItem);
+  SaveAllItemClick(nil);
   OutputBox.Clear;
-  FCompiler.Compile(FCurrentProject, cmDebug);
+  if SelectModeBox.ItemIndex = 0 then
+    FCompiler.Compile(FCurrentProject, cax86)
+  else
+    FCompiler.Compile(FCurrentProject, ca64);
 end;
 
 procedure TMainForm.CompOptionMenuItemClick(Sender: TObject);
 begin
   ShowCompilerOptions;
-end;
-
-procedure TMainForm.CompRelMenuItemClick(Sender: TObject);
-begin
-  SaveAllItemClick(SaveAllItem);
-  OutputBox.Clear;
-  FCompiler.Compile(FCurrentProject, TCompilerMode.cmRelease);
 end;
 
 procedure TMainForm.CloseAllItemClick(Sender: TObject);
@@ -777,13 +755,13 @@ procedure TMainForm.EditorParserFinished(Sender: TObject);
   procedure AddReq(req: string; sl: TStringList);
   var
     f, n: integer;
-  begin           ;
+  begin
+    ;
 
     { Anpassen an PATH variablen }
     if not FilenameIsAbsolute(req) then
-      req := GetFullPath(req, IncludePath,
-        ExtractFilePath((Sender as TEditorFrame).FileName) + PathDelim,
-        FCurrentProject.Paths);
+      req := GetFullPath(req, IncludePath, ExtractFilePath(
+        (Sender as TEditorFrame).FileName) + PathDelim, FCurrentProject.Paths);
     if StringsContain(sl, req) then
       exit;
     sl.Add(req);
@@ -840,10 +818,10 @@ begin
     FFileData[idx].Functions := (Sender as TEditorFrame).FunctionList;
     FFileData[idx].RequiredFiles := (Sender as TEditorFrame).RequiredFiles;
     FFileData[idx].Variables := (Sender as TEditorFrame).VariableList;
-    sl:=TStringList.Create;
+    sl := TStringList.Create;
     try
-    for i := 0 to FFileData[idx].RequiredFiles.Count - 1 do
-      AddReq(FFileData[idx].RequiredFiles[i], sl);
+      for i := 0 to FFileData[idx].RequiredFiles.Count - 1 do
+        AddReq(FFileData[idx].RequiredFiles[i], sl);
     finally
       sl.Free
     end;
@@ -1059,37 +1037,19 @@ begin
   Application.QueueAsyncCall(@ShowStartupScreen, 0);
 end;
 
-procedure TMainForm.RenReleaseMenuItemClick(Sender: TObject);
-begin
-  SaveAllItemClick(SaveAllItem);
-  OutputBox.Items.Clear;
-  OutputBox.Items.Add('Kompiliere: ' + FCurrentProject.Name +
-    ' Modus: ' + IfThen(SelectModeBox.ItemIndex = 0, 'Debug', 'Release'));
-  FCompiler.CompileAndRun(FCurrentProject, TCompilerMode.cmRelease);
-  RunBtn.Enabled := False;
-  StopBtn.Enabled := True;
-end;
-
 procedure TMainForm.RunBtnClick(Sender: TObject);
 begin
-  SaveAllItemClick(SaveAllItem);
-  OutputBox.Items.Clear;
-  OutputBox.Items.Add('Kompiliere: ' + FCurrentProject.Name +
-    ' Modus: ' + IfThen(SelectModeBox.ItemIndex = 0, 'Debug', 'Release'));
-  FCompiler.CompileAndRun(FCurrentProject, TCompilerMode(SelectModeBox.ItemIndex));
-  RunBtn.Enabled := False;
-  StopBtn.Enabled := True;
+  RunMenuItemClick(nil);
 end;
 
-procedure TMainForm.RunDebugMenuItemClick(Sender: TObject);
+procedure TMainForm.RunMenuItemClick(Sender: TObject);
 begin
-  SaveAllItemClick(SaveAllItem);
-  OutputBox.Items.Clear;
-  OutputBox.Items.Add('Kompiliere: ' + FCurrentProject.Name +
-    ' Modus: ' + IfThen(SelectModeBox.ItemIndex = 0, 'Debug', 'Release'));
-  FCompiler.CompileAndRun(FCurrentProject, cmDebug);
-  RunBtn.Enabled := False;
-  StopBtn.Enabled := True;
+  SaveAllItemClick(nil);
+  OutputBox.Clear;
+  if SelectModeBox.ItemIndex = 0 then
+    FCompiler.Run(FCurrentProject, cax86)
+  else
+    FCompiler.Run(FCurrentProject, ca64);
 end;
 
 procedure TMainForm.SampeButtonClick(Sender: TObject);
