@@ -33,6 +33,7 @@ type
     CheckSelTimer: TTimer;
     CloseSearchButton: TSpeedButton;
     CloseCodeExplorerButton: TSpeedButton;
+    CESplitter: TSplitter;
     ToolTipTimer: TTimer;
     CodeExplorer: TTreeView;
     procedure CheckSelTimerTimer(Sender: TObject);
@@ -153,9 +154,15 @@ begin
   with conf do
   begin
     if CERight then
-      CodeExplorerPanel.Align := alRight
+    begin
+      CodeExplorerPanel.Align := alRight;
+      CESplitter.Align := alRight;
+    end
     else
+    begin
       CodeExplorerPanel.Align := alLeft;
+      CESplitter.Align := alLeft;
+    end;
     Self.Color := BGCol;
     CodeEditor.Color := EditBGCol;
     CodeExplorer.BackgroundColor := EditBGCol;

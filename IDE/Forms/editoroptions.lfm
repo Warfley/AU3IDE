@@ -3,6 +3,7 @@ object EditorConf: TEditorConf
   Height = 682
   Top = 246
   Width = 747
+  ActiveControl = Button1
   BorderStyle = bsToolWindow
   Caption = 'AU3 Editor Optionen'
   ClientHeight = 682
@@ -10,7 +11,7 @@ object EditorConf: TEditorConf
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
-  Position = poScreenCenter
+  Position = poMainFormCenter
   LCLVersion = '1.6.0.4'
   Visible = False
   object ModalPanel: TPanel
@@ -71,7 +72,7 @@ object EditorConf: TEditorConf
       end
       inherited CodeEditor: TSynEdit
         Height = 250
-        Width = 512
+        Width = 507
         Lines.Strings = (
           '; Kommentar'
           '$Var1 = 3 + 0x5F * 2'
@@ -91,8 +92,6 @@ object EditorConf: TEditorConf
         Height = 250
         ClientHeight = 250
         inherited CodeExplorerHead: TPanel
-          ClientHeight = 30
-          ClientWidth = 231
           inherited CloseCodeExplorerButton: TSpeedButton
             Left = 197
           end
@@ -102,6 +101,10 @@ object EditorConf: TEditorConf
           MultiSelectStyle = [msControlSelect]
           OnCustomDrawItem = nil
         end
+      end
+      inherited CESplitter: TSplitter
+        Left = 507
+        Height = 250
       end
     end
     object ConfigPageControl: TPageControl

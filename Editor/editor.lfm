@@ -86,7 +86,7 @@ object EditorFrame: TEditorFrame
     Left = 0
     Height = 529
     Top = 0
-    Width = 643
+    Width = 638
     Align = alClient
     Font.Height = -22
     Font.Name = 'Courier New'
@@ -648,6 +648,14 @@ object EditorFrame: TEditorFrame
       Caption = 'Label2'
       ParentColor = False
     end
+  end
+  object CESplitter: TSplitter
+    Left = 638
+    Height = 529
+    Top = 0
+    Width = 5
+    Align = alRight
+    ResizeAnchor = akRight
   end
   object Completion: TSynCompletion
     OnExecute = CompletionExecute

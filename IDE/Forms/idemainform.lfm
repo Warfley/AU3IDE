@@ -3,7 +3,7 @@ object MainForm: TMainForm
   Height = 597
   Top = 51
   Width = 1260
-  ActiveControl = EditorManager1.EditorControl
+  ActiveControl = ProjectInspector1.ProjectFileTreeView
   Caption = 'AET'
   ClientHeight = 597
   ClientWidth = 1260
@@ -16,44 +16,14 @@ object MainForm: TMainForm
   OnWindowStateChange = FormWindowStateChange
   LCLVersion = '1.6.0.4'
   Visible = False
-  inline EditorManager1: TEditorManager
-    Left = 347
-    Height = 435
-    Top = 36
-    Width = 913
-    Align = alClient
-    ClientHeight = 435
-    ClientWidth = 913
-    inherited EditorControl: TPageControl
-      Height = 435
-      Width = 913
-    end
-  end
-  inline ProjectInspector1: TProjectInspector
-    Height = 435
-    Top = 36
-    Align = alLeft
-    ClientHeight = 435
-    TabOrder = 1
-    inherited ProjectFileTreeView: TTreeView
-      Height = 199
-      DefaultItemHeight = 32
-    end
-    inherited FileInfoPanel: TPanel
-      Top = 256
-      inherited AddButton: TButton
-        OnClick = nil
-      end
-    end
-  end
-  object ToolBar1: TToolBar
+  object MainToolbar: TToolBar
     Left = 0
     Height = 36
     Top = 0
     Width = 1260
-    Caption = 'ToolBar1'
-    TabOrder = 2
-    OnPaint = ToolBar1Paint
+    Caption = 'MainToolbar'
+    TabOrder = 1
+    OnPaint = MainToolbarPaint
     object ToolbarSplit1: TPairSplitter
       Left = 1
       Height = 32
@@ -983,14 +953,70 @@ object MainForm: TMainForm
       end
     end
   end
-  object OutputBox: TListBox
-    Left = 0
-    Height = 96
-    Top = 471
-    Width = 1260
-    Align = alBottom
-    ItemHeight = 0
-    TabOrder = 3
+  object CenterPanel: TPanel
+    Left = 352
+    Height = 531
+    Top = 36
+    Width = 908
+    Align = alClient
+    Caption = 'CenterPanel'
+    ClientHeight = 531
+    ClientWidth = 908
+    TabOrder = 2
+    object OutputBox: TListBox
+      Left = 1
+      Height = 96
+      Top = 434
+      Width = 906
+      Align = alBottom
+      ItemHeight = 0
+      TabOrder = 0
+    end
+    inline EditorManager1: TEditorManager
+      Left = 1
+      Height = 428
+      Top = 1
+      Width = 906
+      Align = alClient
+      ClientHeight = 428
+      ClientWidth = 906
+      TabOrder = 1
+      inherited EditorControl: TPageControl
+        Height = 428
+        Width = 906
+      end
+    end
+    object OutBoxSplitter: TSplitter
+      Cursor = crVSplit
+      Left = 1
+      Height = 5
+      Top = 429
+      Width = 906
+      Align = alBottom
+      ResizeAnchor = akBottom
+    end
+  end
+  inline ProjectInspector1: TProjectInspector
+    Height = 531
+    Top = 36
+    Align = alLeft
+    ClientHeight = 531
+    inherited ProjectFileTreeView: TTreeView
+      Height = 295
+      DefaultItemHeight = 32
+    end
+    inherited FileInfoPanel: TPanel
+      Top = 352
+      inherited AddButton: TButton
+        OnClick = nil
+      end
+    end
+  end
+  object ProjectExplorerSplitter: TSplitter
+    Left = 347
+    Height = 531
+    Top = 36
+    Width = 5
   end
   object MainFormMenu: TMainMenu
     left = 512
@@ -1076,6 +1102,19 @@ object MainForm: TMainForm
       object FormatMenuItem: TMenuItem
         Caption = 'Code Formatieren'
         ShortCut = 16452
+      end
+      object MenuSplitItem6: TMenuItem
+        Caption = '-'
+      end
+      object NextTabItem: TMenuItem
+        Caption = 'Nächster Editor'
+        ShortCut = 49191
+        OnClick = NextTabItemClick
+      end
+      object PrevTabItem: TMenuItem
+        Caption = 'Vorheriger Editor'
+        ShortCut = 49189
+        OnClick = PrevTabItemClick
       end
     end
     object RunMenu: TMenuItem

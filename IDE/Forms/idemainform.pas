@@ -10,7 +10,7 @@ uses
   Menus, ComCtrls, Buttons, ExtCtrls, PairSplitter, Project, IDEStartupScreen,
   ProjectInspector, EditorManagerFrame, au3Types, FormEditor, Editor,
   au3FileInfo, strutils, CompilerOptions, au3Compiler, EditorOptions, FormEditorOptions,
-  SampeProjectView, fphttpclient, process, AboutWindow;
+  SampeProjectView, fphttpclient, process, AboutWindow, Math;
 
 type
 
@@ -43,7 +43,14 @@ type
     IDEOptionItem: TMenuItem;
     ExtrasMenuItem: TMenuItem;
     CompileMenuItem: TMenuItem;
+    NextTabItem: TMenuItem;
+    CenterPanel: TPanel;
+    PrevTabItem: TMenuItem;
+    MenuSplitItem6: TMenuItem;
     RunMenuItem: TMenuItem;
+    OutBoxSplitter: TSplitter;
+    ProjectExplorerSplitter: TSplitter;
+    Splitter2: TSplitter;
     UpdateMenuItem: TMenuItem;
     InfoMenuItem: TMenuItem;
     SampeButton: TMenuItem;
@@ -84,7 +91,7 @@ type
     NewProjBtn: TSpeedButton;
     RunBtn: TSpeedButton;
     StopBtn: TSpeedButton;
-    ToolBar1: TToolBar;
+    MainToolbar: TToolBar;
     UndoMenuItem: TMenuItem;
     QuitMenuItem: TMenuItem;
     MenuSplitItem2: TMenuItem;
@@ -108,6 +115,8 @@ type
     procedure NewFileItemClick(Sender: TObject);
     procedure NewFormItemClick(Sender: TObject);
     procedure NewProjectItemClick(Sender: TObject);
+    procedure NextTabItemClick(Sender: TObject);
+    procedure PrevTabItemClick(Sender: TObject);
     procedure RunBtnClick(Sender: TObject);
     procedure RunMenuItemClick(Sender: TObject);
     procedure SampeButtonClick(Sender: TObject);
@@ -118,7 +127,7 @@ type
     procedure SelectModeBoxChange(Sender: TObject);
     procedure StopBtnClick(Sender: TObject);
     procedure TextEditorOptionsItemClick(Sender: TObject);
-    procedure ToolBar1Paint(Sender: TObject);
+    procedure MainToolbarPaint(Sender: TObject);
     procedure UpdateMenuItemClick(Sender: TObject);
   private
     FFirstLoad: boolean;
@@ -728,13 +737,13 @@ begin
   ShowEditorConf;
 end;
 
-procedure TMainForm.ToolBar1Paint(Sender: TObject);
+procedure TMainForm.MainToolbarPaint(Sender: TObject);
 begin
-  ToolBar1.Canvas.Pen.Style := psSolid;
-  ToolBar1.Canvas.Pen.Color := $00DEDEDE;
-  ToolBar1.Canvas.Pen.Width := 2;
-  ToolBar1.Canvas.MoveTo(-1, ToolBar1.Height - 1);
-  ToolBar1.Canvas.LineTo(ToolBar1.Width, ToolBar1.Height - 1);
+  MainToolbar.Canvas.Pen.Style := psSolid;
+  MainToolbar.Canvas.Pen.Color := $00DEDEDE;
+  MainToolbar.Canvas.Pen.Width := 2;
+  MainToolbar.Canvas.MoveTo(-1, MainToolbar.Height - 1);
+  MainToolbar.Canvas.LineTo(MainToolbar.Width, MainToolbar.Height - 1);
 end;
 
 procedure TMainForm.UpdateMenuItemClick(Sender: TObject);
@@ -967,11 +976,13 @@ begin
   begin
     (Sender as TMenuItem).Caption := 'Projektinspektor Links';
     ProjectInspector1.Align := alLeft;
+    ProjectExplorerSplitter.Align := alLeft;
   end
   else
   begin
     (Sender as TMenuItem).Caption := 'Projektinspektor Rechts';
     ProjectInspector1.Align := alRight;
+    ProjectExplorerSplitter.Align := alRight;
   end;
   FCurrentState.PILeft := (Sender as TMenuItem).Checked;
 end;
@@ -1035,6 +1046,16 @@ begin
     exit;
   FCurrentProject.Clear;
   Application.QueueAsyncCall(@ShowStartupScreen, 0);
+end;
+
+procedure TMainForm.NextTabItemClick(Sender: TObject);
+begin
+  EditorManager1.EditorIndex:=Min(EditorManager1.EditorIndex+1, EditorManager1.Count-1);
+end;
+
+procedure TMainForm.PrevTabItemClick(Sender: TObject);
+begin
+  EditorManager1.EditorIndex:=Max(EditorManager1.EditorIndex-1, 0);
 end;
 
 procedure TMainForm.RunBtnClick(Sender: TObject);

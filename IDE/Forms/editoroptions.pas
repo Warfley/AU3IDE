@@ -838,9 +838,15 @@ procedure TEditorConf.CESideBoxChange(Sender: TObject);
 begin
   CESideBox.Caption := IfThen(CESideBox.Checked, 'Rechts', 'Links');
   if CESideBox.Checked then
-    EditorFrame1.CodeExplorerPanel.Align := alRight
+  begin
+    EditorFrame1.CodeExplorerPanel.Align := alRight;
+    EditorFrame1.CESplitter.Align := alRight;
+  end
   else
+  begin
     EditorFrame1.CodeExplorerPanel.Align := alLeft;
+    EditorFrame1.CESplitter.Align := alLeft;
+  end;
 end;
 
 procedure TEditorConf.CommentBChange(Sender: TObject);

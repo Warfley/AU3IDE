@@ -256,6 +256,7 @@
         <Filename Value="Forms\projectconfform.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="ProjectSettings"/>
+        <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="ProjectConfForm"/>
       </Unit22>
