@@ -5,7 +5,7 @@ unit aboutautoit;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ExtCtrls, windows;
+  Classes, SysUtils, FileUtil, Forms, Controls, windows, Graphics, Dialogs, ExtCtrls;
 
 type
 
@@ -15,6 +15,7 @@ type
     Timer1: TTimer;
     procedure FormHide(Sender: TObject);
     procedure FormPaint(Sender: TObject);
+    procedure FormResize(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
   private
@@ -102,12 +103,14 @@ end;
 procedure TAboutAutoitForm.FormPaint(Sender: TObject);
 var r: Integer;
 begin
+     if GetAsyncKeyState(VK_ESCAPE) and 1 <> 0 then
+      Close;
   with Canvas do
   begin
     Brush.Style := bsSolid;
     Brush.Color := HSVtoRGB(h, 255, 255);
     pen.Style := psClear;
-    r:=Self.Width div 3;
+    r:=(Self.Height-40) div 4;
     Ellipse(Self.Width div 2 - r, Self.Height -r-40, Self.Width div 2, Self.Height-40);
     Ellipse(Self.Width div 2, Self.Height-r-40, Self.Width div 2 +r, Self.Height-40);
     Rectangle(Self.Width div 2-r div 2, r div 2, Self.Width div 2+r div 2, Self.Height-(r div 2)-40);
@@ -119,8 +122,39 @@ begin
   end;
 end;
 
+procedure TAboutAutoitForm.FormResize(Sender: TObject);
+var r: Integer;
+  b: TBitmap;
+begin
+  b:=TBitmap.Create;
+  try
+  b.Monochrome:=True;
+  b.Width:=Self.Width;
+  b.Height:=Self.Height;
+  with b.Canvas do
+  begin
+    Brush.Style := bsSolid;
+    Brush.Color := clWhite;
+    pen.Style := psClear;
+    r:=(Self.Height-40) div 4;
+    Ellipse(Self.Width div 2 - r, Self.Height -r-40, Self.Width div 2, Self.Height-40);
+    Ellipse(Self.Width div 2, Self.Height-r-40, Self.Width div 2 +r, Self.Height-40);
+    Rectangle(Self.Width div 2-r div 2, r div 2, Self.Width div 2+r div 2, Self.Height-(r div 2)-40);
+    Ellipse(Self.Width div 2-r div 2, 0, Self.Width div 2+r div 2, r);
+    Brush.Style:=bsClear;
+    Font.Color:=clWhite;
+    Font.Height:=40;
+    TextOut(Self.Width div 2- TextWidth('GAAAAAAAYYYYYYY') div 2, Self.Height-40,'GAAAAAAAYYYYYYY');
+  end;
+  SetShape(b);
+  finally
+    b.Free;
+  end;
+end;
+
 procedure TAboutAutoitForm.FormShow(Sender: TObject);
 begin
+  WindowState:=wsMaximized;
   Timer1.Enabled:=True;
 end;
 

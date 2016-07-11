@@ -3,11 +3,13 @@ object AboutAutoitForm: TAboutAutoitForm
   Height = 770
   Top = 0
   Width = 565
+  BorderStyle = bsNone
   Caption = 'Über Autoit'
   ClientHeight = 770
   ClientWidth = 565
   OnHide = FormHide
   OnPaint = FormPaint
+  OnResize = FormResize
   OnShow = FormShow
   Position = poMainFormCenter
   LCLVersion = '1.6.0.4'

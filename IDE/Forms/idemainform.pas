@@ -481,7 +481,7 @@ end;
 
 procedure TMainForm.AboutAutoitItemClick(Sender: TObject);
 begin
-  AboutAutoitForm.Show;
+  AboutAutoitForm.ShowModal;
 end;
 
 procedure TMainForm.EnterFunc(Data: IntPtr);
