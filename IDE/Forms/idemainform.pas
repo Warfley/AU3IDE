@@ -1075,6 +1075,8 @@ end;
 procedure TMainForm.RunMenuItemClick(Sender: TObject);
 begin
   SaveAllItemClick(nil);
+  RunBtn.Enabled:=False;
+  StopBtn.Enabled:=True;
   OutputBox.Clear;
   if SelectModeBox.ItemIndex = 0 then
     FCompiler.Run(FCurrentProject, cax86)

@@ -1052,7 +1052,7 @@ begin
     tmp := GetCurrWord;
     p := Point(CodeEditor.CaretXPix, CodeEditor.CaretYPix + CodeEditor.LineHeight);
     p := CodeEditor.ClientToScreen(p);
-    if (Length(tmp) > 1) and ((tmp[1] in ['$', '#', '@'])) then
+    if (Length(tmp) > 1) and ((tmp[1] in ['$', '#', '@'])) and not (ssCtrl in Shift) and not (ssAlt in Shift) then
       Completion.Execute(GetCurrWord, p);
   end
   else if Key in [VK_LEFT..VK_DOWN] then
