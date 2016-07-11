@@ -54,14 +54,14 @@ object FormEditFrame: TFormEditFrame
       Height = 256
       Top = 307
       Width = 271
-      ActivePage = ControlProps
+      ActivePage = ControlEvents
       Align = alBottom
-      TabIndex = 0
+      TabIndex = 1
       TabOrder = 0
       object ControlProps: TTabSheet
         Caption = 'Eigenschaften'
-        ClientHeight = 436
-        ClientWidth = 526
+        ClientHeight = 218
+        ClientWidth = 263
         object PropEditor: TTIPropertyGrid
           Left = 0
           Height = 218
@@ -80,11 +80,11 @@ object FormEditFrame: TFormEditFrame
       end
       object ControlEvents: TTabSheet
         Caption = 'Ereignisse'
-        ClientHeight = 456
-        ClientWidth = 526
+        ClientHeight = 218
+        ClientWidth = 263
         object EventEditor: TValueListEditor
           Left = 0
-          Height = 228
+          Height = 218
           Top = 0
           Width = 263
           Align = alClient
@@ -194,8 +194,8 @@ object FormEditFrame: TFormEditFrame
     Anchors = [akRight, akBottom]
     BevelOuter = bvNone
     BorderStyle = bsSingle
-    ClientHeight = 45
-    ClientWidth = 80
+    ClientHeight = 41
+    ClientWidth = 76
     TabOrder = 3
     object PositionPicker: TPaintBox
       Left = 0

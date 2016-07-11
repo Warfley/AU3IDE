@@ -10,7 +10,7 @@ uses
   Menus, ComCtrls, Buttons, ExtCtrls, PairSplitter, Project, IDEStartupScreen,
   ProjectInspector, EditorManagerFrame, au3Types, FormEditor, Editor,
   au3FileInfo, strutils, CompilerOptions, au3Compiler, EditorOptions, FormEditorOptions,
-  SampeProjectView, fphttpclient, process, AboutWindow, Math;
+  SampeProjectView, fphttpclient, process, AboutWindow, Math, aboutautoit;
 
 type
 
@@ -43,10 +43,12 @@ type
     IDEOptionItem: TMenuItem;
     ExtrasMenuItem: TMenuItem;
     CompileMenuItem: TMenuItem;
+    AboutAutoitItem: TMenuItem;
     NextTabItem: TMenuItem;
     CenterPanel: TPanel;
     PrevTabItem: TMenuItem;
     MenuSplitItem6: TMenuItem;
+    ProjectInspector1: TProjectInspector;
     RunMenuItem: TMenuItem;
     OutBoxSplitter: TSplitter;
     ProjectExplorerSplitter: TSplitter;
@@ -74,7 +76,6 @@ type
     PairSplitterSide2: TPairSplitterSide;
     RunMenu: TMenuItem;
     Openau3FileDialog: TOpenDialog;
-    ProjectInspector1: TProjectInspector;
     SaveAsItem: TMenuItem;
     Saveau3FileDialog: TSaveDialog;
     SaveFileItem: TMenuItem;
@@ -100,6 +101,7 @@ type
     NewFileItem: TMenuItem;
     NewMenuItem: TMenuItem;
     NewProjectItem: TMenuItem;
+    procedure AboutAutoitItemClick(Sender: TObject);
     procedure CloseAllItemClick(Sender: TObject);
     procedure CloseFileItemClick(Sender: TObject);
     procedure CompileMenuItemClick(Sender: TObject);
@@ -138,6 +140,7 @@ type
     FLastOpend: TStringList;
     FFileData: Tau3FileManager;
     FCurrentState: TIDEState;
+    IncludePath: string;
     { private declarations }
     procedure OpenProject(P: string);
     function ShowFormConf: boolean;
@@ -170,9 +173,6 @@ type
 
 var
   MainForm: TMainForm;
-
-const
-  IncludePath = 'C:\Program Files (x86)\AutoIt3\Include';
 
 implementation
 
@@ -310,6 +310,8 @@ begin
     FCompiler.SaveIntData := CompilerOptionsForm.SaveIntBox.Checked;
     FCompiler.WriteConf(IncludeTrailingPathDelimiter(
       ExtractFilePath(ParamStr(0))) + 'compiler.cfg');
+    IncludePath := IncludeTrailingPathDelimiter(FCompiler.Path) + 'Include';
+    EditorManager1.IncludePath := IncludePath;
     Result := True;
   end;
 end;
@@ -348,6 +350,8 @@ begin
     Close;
     Exit;
   end;
+  IncludePath := IncludeTrailingPathDelimiter(FCompiler.Path) + 'Include';
+  EditorManager1.IncludePath := IncludePath;
   StartupScreen.LastOpend := FLastOpend;
   if FFirstLoad and (Paramcount > 0) and FileExists(ParamStr(1)) and
     (LowerCase(ExtractFileExt(ParamStr(1))) = '.au3proj') then
@@ -473,6 +477,11 @@ begin
     EditorManager1.CloseEditor(EditorManager1.EditorIndex);
     EditorManager1.Invalidate;
   end;
+end;
+
+procedure TMainForm.AboutAutoitItemClick(Sender: TObject);
+begin
+  AboutAutoitForm.Show;
 end;
 
 procedure TMainForm.EnterFunc(Data: IntPtr);
@@ -1050,12 +1059,12 @@ end;
 
 procedure TMainForm.NextTabItemClick(Sender: TObject);
 begin
-  EditorManager1.EditorIndex:=Min(EditorManager1.EditorIndex+1, EditorManager1.Count-1);
+  EditorManager1.EditorIndex := Min(EditorManager1.EditorIndex + 1, EditorManager1.Count - 1);
 end;
 
 procedure TMainForm.PrevTabItemClick(Sender: TObject);
 begin
-  EditorManager1.EditorIndex:=Max(EditorManager1.EditorIndex-1, 0);
+  EditorManager1.EditorIndex := Max(EditorManager1.EditorIndex - 1, 0);
 end;
 
 procedure TMainForm.RunBtnClick(Sender: TObject);

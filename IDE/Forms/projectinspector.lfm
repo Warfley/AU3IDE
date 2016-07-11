@@ -86,14 +86,14 @@ object ProjectInspector: TProjectInspector
       TabOrder = 3
       Visible = False
     end
-    object Button1: TButton
+    object SettingsButton: TButton
       Left = 8
       Height = 33
       Top = 139
       Width = 128
       Anchors = [akLeft, akBottom]
       Caption = 'Einstellungen'
-      OnClick = Button1Click
+      OnClick = SettingsButtonClick
       TabOrder = 4
     end
   end

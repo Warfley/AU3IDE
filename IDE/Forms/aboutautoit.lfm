@@ -1,0 +1,21 @@
+object AboutAutoitForm: TAboutAutoitForm
+  Left = 0
+  Height = 770
+  Top = 0
+  Width = 565
+  Caption = 'Über Autoit'
+  ClientHeight = 770
+  ClientWidth = 565
+  OnHide = FormHide
+  OnPaint = FormPaint
+  OnShow = FormShow
+  Position = poMainFormCenter
+  LCLVersion = '1.6.0.4'
+  Visible = False
+  object Timer1: TTimer
+    Interval = 50
+    OnTimer = Timer1Timer
+    left = 181
+    top = 446
+  end
+end

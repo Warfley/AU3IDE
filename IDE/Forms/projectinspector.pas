@@ -14,7 +14,7 @@ type
 
   TProjectInspector = class(TFrame)
     AddButton: TButton;
-    Button1: TButton;
+    SettingsButton: TButton;
     Openau3FileDialog: TOpenDialog;
     SetMainFormButton: TButton;
     RenameButton: TButton;
@@ -26,7 +26,7 @@ type
     ProjectFileTreeView: TTreeView;
     TreeFilterEdit1: TTreeFilterEdit;
     procedure AddButtonClick(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
+    procedure SettingsButtonClick(Sender: TObject);
     procedure DeleteButtonClick(Sender: TObject);
     procedure FrameResize(Sender: TObject);
     procedure ProjectFileTreeViewClick(Sender: TObject);
@@ -70,7 +70,7 @@ begin
     else
       PathEdit.Visible := True;
     SetMainFormButton.Visible :=
-      ExtractFileExt(ProjectFileTreeView.Selected.Text) = '.afm';
+      (ExtractFileExt(ProjectFileTreeView.Selected.Text) = '.afm') and (FProject.AppType=atGUI);
     SetMainFormButton.Enabled :=
       (IntPtr(ProjectFileTreeView.Selected.Data) >= 0) and not
       (FProject.MainForm = FProject.Files[IntPtr(ProjectFileTreeView.Selected.Data)]);
@@ -128,25 +128,41 @@ begin
   end;
 end;
 
-procedure TProjectInspector.Button1Click(Sender: TObject);
+procedure TProjectInspector.SettingsButtonClick(Sender: TObject);
 var
   co: TCompOptions;
+  i: integer;
+  v: TVersion;
 begin
   ProjectSettings.NameEdit.Text := FProject.Name;
   ProjectSettings.DirEdit.Directory := FProject.ProjectDir;
-  ProjectSettings.GUIBox.Checked := FProject.GUIBased;
+  ProjectSettings.AppTypeBox.ItemIndex := ord(FProject.AppType);
   ProjectSettings.CompileEdit.FileName :=
     CreateAbsolutePath(FProject.CompilerOptions.OutPath, FProject.ProjectDir);
   ProjectSettings.IconEdit.FileName := FProject.CompilerOptions.IconPath;
   ProjectSettings.CompTrackBar.Position := Ord(FProject.CompilerOptions.Compression);
   ProjectSettings.UPXBox.Checked := FProject.CompilerOptions.PackUPX;
   ProjectSettings.ParamBox.Items.Assign(FProject.RunParams);
+  v := FProject.Version;
+  with v do
+  begin
+    ProjectSettings.UseVersion.Checked := UseVersion;
+    ProjectSettings.IncBuildBox.Checked := IncreaseBuilt;
+    ProjectSettings.VersionEdit.Text := IntToStr(Version);
+    ProjectSettings.SubversionEdit.Text := IntToStr(Subversion);
+    ProjectSettings.RevisionEdit.Text := IntToStr(Revision);
+    ProjectSettings.BuiltEdit.Text := IntToStr(Built);
+  end;
+
+  ProjectSettings.VersionData.Clear;
+  for i := 0 to FProject.VersionData.Count - 1 do
+    ProjectSettings.VersionData.Strings.Values[FProject.VersionData.Names[i]]:= FProject.VersionData.ValueFromIndex[i];
   if ProjectSettings.ShowModal = mrOk then
   begin
     FProject.WriteToFile(IncludeTrailingPathDelimiter(
       ProjectSettings.DirEdit.Directory) + ProjectSettings.NameEdit.Text +
       '.au3proj');
-    FProject.GUIBased := ProjectSettings.GUIBox.Checked;
+    FProject.AppType := TAppType(ProjectSettings.AppTypeBox.ItemIndex);
     with co do
     begin
       if CreateRelativePath(ProjectSettings.CompileEdit.FileName,
@@ -158,6 +174,19 @@ begin
       PackUPX := ProjectSettings.UPXBox.Checked;
     end;
     FProject.CompilerOptions := co;
+    with v do
+    begin
+      UseVersion := ProjectSettings.UseVersion.Checked;
+      IncreaseBuilt := ProjectSettings.IncBuildBox.Checked;
+      Version := StrToInt(ProjectSettings.VersionEdit.Text);
+      Subversion := StrToInt(ProjectSettings.SubversionEdit.Text);
+      Revision := StrToInt(ProjectSettings.RevisionEdit.Text);
+      Built := StrToInt(ProjectSettings.BuiltEdit.Text);
+    end;
+    FProject.Version := v;
+  FProject.VersionData.Clear;
+  for i := 0 to ProjectSettings.VersionData.Strings.Count - 1 do
+    FProject.VersionData.Values[ProjectSettings.VersionData.Strings.Names[i]]:= ProjectSettings.VersionData.Strings.ValueFromIndex[i];
     FProject.RunParams.Assign(ProjectSettings.ParamBox.Items);
     FProject.Save;
   end;

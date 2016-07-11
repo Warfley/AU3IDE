@@ -111,7 +111,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="23">
+    <Units Count="24">
       <Unit0>
         <Filename Value="AU3IDE.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -260,6 +260,12 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="ProjectConfForm"/>
       </Unit22>
+      <Unit23>
+        <Filename Value="Forms\aboutautoit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="AboutAutoitForm"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit23>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

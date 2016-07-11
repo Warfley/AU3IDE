@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, Buttons,
-  ExtCtrls, StdCtrls, ComCtrls, EditBtn, Project, strutils, au3Types;
+  ExtCtrls, StdCtrls, ComCtrls, EditBtn, Project, strutils, au3Types, ProjectConfForm;
 
 type
 
@@ -144,6 +144,7 @@ var
   path, preset, mf: string;
   i: integer;
   co: TCompOptions;
+  s: String;
 begin
   if NewProjectView.ItemIndex < 0 then
   begin
@@ -198,8 +199,16 @@ begin
           p.OpendFiles.Add(OpendFileInfo(Trim(Copy(sl[i], pos('=', sl[i]) + 1,
             length(sl[i]) - pos('=', sl[i])))))
         else if AnsiStartsStr('AppType=', sl[i]) then
-          p.GUIBased := Trim(Copy(sl[i], pos('=', sl[i]) + 1,
-            length(sl[i]) - pos('=', sl[i]))) = 'GUI'
+        begin
+          s:=Trim(Copy(sl[i], pos('=', sl[i]) + 1,
+            length(sl[i]) - pos('=', sl[i])));
+          if s='GUI' then
+            p.AppType:=atGUI
+          else if s='NoConsole' then
+            p.AppType:=atNoConsole
+          else
+            p.AppType:=atConsole;
+        end
         else if AnsiStartsStr('MainForm=', sl[i]) then
           p.MainForm:=Trim(Copy(sl[i], pos('=', sl[i]) + 1,
             length(sl[i]) - pos('=', sl[i])));
@@ -223,6 +232,8 @@ begin
     if p.OpendFiles[p.FocusedFile].Name = mf then
       p.OpendFiles[p.FocusedFile] := OpendFileInfo(p.GetMainFileRel);
     FPath := path + p.Name + '.au3proj';
+    for i:=0 to ProjectSettings.VersionData.RowCount-1 do
+      p.VersionData.Add(ProjectSettings.VersionData.Keys[i]+'=');
     p.WriteToFile(FPath);
   finally
     p.Free;

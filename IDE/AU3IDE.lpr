@@ -11,13 +11,12 @@ uses
   IDEStartupScreen, ProjectInspector, au3Types, Editor, FormEditor,
   EditorManagerFrame, au3FileInfo, FormEditComponents, au3Compiler,
   CompilerOptions, EditorOptions, FormEditorOptions, SampeProjectView,
-  AboutWindow, ProjectConfForm
+  AboutWindow, ProjectConfForm, aboutautoit
   { you can add units after this };
 
 {$R *.res}
 
 begin
-  Application.Title:='AU3IDE';
   RequireDerivedFormResource:=True;
   Application.Initialize;
   Application.CreateForm(TMainForm, MainForm);
@@ -28,6 +27,7 @@ begin
   Application.CreateForm(TSampleForm, SampleForm);
   Application.CreateForm(TAboutForm, AboutForm);
   Application.CreateForm(TProjectSettings, ProjectSettings);
+  Application.CreateForm(TAboutAutoitForm, AboutAutoitForm);
   Application.Run;
 end.
 

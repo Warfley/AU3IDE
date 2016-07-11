@@ -78,6 +78,8 @@ type
     FFunctions: TFuncList;
     FRequiredFiles: TStringList;
     FVars: TVarList;
+    FCompVars: TStringList;
+    FMacros: TStringList;
     FStdFunc: TFuncList;
     FFileName: string;
     FKeyWords: TStringList;
@@ -134,7 +136,9 @@ function IncludeContainsFile(Filename: string; i: string): boolean;
 begin
   if isEnd(i, '#include') then
     Delete(i, 1, Pos('<', i));
-  Result := (Pos(i, Filename) = 1) or (Length(Filename) = 0);
+  Filename:=LowerCase(Filename);
+  i:=LowerCase(i);
+  Result := (Pos(i, Filename) = 1) or (Length(i) = 0);
 end;
 
 procedure TEditorFrame.LoadGeneralConf(FileName: string);
@@ -240,6 +244,12 @@ begin
     'Keywords.lst');
   FStdFunc.Clear;
   LoadFuncList;
+  FMacros.Clear;
+  FCompVars.Clear;
+  FMacros.LoadFromFile(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) +
+    'Macros.lst');
+  FCompVars.LoadFromFile(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) +
+    'STDVars.lst');
 end;
 
 procedure TEditorFrame.MoveHorz(i: IntPtr);
@@ -400,6 +410,8 @@ begin
   FKeyWords := TStringList.Create;
   FDefRanges := TObjectList.Create(False);
   FRequiredFiles := TStringList.Create;
+  FCompVars:=TStringList.Create;
+  FMacros:=TStringList.Create;
   ReLoadConf;
   UpdateTimerTimer(nil);
   FIncludeFiles := TStringList.Create;
@@ -598,8 +610,17 @@ begin
             (Pos(LowerCase(Completion.CurrentString), LowerCase(
             (FDefRanges[x] as TDefRange).Vars[i].Name)) = 1) then
             Completion.ItemList.Add((FDefRanges[x] as TDefRange).Vars[i].Name);
+    for i := 0 to FCompVars.Count - 1 do
+      if (Pos(LowerCase(Completion.CurrentString), LowerCase(FCompVars[i])) = 1) then
+        Completion.ItemList.Add(FCompVars[i]);
     if not StringsContain(Completion.ItemList, Completion.CurrentString) then
       Completion.ItemList.Add(Completion.CurrentString);
+  end
+  else if Completion.CurrentString[1] = '@' then
+  begin
+    for i := 0 to FMacros.Count - 1 do
+      if (Pos(LowerCase(Completion.CurrentString), LowerCase(FMacros[i])) = 1) then
+        Completion.ItemList.Add(FMacros[i]);
   end
   else
   begin
@@ -646,7 +667,7 @@ procedure TEditorFrame.CompleteKeyDown(Sender: TObject; var Key: word;
   Shift: TShiftState);
 begin
   if (Key = 8) and (Length(Completion.CurrentString) > 0) and
-    (Completion.CurrentString[1] = '$') then
+    (Completion.CurrentString[1] in ['$', '@']) then
     Completion.Deactivate
   else
   {if (key in [17, 18]) then
@@ -674,16 +695,17 @@ procedure TEditorFrame.CompletionSearchPosition(var APosition: integer);
 var
   i, x: integer;
 begin
+  Completion.ItemList.Clear;
   if isEnd(CodeEditor.Lines[CodeEditor.LogicalCaretXY.y - 1], '#include') then
   begin
-    Completion.ItemList.Clear;
     for i := 0 to FIncludeFiles.Count - 1 do
       if IncludeContainsFile(FIncludeFiles[i], Completion.CurrentString) then
         Completion.ItemList.Add(FIncludeFiles[i]);
-    Exit;
-  end;
-  Completion.ItemList.Clear;
-  if Length(Completion.CurrentString) = 0 then
+    if Completion.ItemList.Count = 0 then
+      Completion.ItemList.Add(Copy(Completion.CurrentString,
+        pos('<', Completion.CurrentString)+1, Length(Completion.CurrentString)));
+  end
+  else if Length(Completion.CurrentString) = 0 then
   begin
     Completion.ItemList.AddStrings(FKeyWords);
     for i := 0 to FStdFunc.Count - 1 do
@@ -707,8 +729,17 @@ begin
             (Pos(LowerCase(Completion.CurrentString), LowerCase(
             (FDefRanges[x] as TDefRange).Vars[i].Name)) = 1) then
             Completion.ItemList.Add((FDefRanges[x] as TDefRange).Vars[i].Name);
+    for i := 0 to FCompVars.Count - 1 do
+      if (Pos(LowerCase(Completion.CurrentString), LowerCase(FCompVars[i])) = 1) then
+        Completion.ItemList.Add(FCompVars[i]);
     if not StringsContain(Completion.ItemList, Completion.CurrentString) then
       Completion.ItemList.Add(Completion.CurrentString);
+  end
+  else if Completion.CurrentString[1] = '@' then
+  begin
+    for i := 0 to FMacros.Count - 1 do
+      if (Pos(LowerCase(Completion.CurrentString), LowerCase(FMacros[i])) = 1) then
+        Completion.ItemList.Add(FMacros[i]);
   end
   else
   begin
@@ -723,6 +754,8 @@ begin
         Completion.ItemList.Add(FFunctions[i].Name);
     Completion.ItemList.Add(Completion.CurrentString);
   end;
+  if Completion.ItemList.Count = 0 then
+    Completion.ItemList.Add(Completion.CurrentString);
   Completion.ItemList.Add('');
   Completion.Position := min(Max(Completion.Position, 0), Completion.ItemList.Count - 1);
 end;
@@ -1019,7 +1052,7 @@ begin
     tmp := GetCurrWord;
     p := Point(CodeEditor.CaretXPix, CodeEditor.CaretYPix + CodeEditor.LineHeight);
     p := CodeEditor.ClientToScreen(p);
-    if (Length(tmp) > 1) and ((tmp[1] = '$') or (tmp[1] = '#')) then
+    if (Length(tmp) > 1) and ((tmp[1] in ['$', '#', '@'])) then
       Completion.Execute(GetCurrWord, p);
   end
   else if Key in [VK_LEFT..VK_DOWN] then
@@ -1145,14 +1178,14 @@ begin
 
   if i < 1 then
     i := 1;
-  if (i < slen) and (ln[i + 1] in ['_', '0'..'9', 'a'..'z', 'A'..'Z', '$']) and
+  if (i < slen) and (ln[i + 1] in ['_', '0'..'9', 'a'..'z', 'A'..'Z', '$', '@', '#']) and
     ((i > 0) or (ln[i] in [#0..#32])) then
     Inc(i);
 
   while (i > 0) and (ln[i] in ['_', '0'..'9', 'a'..'z', 'A'..'Z']) do
     Dec(i);
 
-  if (i > 0) and (ln[i] = '$') then
+  if (i > 0) and (ln[i] in ['$', '@', '#']) then
   begin
     Inc(len);
     s := i;
@@ -1360,7 +1393,15 @@ begin
     CodeEditor.BlockBegin := Point(p.x, CodeEditor.LogicalCaretXY.Y);
     CodeEditor.BlockEnd := Point(p.y, CodeEditor.LogicalCaretXY.Y);
     CodeEditor.LogicalCaretXY := Point(p.y, CodeEditor.LogicalCaretXY.y);
-  end;
+  end
+  else if (Key = VK_SPACE) and (ssCtrl in Shift) then
+    if CodeEditor.TextBetweenPoints[CodeEditor.BlockBegin,
+      CodeEditor.BlockEnd] <> '' then
+    begin
+      p := CodeEditor.BlockBegin;
+      CodeEditor.TextBetweenPoints[CodeEditor.BlockBegin, CodeEditor.BlockEnd] := '';
+      CodeEditor.LogicalCaretXY := p;
+    end;
 end;
 
 
@@ -1563,14 +1604,14 @@ begin
 
   if i < 1 then
     i := 1;
-  if (i < slen) and (ln[i + 1] in ['_', '0'..'9', 'a'..'z', 'A'..'Z', '$', '#']) and
+  if (i < slen) and (ln[i + 1] in ['_', '0'..'9', 'a'..'z', 'A'..'Z', '$', '#', '@']) and
     ((i > 0) or (ln[i] in [#0..#32])) then
     Inc(i);
 
   while (i > 0) and (ln[i] in ['_', '0'..'9', 'a'..'z', 'A'..'Z']) do
     Dec(i);
 
-  if (i > 0) and (ln[i] in ['$', '#']) then
+  if (i > 0) and (ln[i] in ['$', '#', '@']) then
   begin
     Inc(len);
     s := i;
@@ -1622,6 +1663,8 @@ begin
   CodeEditor.Highlighter := nil;
   Highlight.Free;
   FIncludeFiles.Free;
+  FCompVars.Free;
+  FMacros.Free;
   inherited;
 end;
 

@@ -1,30 +1,30 @@
 object ProjectSettings: TProjectSettings
   Left = 0
-  Height = 354
+  Height = 471
   Top = 0
-  Width = 366
+  Width = 536
   ActiveControl = PageControl1
   BorderStyle = bsSingle
   Caption = 'Projekteinstellungen'
-  ClientHeight = 354
-  ClientWidth = 366
+  ClientHeight = 471
+  ClientWidth = 536
   OnShow = FormShow
   Position = poMainFormCenter
   LCLVersion = '1.6.0.4'
   Visible = False
   object PageControl1: TPageControl
     Left = 0
-    Height = 312
+    Height = 429
     Top = 0
-    Width = 366
+    Width = 536
     ActivePage = Allgemein
     Align = alClient
     TabIndex = 0
     TabOrder = 0
     object Allgemein: TTabSheet
       Caption = 'Allgemein'
-      ClientHeight = 274
-      ClientWidth = 358
+      ClientHeight = 391
+      ClientWidth = 528
       object Label1: TLabel
         Left = 0
         Height = 25
@@ -37,14 +37,14 @@ object ProjectSettings: TProjectSettings
         Left = 16
         Height = 33
         Top = 40
-        Width = 192
+        Width = 336
         TabOrder = 0
       end
       object DirEdit: TDirectoryEdit
         Left = 16
         Height = 33
         Top = 112
-        Width = 192
+        Width = 336
         ShowHidden = False
         ButtonWidth = 23
         NumGlyphs = 1
@@ -59,19 +59,35 @@ object ProjectSettings: TProjectSettings
         Caption = 'Verzeichnis'
         ParentColor = False
       end
-      object GUIBox: TCheckBox
-        Left = 0
-        Height = 29
-        Top = 160
-        Width = 160
-        Caption = 'GUI Anwendung'
+      object AppTypeBox: TComboBox
+        Left = 16
+        Height = 31
+        Top = 192
+        Width = 184
+        ItemHeight = 25
+        ItemIndex = 0
+        Items.Strings = (
+          'Console'
+          'NoConsole'
+          'GUI'
+        )
+        Style = csOwnerDrawFixed
         TabOrder = 2
+        Text = 'Console'
+      end
+      object Label10: TLabel
+        Left = 0
+        Height = 25
+        Top = 160
+        Width = 28
+        Caption = 'Typ'
+        ParentColor = False
       end
     end
     object Compiler: TTabSheet
       Caption = 'Compiler'
-      ClientHeight = 274
-      ClientWidth = 358
+      ClientHeight = 468
+      ClientWidth = 528
       object CompTrackBar: TTrackBar
         Left = 16
         Height = 25
@@ -150,13 +166,13 @@ object ProjectSettings: TProjectSettings
     end
     object TabSheet1: TTabSheet
       Caption = 'Start Parameter'
-      ClientHeight = 274
-      ClientWidth = 358
+      ClientHeight = 468
+      ClientWidth = 528
       object ParamBox: TListBox
         Left = 0
-        Height = 240
+        Height = 434
         Top = 0
-        Width = 358
+        Width = 528
         Align = alClient
         ItemHeight = 0
         TabOrder = 0
@@ -164,15 +180,15 @@ object ProjectSettings: TProjectSettings
       object Panel2: TPanel
         Left = 0
         Height = 34
-        Top = 240
-        Width = 358
+        Top = 434
+        Width = 528
         Align = alBottom
         BevelOuter = bvNone
         ClientHeight = 34
-        ClientWidth = 358
+        ClientWidth = 528
         TabOrder = 1
         object AddParamBtn: TButton
-          Left = 283
+          Left = 453
           Height = 34
           Top = 0
           Width = 75
@@ -182,7 +198,7 @@ object ProjectSettings: TProjectSettings
           TabOrder = 0
         end
         object DeleteParamBtn: TButton
-          Left = 208
+          Left = 378
           Height = 34
           Top = 0
           Width = 75
@@ -195,26 +211,157 @@ object ProjectSettings: TProjectSettings
           Left = 0
           Height = 34
           Top = 0
-          Width = 208
+          Width = 378
           Align = alClient
           OnKeyDown = ParamEditKeyDown
           TabOrder = 2
         end
       end
     end
+    object TabSheet2: TTabSheet
+      Caption = 'Version'
+      ClientHeight = 391
+      ClientWidth = 528
+      object UseVersion: TCheckBox
+        Left = 8
+        Height = 29
+        Top = 8
+        Width = 89
+        Caption = 'Version'
+        OnChange = UseVersionChange
+        TabOrder = 0
+      end
+      object VersionEdit: TEdit
+        Left = 8
+        Height = 33
+        Top = 80
+        Width = 56
+        Enabled = False
+        NumbersOnly = True
+        OnChange = VersionEditChange
+        TabOrder = 1
+        Text = '0'
+      end
+      object SubversionEdit: TEdit
+        Left = 112
+        Height = 33
+        Top = 80
+        Width = 56
+        Enabled = False
+        NumbersOnly = True
+        OnChange = VersionEditChange
+        TabOrder = 2
+        Text = '0'
+      end
+      object RevisionEdit: TEdit
+        Left = 224
+        Height = 33
+        Top = 80
+        Width = 56
+        Enabled = False
+        NumbersOnly = True
+        OnChange = VersionEditChange
+        TabOrder = 3
+        Text = '0'
+      end
+      object BuiltEdit: TEdit
+        Left = 328
+        Height = 33
+        Top = 80
+        Width = 56
+        Enabled = False
+        NumbersOnly = True
+        OnChange = VersionEditChange
+        TabOrder = 4
+        Text = '0'
+      end
+      object IncBuildBox: TCheckBox
+        Left = 416
+        Height = 29
+        Top = 84
+        Width = 95
+        Caption = 'Erhöhen'
+        Enabled = False
+        TabOrder = 5
+      end
+      object VersionData: TValueListEditor
+        Left = 0
+        Height = 236
+        Top = 155
+        Width = 528
+        Align = alBottom
+        DefaultColWidth = 150
+        FixedCols = 0
+        Flat = True
+        HeaderHotZones = []
+        HeaderPushZones = []
+        RowCount = 10
+        TabOrder = 6
+        DisplayOptions = []
+        Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goDrawFocusSelected, goColSizing, goEditing, goAlwaysShowEditor, goThumbTracking, goRelaxedRowSelect, goSmoothScroll, goDontScrollPartCell, goCellEllipsis]
+        Strings.Strings = (
+          'Comments='
+          'CompanyName='
+          'FileDescription='
+          'InternalName='
+          'LegalCopyright='
+          'LegalTrademarks='
+          'OriginalFileName='
+          'ProductName='
+          'FileVersion='
+          'ProductVersion='
+        )
+        ColWidths = (
+          150
+          351
+        )
+      end
+      object Label6: TLabel
+        Left = 8
+        Height = 25
+        Top = 48
+        Width = 58
+        Caption = 'Version'
+        ParentColor = False
+      end
+      object Label7: TLabel
+        Left = 112
+        Height = 25
+        Top = 48
+        Width = 100
+        Caption = 'Unterversion'
+        ParentColor = False
+      end
+      object Label8: TLabel
+        Left = 224
+        Height = 25
+        Top = 48
+        Width = 65
+        Caption = 'Revision'
+        ParentColor = False
+      end
+      object Label9: TLabel
+        Left = 328
+        Height = 25
+        Top = 48
+        Width = 81
+        Caption = 'Kompiliert'
+        ParentColor = False
+      end
+    end
   end
   object Panel1: TPanel
     Left = 0
     Height = 42
-    Top = 312
-    Width = 366
+    Top = 429
+    Width = 536
     Align = alBottom
     BevelOuter = bvNone
     ClientHeight = 42
-    ClientWidth = 366
+    ClientWidth = 536
     TabOrder = 1
     object CancelButton: TButton
-      Left = 152
+      Left = 322
       Height = 42
       Top = 0
       Width = 107
@@ -224,7 +371,7 @@ object ProjectSettings: TProjectSettings
       TabOrder = 0
     end
     object SaveButton: TButton
-      Left = 259
+      Left = 429
       Height = 42
       Top = 0
       Width = 107

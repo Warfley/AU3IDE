@@ -93,6 +93,8 @@ begin
 end;
 
 procedure Tau3Compiler.Compile(P: Tau3Project; Arch: TCompileArch);
+var v: TVersion;
+  i: Integer;
 begin
   Stop;
   FArch := Arch;
@@ -123,7 +125,7 @@ begin
   FCProcess.Parameters.Add(IntToStr(Ord(FCurrentProject.CompilerOptions.Compression)));
   if FCurrentProject.CompilerOptions.PackUPX then
     FCProcess.Parameters.Add('/pack');
-  if FCurrentProject.GUIBased then
+  if FCurrentProject.AppType<>atConsole then
     FCProcess.Parameters.Add('/gui')
   else
     FCProcess.Parameters.Add('/console');
@@ -131,6 +133,22 @@ begin
     FCProcess.Parameters.Add('/x86')
   else
     FCProcess.Parameters.Add('/x64');
+
+  if FCurrentProject.Version.IncreaseBuilt and FCurrentProject.Version.UseVersion then
+  begin
+    v:=FCurrentProject.Version;
+    v.Built:=v.Built+1;
+    FCurrentProject.Version:=v;
+    FCurrentProject.VersionData.Values['FileVersion']:=
+      Format('%d.%d.%d.%d', [v.Version, v.Subversion, v.Revision, v.Built]);
+  end;
+
+  for i:=0 to FCurrentProject.VersionData.Count-1 do
+    if FCurrentProject.VersionData.ValueFromIndex[i]<>'' then
+    begin
+      FCProcess.Parameters.Add('/'+LowerCase(FCurrentProject.VersionData.Names[i]));
+      FCProcess.Parameters.Add(Format('"%s"', [FCurrentProject.VersionData.ValueFromIndex[i]]));
+    end;
 
   ForceDirectory(ExtractFilePath(CreateAbsoluteSearchPath(
     FCurrentProject.CompilerOptions.OutPath, FCurrentProject.ProjectDir)));
