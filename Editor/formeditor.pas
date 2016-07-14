@@ -68,6 +68,7 @@ type
     FConf: TFormEditorConfig;
     Moved: boolean;
     FLastClickTime: cardinal;
+    FLastClickRow: Integer;
     FDrawLines: boolean;
     FMousePoint: TPoint;
     FPanelMousePoint: TPoint;
@@ -287,7 +288,7 @@ var
   c: cardinal;
 begin
   c := GetTickCount;
-  if (c - FLastClickTime < 700) and (EventEditor.ScreenToClient(Mouse.CursorPos).x <
+  if (FLastClickRow=EventEditor.Row) and (c - FLastClickTime < 700) and (EventEditor.ScreenToClient(Mouse.CursorPos).x <
     EventEditor.Width - 20) then
   begin
     if EventEditor.Rows[EventEditor.Row][1] = '' then
@@ -295,6 +296,7 @@ begin
     EventEditorPickListSelect(EventEditor);
   end;
   FLastClickTime := c;
+  FLastClickRow:=EventEditor.Row;
 end;
 
 function TFormEditFrame.CreateLabel(P: TWinControl): Tau3Label;
@@ -643,6 +645,7 @@ begin
   begin
     l.Add(VarInfo('$' + FormControlView.Items[i].Text, 0, i, FFileName));
   end;
+  l.Add(VarInfo('$PerformClose', 0, 0, FileName));
 end;
 
 procedure TFormEditFrame.FormPanelPaint(Sender: TObject);
@@ -928,9 +931,10 @@ begin
       v := v + IntToStr(i);
     end;
     EventEditor.Values[s] := v;
-  end;
+
   if Assigned(FEnterFunc) then
     FEnterFunc(ChangeFileExt(FFileName, '.au3'), v, '', True);
+  end;
 end;
 
 procedure TFormEditFrame.FormControlViewEdited(Sender: TObject;
@@ -1078,7 +1082,6 @@ begin
     begin
       c := TObject(FormControlView.Items[i].Data) as Iau3Component;
       sl.Add(c.Getau3String(FFormular.Name));
-      c.AddEvents(sl);
     end;
     if p <> '' then
       sl.SaveToFile(p);

@@ -8,17 +8,19 @@ object FormEditFrame: TFormEditFrame
   Color = clWindow
   ParentColor = False
   TabOrder = 0
+  DesignLeft = 482
+  DesignTop = 128
   object EditorScrollBox: TScrollBox
     Left = 0
     Height = 563
     Top = 0
     Width = 625
-    HorzScrollBar.Increment = 6
-    HorzScrollBar.Page = 68
+    HorzScrollBar.Increment = 5
+    HorzScrollBar.Page = 50
     HorzScrollBar.Smooth = True
     HorzScrollBar.Tracking = True
-    VertScrollBar.Increment = 3
-    VertScrollBar.Page = 33
+    VertScrollBar.Increment = 2
+    VertScrollBar.Page = 23
     VertScrollBar.Smooth = True
     VertScrollBar.Tracking = True
     Align = alClient
@@ -30,9 +32,9 @@ object FormEditFrame: TFormEditFrame
     OnPaint = EditorScrollBoxPaint
     object FormCaptionLabel: TLabel
       Left = 16
-      Height = 25
+      Height = 15
       Top = 8
-      Width = 52
+      Width = 34
       Caption = 'Form1'
       ParentColor = False
       ParentFont = False
@@ -60,11 +62,11 @@ object FormEditFrame: TFormEditFrame
       TabOrder = 0
       object ControlProps: TTabSheet
         Caption = 'Eigenschaften'
-        ClientHeight = 218
+        ClientHeight = 228
         ClientWidth = 263
         object PropEditor: TTIPropertyGrid
           Left = 0
-          Height = 218
+          Height = 228
           Top = 0
           Width = 263
           Align = alClient
@@ -80,11 +82,11 @@ object FormEditFrame: TFormEditFrame
       end
       object ControlEvents: TTabSheet
         Caption = 'Ereignisse'
-        ClientHeight = 218
+        ClientHeight = 228
         ClientWidth = 263
         object EventEditor: TValueListEditor
           Left = 0
-          Height = 218
+          Height = 228
           Top = 0
           Width = 263
           Align = alClient
@@ -113,11 +115,11 @@ object FormEditFrame: TFormEditFrame
     end
     object FormControlView: TTreeView
       Left = 0
-      Height = 274
-      Top = 33
+      Height = 284
+      Top = 23
       Width = 271
       Align = alClient
-      DefaultItemHeight = 28
+      DefaultItemHeight = 24
       Images = ImageList1
       MultiSelect = True
       MultiSelectStyle = [msControlSelect, msShiftSelect]
@@ -129,7 +131,7 @@ object FormEditFrame: TFormEditFrame
     end
     object TreeFilterEdit1: TTreeFilterEdit
       Left = 0
-      Height = 33
+      Height = 23
       Top = 0
       Width = 271
       ButtonWidth = 23

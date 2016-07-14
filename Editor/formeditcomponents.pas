@@ -10,6 +10,23 @@ uses
   LCLIntf;
 
 type
+  TAU3Cursor =
+    (craHAND,
+    craAPPSTARTING,
+    craARROW,
+    cracraOSS,
+    craHELP,
+    craIBEAM,
+    craICON,
+    craNO,
+    craSIZE,
+    craSIZEALL,
+    craSIZENESW,
+    craSIZENS,
+    craSIZENWSE,
+    craSIZEWE,
+    craUPARROW,
+    craWAIT);
   TWindowStyle = (
     WS_MAXIMIZEBOX,
     WS_MINIMIZEBOX,
@@ -123,7 +140,7 @@ type
     function GetEvents: TStringList;
     function GetOnChangeProp: TPropertyChangeEvent;
     procedure SetOnChangeProp(a: TPropertyChangeEvent);
-    procedure AddEvents(sl: TStringList);
+
 
     property ComponentProp[prop: string]: string read GetProp write SetProp;
     property isProperty[prop: string]: boolean read CheckProperty;
@@ -135,11 +152,18 @@ type
 
   Tau3Form = class(TCustomPanel, Iau3Component)
   private
+    FIsMainForm: boolean;
     FStyle: cardinal;
+    FStyleEx: cardinal;
     FEvents: TStringList;
     FLeft, FTop: integer;
     FOnChangeProp: TPropertyChangeEvent;
     FCaption: string;
+    FEnabled: boolean;
+    FVisible: boolean;
+    FIcon: TFilename;
+    FIconID: integer;
+    FMyCursor: TAU3Cursor;
     FOnChangeCaption: TNotifyEvent;
     function GetEditorTop: integer;
     function GetEditorLeft: integer;
@@ -151,6 +175,20 @@ type
     procedure SetHeight(Val: integer);
     procedure SetText(val: string);
     procedure SetStyle(val: TWindowStyles);
+    procedure SetStyleEX(val: TWindowExStyles);
+
+    procedure SetFormEnabled(Value: boolean);
+    procedure SetFormCursor(Value: TAU3Cursor);
+    procedure SetColor(Value: TColor); override;
+    procedure SetFont(f: TFont);
+    procedure SetFormVisible(Value: boolean);
+    procedure SetIcon(s: string);
+    procedure SetIconID(i: integer);
+    procedure SetIsMainForm(b: boolean);
+
+    function GetFont: TFont;
+    function GetColor: TColor;
+
     function GetStyle: TWindowStyles;
     function GetLeft: integer;
     function GetTop: integer;
@@ -172,11 +210,12 @@ type
     procedure CopyTo(c: TControl);
     function Getau3String(FormName: string): string;
     procedure FillEvents(g: TValueListEditor);
-    procedure AddEvents(sl: TStringList);
+
     property Event[s: string]: string read GetEvent write SetEvent;
     property Events: TStringList read FEvents;
     property ComponentProp[prop: string]: string read GetProp write SetProp;
     property isProperty[prop: string]: boolean read CheckProperty;
+    property isMainForm: boolean read FIsMainForm write SetIsMainForm;
   published
     property EditorTop: integer read GetEditorTop;
     property EditorLeft: integer read GetEditorLeft;
@@ -192,6 +231,14 @@ type
     property Text: string read FCaption write SetText;
     property Caption: string read FCaption write SetText;
     property OnChangeCaption: TNotifyEvent read FOnChangeCaption write FOnChangeCaption;
+    property Enabled: boolean read FEnabled write SetFormEnabled;
+    property Color: TColor read GetColor write SetColor;
+    property Font: TFont read GetFont write SetFont;
+    property CursorIcon: TAU3Cursor read FMyCursor write SetFormCursor;
+    property Visible: boolean read FVisible write SetFormVisible;
+    property Icon: string read FIcon write SetIcon;
+    property IconID: integer read FIconID write SetIconID;
+
     property OnClick;
     property OnEnter;
     property OnExit;
@@ -246,7 +293,7 @@ type
     procedure CopyTo(c: TControl);
     function Getau3String(FormName: string): string;
     procedure FillEvents(g: TValueListEditor);
-    procedure AddEvents(sl: TStringList);
+
     property Event[s: string]: string read GetEvent write SetEvent;
     property Events: TStringList read FEvents;
     property ComponentProp[prop: string]: string read GetProp write SetProp;
@@ -368,7 +415,7 @@ type
     procedure CopyTo(c: TControl);
     function Getau3String(FormName: string): string;
     procedure FillEvents(g: TValueListEditor);
-    procedure AddEvents(sl: TStringList);
+
     property Event[s: string]: string read GetEvent write SetEvent;
     property Events: TStringList read FEvents;
     property ComponentProp[prop: string]: string read GetProp write SetProp;
@@ -476,7 +523,7 @@ type
     procedure CopyTo(c: TControl);
     function Getau3String(FormName: string): string;
     procedure FillEvents(g: TValueListEditor);
-    procedure AddEvents(sl: TStringList);
+
     property Event[s: string]: string read GetEvent write SetEvent;
     property Events: TStringList read FEvents;
     property ComponentProp[prop: string]: string read GetProp write SetProp;
@@ -552,8 +599,8 @@ type
 
   Tau3Label = class(TCustomControl, Iau3Component)
   private
-    FStyle: Cardinal;
-    FStyleEX: Cardinal;
+    FStyle: cardinal;
+    FStyleEX: cardinal;
     FEvents: TStringList;
     FOnChangeProp: TPropertyChangeEvent;
     FCaption: string;
@@ -589,7 +636,7 @@ type
     procedure CopyTo(c: TControl);
     function Getau3String(FormName: string): string;
     procedure FillEvents(g: TValueListEditor);
-    procedure AddEvents(sl: TStringList);
+
     property Event[s: string]: string read GetEvent write SetEvent;
     property Events: TStringList read FEvents;
     property ComponentProp[prop: string]: string read GetProp write SetProp;
@@ -624,7 +671,49 @@ type
     property OnResize;
   end;
 
+const
+  GUI_EVENT_NONE = 0;
+  GUI_EVENT_CLOSE = -3;
+  GUI_EVENT_MINIMIZE = -4;
+  GUI_EVENT_RESTORE = -5;
+  GUI_EVENT_MAXIMIZE = -6;
+  GUI_EVENT_PRIMARYDOWN = -7;
+  GUI_EVENT_PRIMARYUP = -8;
+  GUI_EVENT_SECONDARYDOWN = -9;
+  GUI_EVENT_SECONDARYUP = -10;
+  GUI_EVENT_MOUSEMOVE = -11;
+  GUI_EVENT_RESIZED = -12;
+  GUI_EVENT_DROPPED = -13;
+
 implementation
+
+function GetFontString(f: TFont): string;
+function GetWeight: Integer;
+begin
+  if f.Bold then
+    Result:=700
+  else Result:=400;
+end;
+
+function GetAttr: Integer;
+begin
+  Result:=0;
+  if f.Italic then
+  Result:=Result or 2;
+  if f.Underline then
+  Result:=Result or 4;
+  if f.StrikeThrough then
+  Result:=Result or 8;
+end;
+
+begin
+  Result := Format('%d,%d,%d,"%s"', [f.Size, GetWeight, GetAttr, f.Name]);
+end;
+
+procedure SetFontString(f: TFont; s: string);
+begin
+
+end;
 
 function isNumeric(s: string): boolean;
 var
@@ -685,7 +774,10 @@ begin
   prop := LowerCase(prop);
   Result := (prop = 'name') or (prop = 'text') or (prop = 'x') or
     (prop = 'y') or (prop = 'width') or (prop = 'height') or
-    (prop = 'style') or (Pos('ws_', prop) = 1);
+    (prop = 'style') or (Pos('ws_', prop) = 1) or (Pos('rz', prop) = 1) or
+    (prop = 'enabled') or (prop = 'color') or (prop = 'cursoricon') or
+    (prop = 'font') or (prop = 'icon') or (prop = 'resizing') or
+    (prop = 'visible') or (prop = 'iconid') or (prop = 'styleex');
 end;
 
 function Tau3Form.GetEvents: TStringList;
@@ -751,11 +843,84 @@ begin
   Result := inherited Height;
 end;
 
+procedure Tau3Form.SetFormEnabled(Value: boolean);
+begin
+  FEnabled := Value;
+  if Assigned(FOnChangeProp) then
+    FOnChangeProp(Self, 'Enabled', BoolToStr(Value, 'True', 'False'));
+end;
+
+procedure Tau3Form.SetFormCursor(Value: TAU3Cursor);
+begin
+  FMyCursor := Value;
+  if Assigned(FOnChangeProp) then
+    FOnChangeProp(Self, 'Cursor', IntToStr(Ord(Value)));
+end;
+
+procedure Tau3Form.SetIcon(s: string);
+begin
+  FIcon := s;
+  if Assigned(FOnChangeProp) then
+    FOnChangeProp(Self, 'Icon', s);
+end;
+
+procedure Tau3Form.SetIconID(i: integer);
+begin
+  FIconID := i;
+  if Assigned(FOnChangeProp) then
+    FOnChangeProp(Self, 'IconID', IntToStr(i));
+end;
+
+procedure Tau3Form.SetIsMainForm(b: boolean);
+begin
+  FIsMainForm := b;
+  if Assigned(FOnChangeProp) then
+    FOnChangeProp(Self, '', '');
+end;
+
+procedure Tau3Form.SetColor(Value: TColor);
+begin
+  inherited;
+  if Assigned(FOnChangeProp) then
+    FOnChangeProp(Self, 'Color', IntToStr(Ord(Value)));
+end;
+
+procedure Tau3Form.SetFont(f: TFont);
+begin
+  inherited Font := f;
+  if Assigned(FOnChangeProp) then
+    FOnChangeProp(Self, 'Font', GetFontString(f));
+end;
+
+procedure Tau3Form.SetFormVisible(Value: boolean);
+begin
+  FVisible := Value;
+  if Assigned(FOnChangeProp) then
+    FOnChangeProp(Self, 'Visible', BoolToStr(Value, 'True', 'False'));
+end;
+
+function Tau3Form.GetFont: TFont;
+begin
+  Result := inherited Font;
+end;
+
+function Tau3Form.GetColor: TColor;
+begin
+  Result := inherited Color;
+end;
+
 procedure Tau3Form.SetStyle(val: TWindowStyles);
 begin
   FStyle := DWord(val) shl 16;
   if Assigned(FOnChangeProp) then
     FOnChangeProp(Self, 'Style', IntToStr(FStyle));
+end;
+
+procedure Tau3Form.SetStyleEX(val: TWindowExStyles);
+begin
+  FStyleEX := cardinal(val);
+  if Assigned(FOnChangeProp) then
+    FOnChangeProp(Self, 'StyleEx', IntToStr(cardinal(Val)));
 end;
 
 function Tau3Form.GetStyle: TWindowStyles;
@@ -789,7 +954,23 @@ begin
   else if p = 'height' then
     Result := IntToStr(Height)
   else if p = 'style' then
-    Result := IntToStr(FStyle);
+    Result := IntToStr(FStyle)
+  else if p = 'styleex' then
+    Result := IntToStr(FStyleEx)
+  else if p = 'color' then
+    Result := IntToStr(Color)
+  else if p = 'cursor' then
+    Result := IntToStr(Ord(FMyCursor))
+  else if p = 'enabled' then
+    Result := BoolToStr(FEnabled, 'True', 'False')
+  else if p = 'icon' then
+    Result := IntToStr(Height)
+  else if p = 'iconid' then
+    Result := IntToStr(Height)
+  else if p = 'font' then
+    Result := GetFontString(Font)
+  else if p = 'visible' then
+    Result := BoolToStr(FVisible, 'True', 'False');
 end;
 
 procedure Tau3Form.SetProp(p, val: string);
@@ -808,7 +989,23 @@ begin
   else if (p = 'height') and isNumeric(val) then
     Height := StrToInt(val)
   else if (p = 'style') and isNumeric(val) then
-    FStyle := StrToInt(val);
+    FStyle := StrToInt(val)
+  else if (p = 'styleex') and isNumeric(val) then
+    FStyleEx := StrToInt(val)
+  else if (p = 'color') and isNumeric(val) then
+    inherited Color := StrToInt(val)
+  else if (p = 'cursor') and isNumeric(val) then
+    FMyCursor := TAU3Cursor(StrToInt(val))
+  else if (p = 'enabled') then
+    FEnabled := val = 'True'
+  else if (p = 'icon') then
+    FIcon := val
+  else if (p = 'iconid') and isNumeric(val) then
+    FIconID := StrToInt(val)
+  else if (p = 'font') then
+    SetFontString(Font, val)
+  else if (p = 'visible') then
+    FVisible := val = 'True';
 end;
 
 function Tau3Form.GetEvent(e: string): string;
@@ -829,8 +1026,25 @@ begin
   Width := 386;
   inherited Name := 'Form1';
   FCaption := 'Form1';
+  inherited Color := clBtnFace;
   inherited Caption := '';
-  FEvents.Values['onClick'] := '';
+  FEvents.Values['onClose'] := '';
+  FEvents.Values['onMinimize'] := '';
+  FEvents.Values['onRestore'] := '';
+  FEvents.Values['onMaximize'] := '';
+  FEvents.Values['onMouseMove'] := '';
+  FEvents.Values['onLMouseDown'] := '';
+  FEvents.Values['onLMouseUp'] := '';
+  FEvents.Values['onRMouseDown'] := '';
+  FEvents.Values['onRMouseUp'] := '';
+  FEvents.Values['onResize'] := '';
+  FEvents.Values['onDrop'] := '';
+  FVisible := True;
+  FEnabled := True;
+  FMyCursor := craARROW;
+  FStyle:=$94CA0000;
+  FStyleEx:=$100;
+  FIconID := -1;
 end;
 
 destructor Tau3Form.Destroy;
@@ -857,9 +1071,75 @@ begin
 end;
 
 function Tau3Form.Getau3String(FormName: string): string;
+var
+  sl: TStringList;
 begin
-  Result := Format('$%s = CreateWindow("%s", %d, %d, %d, %d, %d)',
-    [Name, FCaption, FLeft, FTop, Width + 16, Height + 32, FStyle]);
+  sl := TStringList.Create;
+  try
+    sl.Add('Opt("GUIOnEventMode", 1)');
+    sl.Add(Format('$%s = GUICreate("%s", %d, %d, %d, %d, %d, %d)',
+      [Name, FCaption, Width + 16, Height + 32, FLeft, FTop, FStyle, FStyleEx]));
+    if FileExists(FIcon) then
+      sl.Add(Format('GUISetIcon("%s", %d, $%s)', [FIcon, FIconID, Name]));
+    sl.Add(Format('GUISetCursor(%d, 0, $%s)', [Ord(FMyCursor), Name]));
+    sl.Add(Format('GUISetFont(%s)', [GetFontString(Font)]));
+    sl.Add(Format('GUISetBkColor(0x%s, $%s)',
+      [IntToHex(ColorToRGB(Color) and $00FFFFFF, 6), Name]));
+    if not FEnabled then
+      sl.Add('GUISetState(@SW_DISABLE)')
+    else if not Visible then
+      sl.Add('GUISetState(@SW_HIDE)')
+    else
+      sl.Add('GUISetState(@SW_SHOW)');
+    if FIsMainForm then
+    begin
+      sl.Add(Format('GUISetOnEvent(%d, "%sClose_Exit", $%s)',
+        [GUI_EVENT_CLOSE, Name, Name]));
+      sl.Add('$PerformClose=True');
+      sl.Add(Format('Func %sClose_Exit()', [Name]));
+      if FEvents.Values['onClose'] <> '' then
+        sl.Add('  ' + FEvents.Values['onClose'] + '()');
+      sl.Add('  If ($PerformClose = True) Then Exit');
+      sl.Add('EndFunc');
+    end
+    else if FEvents.Values['onClose'] <> '' then
+      sl.Add(Format('GUISetOnEvent(%d, "%s", $%s)',
+        [GUI_EVENT_CLOSE, FEvents.Values['onClose'], Name]));
+
+    if (FEvents.Values['onMinimize'] <> '') then
+      sl.Add(Format('GUISetOnEvent(%d, "%s", $%s)',
+        [GUI_EVENT_MINIMIZE, FEvents.Values['onMinimize'], Name]));
+     if (FEvents.Values['onRestore'] <> '') then
+      sl.Add(Format('GUISetOnEvent(%d, "%s", $%s)',
+        [GUI_EVENT_MINIMIZE, FEvents.Values['onRestore'], Name]));
+     if (FEvents.Values['onMaximize'] <> '') then
+      sl.Add(Format('GUISetOnEvent(%d, "%s", $%s)',
+        [GUI_EVENT_MINIMIZE, FEvents.Values['onMaximize'], Name]));
+     if (FEvents.Values['onMouseMove'] <> '') then
+      sl.Add(Format('GUISetOnEvent(%d, "%s", $%s)',
+        [GUI_EVENT_MINIMIZE, FEvents.Values['onMouseMove'], Name]));
+     if (FEvents.Values['onLMouseDown'] <> '') then
+      sl.Add(Format('GUISetOnEvent(%d, "%s", $%s)',
+        [GUI_EVENT_MINIMIZE, FEvents.Values['onLMouseDown'], Name]));
+     if (FEvents.Values['onLMouseUp'] <> '') then
+      sl.Add(Format('GUISetOnEvent(%d, "%s", $%s)',
+        [GUI_EVENT_MINIMIZE, FEvents.Values['onLMouseUp'], Name]));
+     if (FEvents.Values['onRMouseDown'] <> '') then
+      sl.Add(Format('GUISetOnEvent(%d, "%s", $%s)',
+        [GUI_EVENT_MINIMIZE, FEvents.Values['onRMouseDown'], Name]));
+     if (FEvents.Values['onRMouseUp'] <> '') then
+      sl.Add(Format('GUISetOnEvent(%d, "%s", $%s)',
+        [GUI_EVENT_MINIMIZE, FEvents.Values['onRMouseUp'], Name]));
+     if (FEvents.Values['onResize'] <> '') then
+      sl.Add(Format('GUISetOnEvent(%d, "%s", $%s)',
+        [GUI_EVENT_MINIMIZE, FEvents.Values['onResize'], Name]));
+     if (FEvents.Values['onDrop'] <> '') then
+      sl.Add(Format('GUISetOnEvent(%d, "%s", $%s)',
+        [GUI_EVENT_MINIMIZE, FEvents.Values['onDrop'], Name]));;
+  Result := sl.Text;
+  finally
+    sl.Free;
+  end;
 end;
 
 procedure Tau3Form.SetText(val: string);
@@ -882,16 +1162,6 @@ begin
     g.Values[FEvents.Names[i]] := FEvents.ValueFromIndex[i];
     g.ItemProps[FEvents.Names[i]].EditStyle := esPickList;
   end;
-end;
-
-procedure Tau3Form.AddEvents(sl: TStringList);
-var
-  i: integer;
-begin
-  for i := 0 to FEvents.Count - 1 do
-    if FEvents.ValueFromIndex[i] <> '' then
-      sl.Add(Format('SetOnEvent($%s, "%s","%s")',
-        [Name, FEvents.Names[i], FEvents.ValueFromIndex[i]]));
 end;
 
 { Edit }
@@ -1128,16 +1398,6 @@ begin
     g.Values[FEvents.Names[i]] := FEvents.ValueFromIndex[i];
     g.ItemProps[FEvents.Names[i]].EditStyle := esPickList;
   end;
-end;
-
-procedure Tau3Edit.AddEvents(sl: TStringList);
-var
-  i: integer;
-begin
-  for i := 0 to FEvents.Count - 1 do
-    if FEvents.ValueFromIndex[i] <> '' then
-      sl.Add(Format('SetOnEvent($%s, "%s","%s")',
-        [Name, FEvents.Names[i], FEvents.ValueFromIndex[i]]));
 end;
 
 { Button }
@@ -1387,16 +1647,6 @@ begin
   end;
 end;
 
-procedure Tau3Button.AddEvents(sl: TStringList);
-var
-  i: integer;
-begin
-  for i := 0 to FEvents.Count - 1 do
-    if FEvents.ValueFromIndex[i] <> '' then
-      sl.Add(Format('SetOnEvent($%s, "%s","%s")',
-        [Name, FEvents.Names[i], FEvents.ValueFromIndex[i]]));
-end;
-
 { Checkbox }
 
 function Tau3CheckBox.CheckProperty(prop: string): boolean;
@@ -1636,16 +1886,6 @@ begin
     g.Values[FEvents.Names[i]] := FEvents.ValueFromIndex[i];
     g.ItemProps[FEvents.Names[i]].EditStyle := esPickList;
   end;
-end;
-
-procedure Tau3Checkbox.AddEvents(sl: TStringList);
-var
-  i: integer;
-begin
-  for i := 0 to FEvents.Count - 1 do
-    if FEvents.ValueFromIndex[i] <> '' then
-      sl.Add(Format('SetOnEvent($%s, "%s","%s")',
-        [Name, FEvents.Names[i], FEvents.ValueFromIndex[i]]));
 end;
 
 { Label }
@@ -1899,16 +2139,6 @@ begin
     g.Values[FEvents.Names[i]] := FEvents.ValueFromIndex[i];
     g.ItemProps[FEvents.Names[i]].EditStyle := esPickList;
   end;
-end;
-
-procedure Tau3Label.AddEvents(sl: TStringList);
-var
-  i: integer;
-begin
-  for i := 0 to FEvents.Count - 1 do
-    if FEvents.ValueFromIndex[i] <> '' then
-      sl.Add(Format('SetOnEvent($%s, "%s","%s")',
-        [Name, FEvents.Names[i], FEvents.ValueFromIndex[i]]));
 end;
 
 end.

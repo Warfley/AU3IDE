@@ -180,6 +180,7 @@ end;
 
 procedure Tau3Compiler.ProcTerm(Sender: TObject);
 begin
+  ReadData(nil);
   if not FIsCompiling and FSaveIntData then
     FOutput.SaveToFile(IncludeTrailingPathDelimiter(
       FCurrentProject.ProjectDir) + 'Run.log');

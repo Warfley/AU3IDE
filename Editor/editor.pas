@@ -97,6 +97,7 @@ type
     function GetAtPoint(p: TPoint): string;
     procedure ParserHasFinished(Sender: TObject);
     procedure LoadGeneralConf(FileName: string);
+    procedure TTClick(Sender: TObject);
     { private declarations }
   public
     procedure ReLoadConf;
@@ -136,8 +137,8 @@ function IncludeContainsFile(Filename: string; i: string): boolean;
 begin
   if isEnd(i, '#include') then
     Delete(i, 1, Pos('<', i));
-  Filename:=LowerCase(Filename);
-  i:=LowerCase(i);
+  Filename := LowerCase(Filename);
+  i := LowerCase(i);
   Result := (Pos(i, Filename) = 1) or (Length(i) = 0);
 end;
 
@@ -277,6 +278,16 @@ begin
   CodeEditor.LogicalCaretXY := p;
 end;
 
+procedure TEditorFrame.TTClick(Sender: TObject);
+begin
+  CodeEditor.LogicalCaretXY :=
+    CodeEditor.PixelsToLogicalPos(CodeEditor.ScreenToClient(Mouse.CursorPos));
+  CheckSelTimerTimer(CheckSelTimer);
+  CodeEditorMouseUp(CodeEditor, mbLeft, [ssLeft],
+    CodeEditor.ScreenToClient(Mouse.CursorPos).x,
+    CodeEditor.ScreenToClient(Mouse.CursorPos).y);
+end;
+
 function TEditorFrame.GetTemplatePos(UseCursor: boolean): TPoint;
 var
   i, l, p: integer;
@@ -410,11 +421,12 @@ begin
   FKeyWords := TStringList.Create;
   FDefRanges := TObjectList.Create(False);
   FRequiredFiles := TStringList.Create;
-  FCompVars:=TStringList.Create;
-  FMacros:=TStringList.Create;
+  FCompVars := TStringList.Create;
+  FMacros := TStringList.Create;
   ReLoadConf;
   UpdateTimerTimer(nil);
   FIncludeFiles := TStringList.Create;
+  FToolTip.OnClick := @TTClick;
   currWord := '';
 end;
 
@@ -703,7 +715,7 @@ begin
         Completion.ItemList.Add(FIncludeFiles[i]);
     if Completion.ItemList.Count = 0 then
       Completion.ItemList.Add(Copy(Completion.CurrentString,
-        pos('<', Completion.CurrentString)+1, Length(Completion.CurrentString)));
+        pos('<', Completion.CurrentString) + 1, Length(Completion.CurrentString)));
   end
   else if Length(Completion.CurrentString) = 0 then
   begin
@@ -1052,7 +1064,8 @@ begin
     tmp := GetCurrWord;
     p := Point(CodeEditor.CaretXPix, CodeEditor.CaretYPix + CodeEditor.LineHeight);
     p := CodeEditor.ClientToScreen(p);
-    if (Length(tmp) > 1) and ((tmp[1] in ['$', '#', '@'])) and not (ssCtrl in Shift) and not (ssAlt in Shift) then
+    if (Length(tmp) > 1) and ((tmp[1] in ['$', '#', '@'])) and not
+      (ssCtrl in Shift) and not (ssAlt in Shift) then
       Completion.Execute(GetCurrWord, p);
   end
   else if Key in [VK_LEFT..VK_DOWN] then

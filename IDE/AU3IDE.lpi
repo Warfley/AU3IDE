@@ -178,6 +178,7 @@
       <Unit10>
         <Filename Value="..\Editor\tooltip.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="ToolTip"/>
       </Unit10>
       <Unit11>
         <Filename Value="..\Editor\unitparser.pas"/>

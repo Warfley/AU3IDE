@@ -5,7 +5,7 @@ unit ToolTip;
 interface
 
 uses
-  Classes, SysUtils, Forms, Graphics, Controls, Math;
+  Classes, SysUtils, Forms, Graphics, Controls, Math, windows;
 
 type
   TEditorToolTip = class(TGraphicControl)
