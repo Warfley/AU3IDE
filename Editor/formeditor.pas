@@ -20,6 +20,7 @@ type
     PositionPickerPanel: TPanel;
     PositionPicker: TPaintBox;
     PropEditor: TTIPropertyGrid;
+    OISplitter: TSplitter;
     ToolSelect: TListView;
     ToolboxHeaderPanel: TPanel;
     ToolBoxPanel: TPanel;
@@ -48,6 +49,7 @@ type
     procedure FormPanelMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: integer);
     procedure FormPanelPaint(Sender: TObject);
+    procedure OISplitterMoved(Sender: TObject);
     procedure PositionPickerMouseEnter(Sender: TObject);
     procedure PositionPickerMouseLeave(Sender: TObject);
     procedure PositionPickerMouseMove(Sender: TObject; Shift: TShiftState;
@@ -68,7 +70,7 @@ type
     FConf: TFormEditorConfig;
     Moved: boolean;
     FLastClickTime: cardinal;
-    FLastClickRow: Integer;
+    FLastClickRow: integer;
     FDrawLines: boolean;
     FMousePoint: TPoint;
     FPanelMousePoint: TPoint;
@@ -97,6 +99,7 @@ type
     destructor Destroy; override;
     procedure Save(p: string = '');
     procedure Load(p: string = '');
+    procedure SetMainForm(b: boolean; Silent: Boolean = False);
     { public declarations }
     property FuncList: TStringList read FFuncList;
     property FileName: string read FFileName write FFileName;
@@ -165,6 +168,7 @@ begin
     if OIRight then
     begin
       PropertyPanel.Align := alRight;
+      OISplitter.Align := alRight;
       PositionPickerPanel.Left :=
         ClientWidth - PropertyPanel.Width - 8 - PositionPickerPanel.Width;
       ToolBoxPanel.Left := 8;
@@ -172,6 +176,7 @@ begin
     else
     begin
       PropertyPanel.Align := alLeft;
+      OISplitter.Align := alLeft;
       PositionPickerPanel.Left := ClientWidth - 8 - PositionPickerPanel.Width;
       ToolBoxPanel.Left := PropertyPanel.Width + 8;
     end;
@@ -288,15 +293,15 @@ var
   c: cardinal;
 begin
   c := GetTickCount;
-  if (FLastClickRow=EventEditor.Row) and (c - FLastClickTime < 700) and (EventEditor.ScreenToClient(Mouse.CursorPos).x <
-    EventEditor.Width - 20) then
+  if (FLastClickRow = EventEditor.Row) and (c - FLastClickTime < 700) and
+    (EventEditor.ScreenToClient(Mouse.CursorPos).x < EventEditor.Width - 20) then
   begin
     if EventEditor.Rows[EventEditor.Row][1] = '' then
       EventEditor.Rows[EventEditor.Row][1] := '(Neu...)';
     EventEditorPickListSelect(EventEditor);
   end;
   FLastClickTime := c;
-  FLastClickRow:=EventEditor.Row;
+  FLastClickRow := EventEditor.Row;
 end;
 
 function TFormEditFrame.CreateLabel(P: TWinControl): Tau3Label;
@@ -645,7 +650,8 @@ begin
   begin
     l.Add(VarInfo('$' + FormControlView.Items[i].Text, 0, i, FFileName));
   end;
-  l.Add(VarInfo('$PerformClose', 0, 0, FileName));
+  if FFormular.isMainForm then
+  l.Add(VarInfo('$PerformClose', 0, 0, FFileName));
 end;
 
 procedure TFormEditFrame.FormPanelPaint(Sender: TObject);
@@ -712,6 +718,14 @@ begin
 
           end;
       end;
+end;
+
+procedure TFormEditFrame.OISplitterMoved(Sender: TObject);
+begin
+  if PropertyPanel.Align = alRight then
+    PositionPickerPanel.Left := PropertyPanel.Left - PositionPickerPanel.Width - 8
+  else
+    ToolBoxPanel.Left := OISplitter.Left + OISplitter.Width + 16;
 end;
 
 procedure TFormEditFrame.PositionPickerMouseEnter(Sender: TObject);
@@ -818,7 +832,7 @@ var
 begin
   if Button = mbLeft then
   begin
-    MovingControl:=Sender as TControl;
+    MovingControl := Sender as TControl;
     FMousePoint := Point(X, Y);
     FPanelMousePoint := FFormular.ScreenToClient(
       (Sender as TControl).ClientToScreen(Point(X, Y)));
@@ -932,8 +946,8 @@ begin
     end;
     EventEditor.Values[s] := v;
 
-  if Assigned(FEnterFunc) then
-    FEnterFunc(ChangeFileExt(FFileName, '.au3'), v, '', True);
+    if Assigned(FEnterFunc) then
+      FEnterFunc(ChangeFileExt(FFileName, '.au3'), v, '', True);
   end;
 end;
 
@@ -982,6 +996,13 @@ begin
   end;
   FFormular.Invalidate;
   if Assigned(FOnChange) then
+    FOnChange(Self);
+end;
+
+procedure TFormEditFrame.SetMainForm(b: boolean; Silent: Boolean = False);
+begin
+  FFormular.isMainForm := b;
+  if Assigned(FOnChange) and not Silent then
     FOnChange(Self);
 end;
 
@@ -1078,11 +1099,7 @@ begin
     p := FFileName;
   sl := TStringList.Create;
   try
-    for i := 0 to FormControlView.Items.Count - 1 do
-    begin
-      c := TObject(FormControlView.Items[i].Data) as Iau3Component;
-      sl.Add(c.Getau3String(FFormular.Name));
-    end;
+    sl.Text := FFormular.Getau3String(FFormular.Name);
     if p <> '' then
       sl.SaveToFile(p);
   finally

@@ -1308,7 +1308,9 @@ begin
           CodeJump(Point(v.Pos, v.Line + 1));
       end
       else if Assigned(FOpenEditor) then
+      begin
         FOpenEditor(v.FileName, Point(v.Pos + 1, v.Line + 1));
+      end;
     end
     else if GetCurrInclude(sel) then
     begin

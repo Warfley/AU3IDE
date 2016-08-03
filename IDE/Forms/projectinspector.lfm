@@ -14,7 +14,7 @@ object ProjectInspector: TProjectInspector
     Width = 347
     Align = alClient
     Anchors = [akTop, akLeft, akRight]
-    DefaultItemHeight = 32
+    DefaultItemHeight = 34
     Images = FileIconList
     ReadOnly = True
     TabOrder = 0

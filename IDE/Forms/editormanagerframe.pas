@@ -184,6 +184,8 @@ procedure TEditorManager.EditorChanged(Sender: TObject);
 begin
   if not ((Sender as TFrame).Parent.Caption[1] = '*') then
     (Sender as TFrame).Parent.Caption := '*' + (Sender as TFrame).Parent.Caption;
+  if Assigned(FOnEditorChanged) then
+    FOnEditorChanged(Self);
 end;
 
 function TEditorManager.GetFileName(i: integer): string;
@@ -240,6 +242,8 @@ begin
       OnVarChanged := FOnParserFinished;
       OpenEditor := FOpenEditor;
       EnterFunc := FEnterFunc;
+      if FName=GetFullPath(FProject.MainForm, IncludePath,FProject.ProjectDir,FProject.Paths) then
+        SetMainForm(True, True);
       if FileExists(FName) then
         Load(FName)
       else

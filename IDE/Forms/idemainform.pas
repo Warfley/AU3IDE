@@ -157,7 +157,7 @@ type
     procedure UpdateProject(Data: IntPtr);
     procedure EnterFunc(Data: IntPtr);
     procedure CreateFunc(Data: IntPtr);
-    procedure ChangeMainForm(FileName: string);
+    procedure ChangeMainForm(FileName: string; Silent: boolean = False);
     function ShowCompilerOptions: boolean;
     function ShowEditorConf: boolean;
     procedure PrintText(Sender: TObject; FileName: string; Output: string);
@@ -774,8 +774,6 @@ procedure TMainForm.EditorParserFinished(Sender: TObject);
   var
     f, n: integer;
   begin
-    ;
-
     { Anpassen an PATH variablen }
     if not FilenameIsAbsolute(req) then
       req := GetFullPath(req, IncludePath, ExtractFilePath(
@@ -846,11 +844,11 @@ begin
   end;
 end;
 
-procedure TMainForm.ChangeMainForm(FileName: string);
-
+procedure TMainForm.ChangeMainForm(FileName: string; Silent: boolean = False);
 var
   sl: TStringList;
   e: TEditorFrame;
+  f: TFormEditFrame;
   i: integer;
 begin
   if FilenameIsAbsolute(FileName) then
@@ -860,11 +858,19 @@ begin
   begin
     for i := 0 to e.CodeEditor.Lines.Count - 1 do
       if isEnd(e.CodeEditor.Lines[i], '#include') then
-        if ExtractBetween(e.CodeEditor.Lines[i], '"', '"') =
+        if Pos('"', e.CodeEditor.Lines[i]) > 0 then
+        begin
+          if ExtractBetween(e.CodeEditor.Lines[i], '"', '"') =
+            ChangeFileExt(FCurrentProject.MainForm, '.au3') then
+            e.CodeEditor.TextBetweenPoints[Point(1, i + 1),
+              Point(Length(e.CodeEditor.Lines[i]) + 1, i + 1)] :=
+              Format('#include<%s>', [ChangeFileExt(FileName,'.au3')]);
+        end
+        else if ExtractBetween(e.CodeEditor.Lines[i], '<', '>') =
           ChangeFileExt(FCurrentProject.MainForm, '.au3') then
           e.CodeEditor.TextBetweenPoints[Point(1, i + 1),
             Point(Length(e.CodeEditor.Lines[i]) + 1, i + 1)] :=
-            Format('#include<%s>', [FileName]);
+            Format('#include<%s>', [ChangeFileExt(FileName,'.au3')]);
   end
   else if FileExists(FCurrentProject.MainFile) then
   begin
@@ -873,14 +879,70 @@ begin
       sl.LoadFromFile(FCurrentProject.MainFile);
       for i := 0 to sl.Count - 1 do
         if isEnd(sl[i], '#include') then
-          if ExtractBetween(sl[i], '"', '"') = ChangeFileExt(
+          if pos('"', sl[i]) > 0 then
+          begin
+            if ExtractBetween(sl[i], '"', '"') = ChangeFileExt(
+              FCurrentProject.MainForm, '.au3') then
+              sl[i] := Format('#include<%s>', [ChangeFileExt(FileName,'.au3')]);
+          end
+          else if ExtractBetween(sl[i], '<', '>') = ChangeFileExt(
             FCurrentProject.MainForm, '.au3') then
-            sl[i] := Format('#include<%s>', [FileName]);
+            sl[i] := Format('#include<%s>', [ChangeFileExt(FileName,'.au3')]);
     finally
       sl.Free;
     end;
   end;
-  FCurrentProject.MainForm := FCurrentProject.GetRelPath(FileName);
+  // Change exit
+  f := EditorManager1.FormEditor[GetFullPath(FCurrentProject.MainForm,
+    IncludePath, FCurrentProject.ProjectDir, FCurrentProject.Paths)];
+  if Assigned(f) then
+    f.SetMainForm(False, Silent)
+  else if FileExistsUTF8(GetFullPath(FCurrentProject.MainForm,
+    IncludePath, FCurrentProject.ProjectDir, FCurrentProject.Paths)) then
+  begin
+    sl := TStringList.Create;
+    try
+      sl.LoadFromFile(GetFullPath(FCurrentProject.MainForm, IncludePath,
+        FCurrentProject.ProjectDir, FCurrentProject.Paths));
+      for i := 0 to sl.Count - 1 do
+        if isEnd(sl[i], 'global') then
+        begin
+          sl.Delete(i + 3);
+          sl.Delete(i);
+          Break;
+        end;
+      sl.SaveToFile(GetFullPath(FCurrentProject.MainForm, IncludePath,
+        FCurrentProject.ProjectDir, FCurrentProject.Paths));
+    finally
+      sl.Free;
+    end;
+  end;
+  f := EditorManager1.FormEditor[GetFullPath(FileName, IncludePath,
+    FCurrentProject.ProjectDir, FCurrentProject.Paths)];
+  if Assigned(f) then
+    f.SetMainForm(True, Silent)
+  else if FileExistsUTF8(GetFullPath(FileName, IncludePath,
+    FCurrentProject.ProjectDir, FCurrentProject.Paths)) then
+  begin
+    sl := TStringList.Create;
+    try
+      sl.LoadFromFile(GetFullPath(FileName, IncludePath,
+        FCurrentProject.ProjectDir, FCurrentProject.Paths));
+      for i := 0 to sl.Count - 1 do
+        if isEnd(sl[i], 'func') then
+          sl.Insert(i, 'Global $PerformClose=True')
+        else if isEnd(sl[i], 'endfunc') then
+        begin
+          sl.Insert(i, '  If ($PerformClose = True) Then Exit');
+          Break;
+        end;
+      sl.SaveToFile(GetFullPath(FileName, IncludePath, FCurrentProject.ProjectDir,
+        FCurrentProject.Paths));
+    finally
+      sl.Free;
+    end;
+  end;
+  FCurrentProject.MainForm := FileName;
 end;
 
 procedure TMainForm.FormCreate(Sender: TObject);
@@ -1030,11 +1092,21 @@ begin
   fName := FCurrentProject.GetAbsPath('Form' + IntToStr(i));
   sl := TStringList.Create;
   try
-    sl.Text := '#include("' + 'Form' + IntToStr(i) + '.afm")';
+    sl.Text := '#include<' + 'Form' + IntToStr(i) + '.afm>';
     sl.SaveToFile(fName + '.au3');
     sl.Clear;
-    sl.Text := Format('$%s = CreateWindow("%s"), %d, %d, %d, %d, %d',
-      ['Form' + IntToStr(i), 'Form' + IntToStr(i), 150, 150, 300, 200, 0]);
+    sl.Add('Opt("GUIOnEventMode", 1)');
+    sl.Add('Opt("GUIResizeMode", 0)');
+    sl.Add(Format('$%s = GUICreate("%s", 402, 344, 0, 0, -1798701056, 256)',
+      ['Form' + IntToStr(i), 'Form' + IntToStr(i)]));
+    sl.Add(Format('GUISetCursor(2, 0, $%s)', ['Form' + IntToStr(i)]));
+    sl.Add('GUISetFont(0,400,0,"default")');
+    sl.Add(Format('GUISetBkColor(0xF0F0F0, $%s)', ['Form' + IntToStr(i)]));
+    sl.Add('GUISetState(@SW_SHOW)');
+    sl.Add(Format('GUISetOnEvent(-3, "%sClose_Exit", $%s)',
+      ['Form' + IntToStr(i), 'Form' + IntToStr(i)]));
+    sl.Add(Format('Func %sClose_Exit()', ['Form' + IntToStr(i)]));
+    sl.Add('EndFunc');
     sl.SaveToFile(fName + '.afm');
   finally
     sl.Free;
@@ -1059,7 +1131,8 @@ end;
 
 procedure TMainForm.NextTabItemClick(Sender: TObject);
 begin
-  EditorManager1.EditorIndex := Min(EditorManager1.EditorIndex + 1, EditorManager1.Count - 1);
+  EditorManager1.EditorIndex :=
+    Min(EditorManager1.EditorIndex + 1, EditorManager1.Count - 1);
 end;
 
 procedure TMainForm.PrevTabItemClick(Sender: TObject);
@@ -1075,8 +1148,8 @@ end;
 procedure TMainForm.RunMenuItemClick(Sender: TObject);
 begin
   SaveAllItemClick(nil);
-  RunBtn.Enabled:=False;
-  StopBtn.Enabled:=True;
+  RunBtn.Enabled := False;
+  StopBtn.Enabled := True;
   OutputBox.Clear;
   if SelectModeBox.ItemIndex = 0 then
     FCompiler.Run(FCurrentProject, cax86)

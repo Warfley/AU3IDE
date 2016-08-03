@@ -5,7 +5,7 @@ unit au3Types;
 interface
 
 uses
-  Classes, SysUtils, fgl, ListRecords, Graphics, LazFileUtils, strutils;
+  Classes, SysUtils, fgl, ListRecords, Graphics, LazFileUtils, strutils, Dialogs;
 
 type
   TTokenType = (tkComment, tkIdentifier, tkFunction, tkSymbol, tkNumber, tkSpace,
@@ -16,7 +16,7 @@ type
   TCloseEditorEvent = procedure(Filename: string) of object;
   TCheckIncludeEvent = function(FileName, IncludeFile: string): boolean of object;
   TAddIncludeEvent = procedure(FileName, IncludeFile: string) of object;
-  TChangeMainFormEvent = procedure(FileName: string) of object;
+  TChangeMainFormEvent = procedure(FileName: string; Silent: boolean = False) of object;
 
   TOpenFunctionEvent = function(FileName, FuncName: string; Params: string;
     CreateNew: boolean): string of object;
@@ -214,20 +214,22 @@ var
   p: string;
 begin
   Result := CreateAbsoluteSearchPath(Filename, FPath);
-  if FileExistsUTF8(Result) then
-    exit;
-  Result := CreateAbsoluteSearchPath(Filename, IncludePath);
-  if FileExistsUTF8(Result) then
-    exit;
-  for p in Paths do
+  if not FileExistsUTF8(Result) then
   begin
-    Result := CreateAbsoluteSearchPath(Filename, p);
-    if FileExistsUTF8(Result) then
-      Exit;
+    Result := CreateAbsoluteSearchPath(Filename, IncludePath);
+    if not FileExistsUTF8(Result) then
+    begin
+      for p in Paths do
+      begin
+        Result := CreateAbsoluteSearchPath(Filename, p);
+        if FileExistsUTF8(Result) then
+          Exit;
+      end;
+      Result := '';
+    end;
   end;
-  Result := '';
-
-
+  // Ugly but working
+  Result := StringReplace(Result, '\\', '\', [rfReplaceAll]);
 end;
 
 function GetRelInclude(FullPath, IncludePath, FPath: string;

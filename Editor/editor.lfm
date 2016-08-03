@@ -8,8 +8,6 @@ object EditorFrame: TEditorFrame
   Font.Quality = fqProof
   ParentFont = False
   TabOrder = 0
-  DesignLeft = 204
-  DesignTop = 48
   object SearchBar: TPanel
     Left = 0
     Height = 34
@@ -23,15 +21,15 @@ object EditorFrame: TEditorFrame
     Visible = False
     object Label1: TLabel
       Left = 0
-      Height = 15
+      Height = 25
       Top = 4
-      Width = 35
+      Width = 51
       Caption = 'Suche:'
       ParentColor = False
     end
     object SearchEdit: TEdit
       Left = 56
-      Height = 23
+      Height = 33
       Top = 0
       Width = 152
       OnKeyUp = SearchEditKeyUp
@@ -48,7 +46,7 @@ object EditorFrame: TEditorFrame
     end
     object ReplaceEdit: TEdit
       Left = 288
-      Height = 23
+      Height = 33
       Top = 0
       Width = 152
       OnKeyUp = ReplaceEditKeyUp
@@ -626,7 +624,7 @@ object EditorFrame: TEditorFrame
       Top = 34
       Width = 235
       Align = alClient
-      DefaultItemHeight = 24
+      DefaultItemHeight = 28
       ExpandSignType = tvestPlusMinus
       Images = CodeExplorerImages
       MultiSelectStyle = [msControlSelect, msShiftSelect]
@@ -644,9 +642,9 @@ object EditorFrame: TEditorFrame
     end
     object Label2: TLabel
       Left = 121
-      Height = 15
+      Height = 25
       Top = 206
-      Width = 34
+      Width = 51
       Caption = 'Label2'
       ParentColor = False
     end

@@ -236,7 +236,6 @@ begin
   begin
     if Assigned(FMainForm) then
       FMainForm(FProject.FilePath[IntPtr(ProjectFileTreeView.Selected.Data)]);
-    FProject.MainForm := FProject.Files[IntPtr(ProjectFileTreeView.Selected.Data)];
     SetMainFormButton.Enabled := False;
   end;
 end;

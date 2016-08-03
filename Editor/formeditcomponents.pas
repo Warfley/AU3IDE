@@ -7,7 +7,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, StdCtrls, ExtCtrls, ValEdit,
-  LCLIntf;
+  LCLIntf, LCLType;
 
 type
   TAU3Cursor =
@@ -27,6 +27,20 @@ type
     craSIZEWE,
     craUPARROW,
     craWAIT);
+
+  TResizeMode = (
+    rzDOCKAUTO,
+    rzDOCKLEFT,
+    rzDOCKRIGHT,
+    rzDOCKHCENTER,
+    rzFiller6,
+    rzDOCKTOP,
+    rzDOCKBOTTOM,
+    rzDOCKVCENTER,
+    rzDOCKWIDTH,
+    rzDOCKHEIGHT);
+  TResizeModes = set of TResizeMode;
+
   TWindowStyle = (
     WS_MAXIMIZEBOX,
     WS_MINIMIZEBOX,
@@ -165,6 +179,7 @@ type
     FIconID: integer;
     FMyCursor: TAU3Cursor;
     FOnChangeCaption: TNotifyEvent;
+    FResize: cardinal;
     function GetEditorTop: integer;
     function GetEditorLeft: integer;
   protected
@@ -185,6 +200,7 @@ type
     procedure SetIcon(s: string);
     procedure SetIconID(i: integer);
     procedure SetIsMainForm(b: boolean);
+    procedure SetResize(val: TResizeModes);
 
     function GetFont: TFont;
     function GetColor: TColor;
@@ -194,6 +210,7 @@ type
     function GetTop: integer;
     function GetWidth: integer;
     function GetHeight: integer;
+    function GetResize: TResizeModes;
     procedure Paint; override;
   public
     procedure SetFormPos(x, y: integer);
@@ -238,6 +255,7 @@ type
     property Visible: boolean read FVisible write SetFormVisible;
     property Icon: string read FIcon write SetIcon;
     property IconID: integer read FIconID write SetIconID;
+    property Resize: TResizeModes read GetResize write SetResize;
 
     property OnClick;
     property OnEnter;
@@ -255,12 +273,20 @@ type
     property OnResize;
   end;
 
+  { Tau3Edit }
+
   Tau3Edit = class(TCustomEdit, Iau3Component)
   private
+    FEnabled: boolean;
     FStyle: cardinal;
     FStyleEX: cardinal;
     FEvents: TStringList;
     FOnChangeProp: TPropertyChangeEvent;
+    FCursorIcon: TAU3Cursor;
+    FisEnabled: boolean;
+    FTabOrder: integer;
+    FIsVisible: boolean;
+    FResizing: TResizeModes;
   protected
     procedure SetName(const Value: TComponentName); override;
     procedure SetLeft(Val: integer);
@@ -271,6 +297,20 @@ type
     procedure SetStyle(val: TWindowStyles);
     procedure SetEditStyle(val: TEditStyles);
     procedure SetStyleEx(val: TWindowExStyles);
+
+    procedure SetColor(Value: TColor); override;
+    procedure SetCursorIcon(c: TAU3Cursor);
+    procedure SetisEnabled(b: boolean);
+    procedure SetFont(f: TFont);
+    procedure SetMaxLen(l: integer);
+    procedure SetHint(const Value: TTranslateString); override;
+    procedure SetTabOrder(i: integer);
+    procedure SetisVisible(b: boolean);
+    procedure SetResizing(b: TResizeModes);
+
+    function GetFont: TFont;
+    function GetMaxLen: integer;
+
     function GetStyle: TWindowStyles;
     function GetEditStyle: TEditStyles;
     function GetStyleEx: TWindowExStyles;
@@ -299,6 +339,7 @@ type
     property ComponentProp[prop: string]: string read GetProp write SetProp;
     property isProperty[prop: string]: boolean read CheckProperty;
   published
+
     property Name;
     property Y: integer read GetTop write SetTop;
     property X: integer read GetLeft write SetLeft;
@@ -311,6 +352,15 @@ type
     property StyleEX: TWindowExStyles read GetStyleEx write SetStyleEx;
     property EditStyle: TEditStyles read GetEditStyle write SetEditStyle;
     property CompleteStyle: cardinal read FStyle write FStyle;
+
+    property MaxLength: integer read GetMaxLen write SetMaxLen;
+    property CursorIcon: TAU3Cursor read FCursorIcon write SetCursorIcon;
+    property Enabled: boolean read FEnabled write SetisEnabled;
+    property Font: TFont read GetFont write SetFont;
+    property Resizing: TResizeModes read FResizing write SetResizing;
+    property Visible: boolean read FIsVisible write SetisVisible;
+    property TabOrder: integer read FTabOrder write SetTabOrder;
+
     property Action;
     property Align;
     property Alignment;
@@ -327,10 +377,7 @@ type
     property DragKind;
     property DragMode;
     property EchoMode;
-    property Enabled;
-    property Font;
     property HideSelection;
-    property MaxLength;
     property NumbersOnly;
     property ParentBidiMode;
     property OnChange;
@@ -366,13 +413,11 @@ type
     property ReadOnly;
     property ShowHint;
     property TabStop;
-    property TabOrder;
     property Text: string read GetText write SetText;
     property Caption: string read GetText write SetText;
     property TextHint;
     property TextHintFontColor;
     property TextHintFontStyle;
-    property Visible;
   end;
 
   Tau3Button = class(TCustomButton, Iau3Component)
@@ -688,23 +733,25 @@ const
 implementation
 
 function GetFontString(f: TFont): string;
-function GetWeight: Integer;
-begin
-  if f.Bold then
-    Result:=700
-  else Result:=400;
-end;
 
-function GetAttr: Integer;
-begin
-  Result:=0;
-  if f.Italic then
-  Result:=Result or 2;
-  if f.Underline then
-  Result:=Result or 4;
-  if f.StrikeThrough then
-  Result:=Result or 8;
-end;
+  function GetWeight: integer;
+  begin
+    if f.Bold then
+      Result := 700
+    else
+      Result := 400;
+  end;
+
+  function GetAttr: integer;
+  begin
+    Result := 0;
+    if f.Italic then
+      Result := Result or 2;
+    if f.Underline then
+      Result := Result or 4;
+    if f.StrikeThrough then
+      Result := Result or 8;
+  end;
 
 begin
   Result := Format('%d,%d,%d,"%s"', [f.Size, GetWeight, GetAttr, f.Name]);
@@ -777,7 +824,7 @@ begin
     (prop = 'style') or (Pos('ws_', prop) = 1) or (Pos('rz', prop) = 1) or
     (prop = 'enabled') or (prop = 'color') or (prop = 'cursoricon') or
     (prop = 'font') or (prop = 'icon') or (prop = 'resizing') or
-    (prop = 'visible') or (prop = 'iconid') or (prop = 'styleex');
+    (prop = 'visible') or (prop = 'iconid') or (prop = 'styleex') or (prop = 'resize');
 end;
 
 function Tau3Form.GetEvents: TStringList;
@@ -843,6 +890,11 @@ begin
   Result := inherited Height;
 end;
 
+function Tau3Form.GetResize: TResizeModes;
+begin
+  Result := TResizeModes(FResize);
+end;
+
 procedure Tau3Form.SetFormEnabled(Value: boolean);
 begin
   FEnabled := Value;
@@ -876,6 +928,13 @@ begin
   FIsMainForm := b;
   if Assigned(FOnChangeProp) then
     FOnChangeProp(Self, '', '');
+end;
+
+procedure Tau3Form.SetResize(val: TResizeModes);
+begin
+  FResize := cardinal(val);
+  if Assigned(FOnChangeProp) then
+    FOnChangeProp(Self, 'Resize', IntToStr(cardinal(val)));
 end;
 
 procedure Tau3Form.SetColor(Value: TColor);
@@ -970,7 +1029,9 @@ begin
   else if p = 'font' then
     Result := GetFontString(Font)
   else if p = 'visible' then
-    Result := BoolToStr(FVisible, 'True', 'False');
+    Result := BoolToStr(FVisible, 'True', 'False')
+  else if p = 'resize' then
+    Result := IntToStr(FResize);
 end;
 
 procedure Tau3Form.SetProp(p, val: string);
@@ -989,13 +1050,15 @@ begin
   else if (p = 'height') and isNumeric(val) then
     Height := StrToInt(val)
   else if (p = 'style') and isNumeric(val) then
-    FStyle := StrToInt(val)
+    FStyle := StrToInt64(val)
   else if (p = 'styleex') and isNumeric(val) then
     FStyleEx := StrToInt(val)
   else if (p = 'color') and isNumeric(val) then
     inherited Color := StrToInt(val)
   else if (p = 'cursor') and isNumeric(val) then
     FMyCursor := TAU3Cursor(StrToInt(val))
+  else if (p = 'resize') and isNumeric(val) then
+    FResize := StrToInt(val)
   else if (p = 'enabled') then
     FEnabled := val = 'True'
   else if (p = 'icon') then
@@ -1042,8 +1105,8 @@ begin
   FVisible := True;
   FEnabled := True;
   FMyCursor := craARROW;
-  FStyle:=$94CA0000;
-  FStyleEx:=$100;
+  FStyle := $94CA0000;
+  FStyleEx := $100;
   FIconID := -1;
 end;
 
@@ -1068,15 +1131,18 @@ begin
     (c as Tau3Form).Style := Style;
     (c as Tau3Form).Events.Assign(FEvents);
   end;
+  // TODO
 end;
 
 function Tau3Form.Getau3String(FormName: string): string;
 var
   sl: TStringList;
+  i: integer;
 begin
   sl := TStringList.Create;
   try
     sl.Add('Opt("GUIOnEventMode", 1)');
+    sl.Add(Format('Opt("GUIResizeMode", %d)', [FResize]));
     sl.Add(Format('$%s = GUICreate("%s", %d, %d, %d, %d, %d, %d)',
       [Name, FCaption, Width + 16, Height + 32, FLeft, FTop, FStyle, FStyleEx]));
     if FileExists(FIcon) then
@@ -1091,52 +1157,53 @@ begin
       sl.Add('GUISetState(@SW_HIDE)')
     else
       sl.Add('GUISetState(@SW_SHOW)');
+
+    sl.Add(Format('GUISetOnEvent(%d, "%sClose_Exit", $%s)',
+      [GUI_EVENT_CLOSE, Name, Name]));
+
     if FIsMainForm then
-    begin
-      sl.Add(Format('GUISetOnEvent(%d, "%sClose_Exit", $%s)',
-        [GUI_EVENT_CLOSE, Name, Name]));
-      sl.Add('$PerformClose=True');
-      sl.Add(Format('Func %sClose_Exit()', [Name]));
-      if FEvents.Values['onClose'] <> '' then
-        sl.Add('  ' + FEvents.Values['onClose'] + '()');
+      sl.Add('Global $PerformClose=True');
+    sl.Add(Format('Func %sClose_Exit()', [Name]));
+    if FEvents.Values['onClose'] <> '' then
+      sl.Add('  ' + FEvents.Values['onClose'] + '()');
+    if FIsMainForm then
       sl.Add('  If ($PerformClose = True) Then Exit');
-      sl.Add('EndFunc');
-    end
-    else if FEvents.Values['onClose'] <> '' then
-      sl.Add(Format('GUISetOnEvent(%d, "%s", $%s)',
-        [GUI_EVENT_CLOSE, FEvents.Values['onClose'], Name]));
+    sl.Add('EndFunc');
 
     if (FEvents.Values['onMinimize'] <> '') then
       sl.Add(Format('GUISetOnEvent(%d, "%s", $%s)',
         [GUI_EVENT_MINIMIZE, FEvents.Values['onMinimize'], Name]));
-     if (FEvents.Values['onRestore'] <> '') then
+    if (FEvents.Values['onRestore'] <> '') then
       sl.Add(Format('GUISetOnEvent(%d, "%s", $%s)',
         [GUI_EVENT_MINIMIZE, FEvents.Values['onRestore'], Name]));
-     if (FEvents.Values['onMaximize'] <> '') then
+    if (FEvents.Values['onMaximize'] <> '') then
       sl.Add(Format('GUISetOnEvent(%d, "%s", $%s)',
         [GUI_EVENT_MINIMIZE, FEvents.Values['onMaximize'], Name]));
-     if (FEvents.Values['onMouseMove'] <> '') then
+    if (FEvents.Values['onMouseMove'] <> '') then
       sl.Add(Format('GUISetOnEvent(%d, "%s", $%s)',
         [GUI_EVENT_MINIMIZE, FEvents.Values['onMouseMove'], Name]));
-     if (FEvents.Values['onLMouseDown'] <> '') then
+    if (FEvents.Values['onLMouseDown'] <> '') then
       sl.Add(Format('GUISetOnEvent(%d, "%s", $%s)',
         [GUI_EVENT_MINIMIZE, FEvents.Values['onLMouseDown'], Name]));
-     if (FEvents.Values['onLMouseUp'] <> '') then
+    if (FEvents.Values['onLMouseUp'] <> '') then
       sl.Add(Format('GUISetOnEvent(%d, "%s", $%s)',
         [GUI_EVENT_MINIMIZE, FEvents.Values['onLMouseUp'], Name]));
-     if (FEvents.Values['onRMouseDown'] <> '') then
+    if (FEvents.Values['onRMouseDown'] <> '') then
       sl.Add(Format('GUISetOnEvent(%d, "%s", $%s)',
         [GUI_EVENT_MINIMIZE, FEvents.Values['onRMouseDown'], Name]));
-     if (FEvents.Values['onRMouseUp'] <> '') then
+    if (FEvents.Values['onRMouseUp'] <> '') then
       sl.Add(Format('GUISetOnEvent(%d, "%s", $%s)',
         [GUI_EVENT_MINIMIZE, FEvents.Values['onRMouseUp'], Name]));
-     if (FEvents.Values['onResize'] <> '') then
+    if (FEvents.Values['onResize'] <> '') then
       sl.Add(Format('GUISetOnEvent(%d, "%s", $%s)',
         [GUI_EVENT_MINIMIZE, FEvents.Values['onResize'], Name]));
-     if (FEvents.Values['onDrop'] <> '') then
+    if (FEvents.Values['onDrop'] <> '') then
       sl.Add(Format('GUISetOnEvent(%d, "%s", $%s)',
-        [GUI_EVENT_MINIMIZE, FEvents.Values['onDrop'], Name]));;
-  Result := sl.Text;
+        [GUI_EVENT_MINIMIZE, FEvents.Values['onDrop'], Name]));
+
+    for i := 0 to Self.ControlCount - 1 do
+      sl.Add((Self.Controls[i] as Iau3Component).Getau3String(FormName));
+    Result := sl.Text;
   finally
     sl.Free;
   end;
@@ -1172,7 +1239,10 @@ begin
   Result := (prop = 'name') or (prop = 'text') or (prop = 'x') or
     (prop = 'y') or (prop = 'width') or (prop = 'height') or
     (prop = 'style') or (prop = 'styleex') or (prop = 'editstyle') or
-    (Pos('ws_', prop) = 1) or (Pos('es_', prop) = 1);
+    (Pos('ws_', prop) = 1) or (Pos('es_', prop) = 1) or (prop = 'color') or
+    (prop = 'cursoricon') or (prop = 'enabled') or (prop = 'font') or
+    (prop = 'hint') or (prop = 'maxlength') or (prop = 'resizing') or
+    (prop = 'taborder') or (prop = 'visible');
 end;
 
 function Tau3Edit.GetEvents: TStringList;
@@ -1270,6 +1340,79 @@ begin
     FOnChangeProp(Self, 'StyleEx', IntToStr(cardinal(Val)));
 end;
 
+procedure Tau3Edit.SetColor(Value: TColor);
+begin
+  inherited SetColor(Value);
+  if Assigned(FOnChangeProp) then
+    FOnChangeProp(Self, 'Color', IntToStr(ColorToRGB(Value) and $FFFFFF));
+end;
+
+procedure Tau3Edit.SetCursorIcon(c: TAU3Cursor);
+begin
+  FCursorIcon := c;
+  if Assigned(FOnChangeProp) then
+    FOnChangeProp(Self, 'Cursor', IntToStr(cardinal(c)));
+end;
+
+procedure Tau3Edit.SetisEnabled(b: boolean);
+begin
+  FisEnabled := b;
+  if Assigned(FOnChangeProp) then
+    FOnChangeProp(Self, 'Enabled', BoolToStr(b, True));
+end;
+
+procedure Tau3Edit.SetFont(f: TFont);
+begin
+  inherited Font := f;
+  if Assigned(FOnChangeProp) then
+    FOnChangeProp(Self, 'Font', GetFontString(f));
+end;
+
+procedure Tau3Edit.SetMaxLen(l: integer);
+begin
+  inherited MaxLength := l;
+  if Assigned(FOnChangeProp) then
+    FOnChangeProp(Self, 'MaxLength', IntToStr(l));
+end;
+
+procedure Tau3Edit.SetHint(const Value: TTranslateString);
+begin
+  inherited SetHint(Value);
+  if Assigned(FOnChangeProp) then
+    FOnChangeProp(Self, 'Hint', Value);
+end;
+
+procedure Tau3Edit.SetTabOrder(i: integer);
+begin
+  FTabOrder := i;
+  if Assigned(FOnChangeProp) then
+    FOnChangeProp(Self, 'Taborder', IntToStr(i));
+end;
+
+procedure Tau3Edit.SetisVisible(b: boolean);
+begin
+  FIsVisible := b;
+  if Assigned(FOnChangeProp) then
+    FOnChangeProp(Self, 'Visible', BoolToStr(b, True));
+end;
+
+procedure Tau3Edit.SetResizing(b: TResizeModes);
+begin
+  FResizing := b;
+  if Assigned(FOnChangeProp) then
+    FOnChangeProp(Self, 'Resizing', IntToStr(cardinal(b)));
+end;
+
+function Tau3Edit.GetFont: TFont;
+begin
+  Result := inherited Font;
+end;
+
+function Tau3Edit.GetMaxLen: integer;
+begin
+  Result := inherited MaxLength;
+end;
+
 function Tau3Edit.GetStyle: TWindowStyles;
 begin
   Result := TWindowStyles(FStyle shr 16);
@@ -1305,7 +1448,25 @@ begin
   else if prop = 'editstyle' then
     Result := IntToStr(cardinal(GetEditStyle))
   else if prop = 'styleex' then
-    Result := IntToStr(FStyleEX);
+    Result := IntToStr(FStyleEX)
+  else if prop = 'color' then
+    Result := IntToStr(ColorToRGB(Color))
+  else if prop = 'cursoricon' then
+    Result := IntToStr(cardinal(FCursorIcon))
+  else if prop = 'enabled' then
+    Result := BoolToStr(FisEnabled, True)
+  else if prop = 'font' then
+    Result := GetFontString(Font)
+  else if prop = 'hint' then
+    Result := Hint
+  else if prop = 'maxlength' then
+    Result := IntToStr(MaxLength)
+  else if prop = 'resizing' then
+    Result := IntToStr(cardinal(FResizing))
+  else if prop = 'taborder' then
+    Result := IntToStr(FTabOrder)
+  else if prop = 'Visible' then
+    Result := BoolToStr(FIsVisible, True);
 end;
 
 procedure Tau3Edit.SetProp(prop, val: string);
@@ -1328,7 +1489,25 @@ begin
   else if (prop = 'editstyle') and isNumeric(val) then
     SetEditStyle(TEditStyles(StrToInt(val)))
   else if (prop = 'styleex') and isNumeric(val) then
-    FStyleEX := StrToInt(val);
+    FStyleEX := StrToInt(val)
+  else if (prop = 'color') and isNumeric(val) then
+    inherited Color := TColor(StrToInt(val))
+  else if (prop = 'cursoricon') and isNumeric(val) then
+    FCursorIcon := TAU3Cursor(StrToInt(val))
+  else if (prop = 'enabled') then
+    FEnabled := val = 'True'
+  else if (prop = 'font') then
+    SetFontString(Font, val)
+  else if (prop = 'hint') then
+    Hint := (val)
+  else if (prop = 'maxlength') and isNumeric(val) then
+    MaxLength := StrToInt(val)
+  else if (prop = 'resizing') and isNumeric(val) then
+    FResizing := TResizeModes(StrToInt(val))
+  else if (prop = 'taborder') and isNumeric(val) then
+    FTabOrder := StrToInt(val)
+  else if (prop = 'visible') then
+    FIsVisible := val = 'True';
 end;
 
 function Tau3Edit.GetEvent(e: string): string;
@@ -1356,6 +1535,12 @@ begin
   inherited;
   FEvents := TStringList.Create;
   FEvents.Values['onClick'] := '';
+  FStyle := $503310C4;
+  Style := [WS_BORDER];
+  FCursorIcon := craARROW;
+  Color := clWhite;
+  FIsVisible := True;
+  FisEnabled := True;
 end;
 
 destructor Tau3Edit.Destroy;
@@ -1384,9 +1569,37 @@ begin
 end;
 
 function Tau3Edit.Getau3String(FormName: string): string;
+var
+  sl: TStringList;
 begin
-  Result := Format('$%s = CreateInputbox($%s, "%s", %d, %d, %d, %d, %d, %d)',
-    [Name, FormName, Text, Left, Top, Width, Height, FStyle, FStyleEX]);
+  sl := TStringList.Create;
+  try
+    sl.Add(Format('$%s = GUICtrlCreateInput("%s", %d, %d, %d, %d, %d, %d)',
+      [Name, Text, Left, Top, Width, Height, FStyle, FStyleEX]));
+    // MaxLength
+    sl.Add(Format('GUICtrlSetLimit($%s, %d)', [Name, MaxLength]));
+    // Font
+    sl.Add(Format('GUICtrlSetFont($%s, %s)', [Name, GetFontString(Font)]));
+    sl.Add(Format('GUICtrlSetColor($%s, 0x%s)',
+      [Name, IntToHex(ColorToRGB(Font.Color) and $00FFFFFF, 6)]));
+    // Background Color
+    sl.Add(Format('GUICtrlSetBkColor($%s, 0x%s)',
+      [Name, IntToHex(ColorToRGB(Color) and $00FFFFFF, 6)]));
+    // Resizing
+    sl.Add(Format('GUICtrlSetResizing($%s, %d)', [Name, cardinal(FResizing)]));
+    // Visible/Enabled
+    if not FIsVisible then
+      sl.Add(Format('GUICtrlSetState($%s, %d)', [Name, 32]))
+    else if not FisEnabled then
+      sl.Add(Format('GUICtrlSetState($%s, %d)', [Name, 128]));
+    // Hint
+    sl.Add(Format('GUICtrlSetTip($%s, "%s")', [Name, Hint]));
+    // Cursor
+    sl.Add(Format('GUICtrlSetCursor($%s, %d)', [Name, cardinal(FCursorIcon)]));
+    Result := sl.Text;
+  finally
+    sl.Free;
+  end;
 end;
 
 procedure Tau3Edit.FillEvents(g: TValueListEditor);

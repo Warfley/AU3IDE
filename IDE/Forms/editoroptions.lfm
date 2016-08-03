@@ -91,11 +91,6 @@ object EditorConf: TEditorConf
         Left = 512
         Height = 250
         ClientHeight = 250
-        inherited CodeExplorerHead: TPanel
-          inherited CloseCodeExplorerButton: TSpeedButton
-            Left = 197
-          end
-        end
         inherited CodeExplorer: TTreeView
           Height = 216
           MultiSelectStyle = [msControlSelect]
