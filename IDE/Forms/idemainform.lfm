@@ -987,13 +987,13 @@ object MainForm: TMainForm
         end
         object SelectModeBox: TComboBox
           Left = 80
-          Height = 33
+          Height = 23
           Hint = 'Modus'
-          Top = -2
+          Top = 3
           Width = 100
           Anchors = [akLeft]
           AutoSize = False
-          ItemHeight = 25
+          ItemHeight = 15
           ItemIndex = 0
           Items.Strings = (
             'x86'
@@ -1011,18 +1011,18 @@ object MainForm: TMainForm
   end
   object CenterPanel: TPanel
     Left = 352
-    Height = 531
+    Height = 541
     Top = 36
     Width = 908
     Align = alClient
     Caption = 'CenterPanel'
-    ClientHeight = 531
+    ClientHeight = 541
     ClientWidth = 908
     TabOrder = 1
     object OutputBox: TListBox
       Left = 1
       Height = 96
-      Top = 434
+      Top = 444
       Width = 906
       Align = alBottom
       ItemHeight = 0
@@ -1030,15 +1030,15 @@ object MainForm: TMainForm
     end
     inline EditorManager1: TEditorManager
       Left = 1
-      Height = 428
+      Height = 438
       Top = 1
       Width = 906
       Align = alClient
-      ClientHeight = 428
+      ClientHeight = 438
       ClientWidth = 906
       TabOrder = 1
       inherited EditorControl: TPageControl
-        Height = 428
+        Height = 438
         Width = 906
       end
     end
@@ -1046,7 +1046,7 @@ object MainForm: TMainForm
       Cursor = crVSplit
       Left = 1
       Height = 5
-      Top = 429
+      Top = 439
       Width = 906
       Align = alBottom
       ResizeAnchor = akBottom
@@ -1054,21 +1054,31 @@ object MainForm: TMainForm
   end
   object ProjectExplorerSplitter: TSplitter
     Left = 347
-    Height = 531
+    Height = 541
     Top = 36
     Width = 5
   end
   inline ProjectInspector1: TProjectInspector
-    Height = 531
+    Height = 541
     Top = 36
     Align = alLeft
-    ClientHeight = 531
+    ClientHeight = 541
     TabOrder = 3
     inherited ProjectFileTreeView: TTreeView
-      Height = 295
+      Height = 315
+      Top = 47
+      DefaultItemHeight = 32
     end
     inherited FileInfoPanel: TPanel
-      Top = 352
+      Top = 362
+      inherited PathEdit: TLabeledEdit
+        Height = 23
+        EditLabel.Height = 15
+        EditLabel.Top = 6
+      end
+    end
+    inherited TreeFilterEdit1: TTreeFilterEdit
+      Height = 23
     end
     inherited FileIconList: TImageList
       Bitmap = {

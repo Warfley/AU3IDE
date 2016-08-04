@@ -6,7 +6,7 @@ unit FormEditComponents;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, StdCtrls, ExtCtrls, ValEdit,
+  Classes, SysUtils, Forms, Controls, Graphics, StdCtrls, ExtCtrls, Buttons, ValEdit,
   LCLIntf, LCLType;
 
 type
@@ -420,13 +420,20 @@ type
     property TextHintFontStyle;
   end;
 
-  Tau3Button = class(TCustomButton, Iau3Component)
+  Tau3Button = class(TCustomBitBtn, Iau3Component)
   private
     FStyle: cardinal;
     FStyleEX: cardinal;
     FEvents: TStringList;
     FLastClick: cardinal;
     FOnChangeProp: TPropertyChangeEvent;
+    FCursorIcon: TAU3Cursor;
+    FisEnabled: boolean;
+    FTabOrder: integer;
+    FIsVisible: boolean;
+    FResizing: TResizeModes;
+    FPicture: String;
+    FHotKey: String;
   protected
     procedure SetName(const Value: TComponentName); override;
     procedure SetLeft(Val: integer);
@@ -437,6 +444,34 @@ type
     procedure SetStyle(val: TWindowStyles);
     procedure SetButtonStyle(val: TButtonStyles);
     procedure SetStyleEx(val: TWindowExStyles);
+
+    {
+    Color
+    Cursor
+    Enabled
+    Font
+    Hint
+    HotKey
+    Picture
+    Resizing
+    TabOrder
+    Visible
+}
+
+    procedure SetColor(Value: TColor); override;
+    procedure SetCursorIcon(c: TAU3Cursor);
+    procedure SetisEnabled(b: boolean);
+    procedure SetFont(f: TFont);
+    procedure SetHint(const Value: TTranslateString); override;
+    procedure SetHotKey(h: String);
+    procedure SetPicture(p: String);
+    procedure SetTabOrder(i: integer);
+    procedure SetisVisible(b: boolean);
+    procedure SetResizing(b: TResizeModes);
+
+    function GetFont: TFont;
+    function GetMaxLen: integer;
+
     function GetStyle: TWindowStyles;
     function GetButtonStyle: TButtonStyles;
     function GetStyleEx: TWindowExStyles;
