@@ -1131,7 +1131,7 @@ begin
     (c as Tau3Form).Style := Style;
     (c as Tau3Form).Events.Assign(FEvents);
   end;
-  // TODO
+        { TODO : Extend CopyTo }
 end;
 
 function Tau3Form.Getau3String(FormName: string): string;
@@ -1175,31 +1175,31 @@ begin
         [GUI_EVENT_MINIMIZE, FEvents.Values['onMinimize'], Name]));
     if (FEvents.Values['onRestore'] <> '') then
       sl.Add(Format('GUISetOnEvent(%d, "%s", $%s)',
-        [GUI_EVENT_MINIMIZE, FEvents.Values['onRestore'], Name]));
+        [GUI_EVENT_RESTORE, FEvents.Values['onRestore'], Name]));
     if (FEvents.Values['onMaximize'] <> '') then
       sl.Add(Format('GUISetOnEvent(%d, "%s", $%s)',
-        [GUI_EVENT_MINIMIZE, FEvents.Values['onMaximize'], Name]));
+        [GUI_EVENT_MAXIMIZE, FEvents.Values['onMaximize'], Name]));
     if (FEvents.Values['onMouseMove'] <> '') then
       sl.Add(Format('GUISetOnEvent(%d, "%s", $%s)',
-        [GUI_EVENT_MINIMIZE, FEvents.Values['onMouseMove'], Name]));
+        [GUI_EVENT_MOUSEMOVE, FEvents.Values['onMouseMove'], Name]));
     if (FEvents.Values['onLMouseDown'] <> '') then
       sl.Add(Format('GUISetOnEvent(%d, "%s", $%s)',
-        [GUI_EVENT_MINIMIZE, FEvents.Values['onLMouseDown'], Name]));
+        [GUI_EVENT_PRIMARYDOWN, FEvents.Values['onLMouseDown'], Name]));
     if (FEvents.Values['onLMouseUp'] <> '') then
       sl.Add(Format('GUISetOnEvent(%d, "%s", $%s)',
-        [GUI_EVENT_MINIMIZE, FEvents.Values['onLMouseUp'], Name]));
+        [GUI_EVENT_PRIMARYUP, FEvents.Values['onLMouseUp'], Name]));
     if (FEvents.Values['onRMouseDown'] <> '') then
       sl.Add(Format('GUISetOnEvent(%d, "%s", $%s)',
-        [GUI_EVENT_MINIMIZE, FEvents.Values['onRMouseDown'], Name]));
+        [GUI_EVENT_SECONDARYDOWN, FEvents.Values['onRMouseDown'], Name]));
     if (FEvents.Values['onRMouseUp'] <> '') then
       sl.Add(Format('GUISetOnEvent(%d, "%s", $%s)',
-        [GUI_EVENT_MINIMIZE, FEvents.Values['onRMouseUp'], Name]));
+        [GUI_EVENT_SECONDARYUP, FEvents.Values['onRMouseUp'], Name]));
     if (FEvents.Values['onResize'] <> '') then
       sl.Add(Format('GUISetOnEvent(%d, "%s", $%s)',
-        [GUI_EVENT_MINIMIZE, FEvents.Values['onResize'], Name]));
+        [GUI_EVENT_RESIZED, FEvents.Values['onResize'], Name]));
     if (FEvents.Values['onDrop'] <> '') then
       sl.Add(Format('GUISetOnEvent(%d, "%s", $%s)',
-        [GUI_EVENT_MINIMIZE, FEvents.Values['onDrop'], Name]));
+        [GUI_EVENT_DROPPED, FEvents.Values['onDrop'], Name]));
 
     for i := 0 to Self.ControlCount - 1 do
       sl.Add((Self.Controls[i] as Iau3Component).Getau3String(FormName));
@@ -1534,7 +1534,7 @@ constructor Tau3Edit.Create(AOwner: TComponent);
 begin
   inherited;
   FEvents := TStringList.Create;
-  FEvents.Values['onClick'] := '';
+  FEvents.Values['onChange'] := '';
   FStyle := $503310C4;
   Style := [WS_BORDER];
   FCursorIcon := craARROW;
@@ -1566,6 +1566,7 @@ begin
     (c as Tau3Edit).StyleEX := StyleEX;
     (c as Tau3Edit).Events.Assign(FEvents);
   end;
+  { TODO : Extend this shit }
 end;
 
 function Tau3Edit.Getau3String(FormName: string): string;
@@ -1596,6 +1597,8 @@ begin
     sl.Add(Format('GUICtrlSetTip($%s, "%s")', [Name, Hint]));
     // Cursor
     sl.Add(Format('GUICtrlSetCursor($%s, %d)', [Name, cardinal(FCursorIcon)]));
+    if Length(FEvents.Values['onChange'])>0 then
+      sl.Add(Format('GUICtrlSetOnEvent($%s, "%s")', [Name, FEvents.Values['onChange']]));
     Result := sl.Text;
   finally
     sl.Free;

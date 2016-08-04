@@ -9,7 +9,7 @@ uses
   au3Highlighter, Types, contnrs, LCLType, ExtCtrls, au3Types, UnitParser,
   Dialogs, Graphics, StdCtrls, Buttons, ComCtrls, strutils, CodeFormatter,
   ToolTip, ListRecords, SynEditTypes, Math, SynGutterBase, SynGutterChanges,
-  GraphUtil, Project;
+  GraphUtil, Project, gvector;
 
 type
 
@@ -52,6 +52,8 @@ type
     procedure CompletionCodeCompletion(var Value: string; SourceValue: string;
       var SourceStart, SourceEnd: TPoint; KeyChar: TUTF8Char; Shift: TShiftState);
     procedure CompletionExecute(Sender: TObject);
+    function CompletionPaintItem(const AKey: string; ACanvas: TCanvas;
+      X, Y: integer; Selected: boolean; Index: integer): boolean;
     procedure CompletionSearchPosition(var APosition: integer);
     procedure ReplaceAllButtonClick(Sender: TObject);
     procedure ReplaceButtonClick(Sender: TObject);
@@ -649,6 +651,78 @@ begin
   end;
   Completion.ItemList.Add('');
   Completion.Position := 0;
+end;
+
+function TEditorFrame.CompletionPaintItem(const AKey: string;
+  ACanvas: TCanvas; X, Y: integer; Selected: boolean; Index: integer): boolean;
+var
+  s, l, p: integer;
+  curr: TTokenType;
+  tok: string;
+begin
+  with ACanvas do
+  begin
+    p := 0;
+    if Length(AKey) > 0 then
+    begin
+      s := 1;
+      while s <= Length(AKey) do
+      begin
+        case AKey[s] of
+          '$': curr := tkVar;
+          '#': curr := tkFunction;
+          '@', '0'..'9': curr := tkNumber;
+          'A'..'Z', 'a'..'z', '_': curr := tkUnknown;
+          '"': curr := tkString;
+          '{': curr := tkTemp;
+          #01..#32: curr := tkSpace;
+          else
+            curr := tkSymbol;
+        end;
+        l := 1;
+        while s + l <= Length(AKey) do
+          if ((AKey[s + l] in ['A'..'Z', 'a'..'z', '0'..'9', '_', '-']) and
+            (curr in [tkVar, tkFunction, tkUnknown, tkNumber])) or
+            ((AKey[s + l] in [#01..#32]) and (curr = tkSpace)) or
+            ((AKey[s + l] <> '"') and (curr = tkString)) or
+            ((AKey[s + l] <> '}') and (curr = tkTemp)) then
+            Inc(l)
+          else
+            break;
+        if curr in [tkString, tkTemp] then
+          Inc(l)
+        else if (curr = tkUnknown) and (s + l <= Length(AKey)) and (AKey[s + l] = '(') then
+          curr := tkFunction;
+        tok := Copy(AKey, s, l);
+        Font.Bold := False;
+        case curr of
+          tkVar:
+          begin
+            Font.Color := Highlight.VariableAttribute.Foreground;
+            Font.Bold := True;
+          end;
+          tkFunction:
+            Font.Color := Highlight.FunctionAttribute.Foreground;
+          tkUnknown:
+            Font.Color := Highlight.KeywordAttribute.Foreground;
+          tkNumber:
+            Font.Color := Highlight.NumberAttribute.Foreground;
+          tkString:
+            Font.Color := Highlight.StringAttribute.Foreground;
+          tkSpace:
+            Font.Color := Highlight.SpaceAttribute.Foreground;
+          tkSymbol:
+            Font.Color := Highlight.SymbolAttribute.Foreground;
+          tkTemp:
+            Font.Color := Highlight.TempAttribute.Foreground;
+        end;
+        TextOut(x + p, y, tok);
+        Inc(s, l);
+        Inc(p, TextWidth(tok));
+      end;
+    end;
+  end;
+  Result := True;
 end;
 
 procedure TEditorFrame.Save(p: string = '');
@@ -1453,22 +1527,31 @@ procedure TEditorFrame.CheckSelTimerTimer(Sender: TObject);
     i, len: integer;
     ln: string;
     d: integer;
+    instr: boolean;
   begin
     Result := False;
-    n := 0;
-    d := 1;
-    i := CodeEditor.LogicalCaretXY.x - 1;
-    ln := CodeEditor.Lines[CodeEditor.LogicalCaretXY.y - 1];
-    while (i > 0) and (i <= Length(ln)) and (d > 0) do
-    begin
-      if ln[i] = ')' then
-        Inc(d)
-      else if ln[i] = '(' then
-        Dec(d);
-      if (d = 1) and (ln[i] = ',') then
-        Inc(n);
-      Dec(i);
-    end;
+    instr := False;
+    repeat
+      n := 0;
+      d := 1;
+      i := CodeEditor.LogicalCaretXY.x - 1;
+      ln := CodeEditor.Lines[CodeEditor.LogicalCaretXY.y - 1];
+      instr := not instr;
+      while (i > 0) and (i <= Length(ln)) and (d > 0) do
+      begin
+        if ln[i] = ')' then
+          Inc(d)
+        else if ln[i] = '"' then
+        begin
+          instr := not instr;
+        end
+        else if ln[i] = '(' then
+          Dec(d);
+        if (d = 1) and (ln[i] = ',') and not instr then
+          Inc(n);
+        Dec(i);
+      end;
+    until not instr;
     if d = 0 then
     begin
       len := 0;

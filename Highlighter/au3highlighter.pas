@@ -541,7 +541,7 @@ begin
   else
   if FLineText[FTokenEnd] in [#9, ' '] then
   begin
-    while (FTokenEnd <= l) and (FLineText[FTokenEnd] in [#0..#32]) do
+    while (FTokenEnd <= l) and (FLineText[FTokenEnd] in [#01..#32]) do
       Inc(FTokenEnd);
     FTokLen := FTokenEnd - FTokenPos;
     FToken := copy(FLineText, FTokenPos, FTokLen);

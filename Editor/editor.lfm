@@ -659,10 +659,11 @@ object EditorFrame: TEditorFrame
   end
   object Completion: TSynCompletion
     OnExecute = CompletionExecute
+    OnPaintItem = CompletionPaintItem
     Position = 0
     LinesInWindow = 6
     OnSearchPosition = CompletionSearchPosition
-    SelectedColor = clHighlight
+    SelectedColor = cl3DLight
     CaseSensitive = False
     Width = 262
     ShowSizeDrag = True

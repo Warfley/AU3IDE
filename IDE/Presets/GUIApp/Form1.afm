@@ -1,3 +1,12 @@
-;AET Generated Form File
-;Controllerfile should have the same Name
-$Form1 = CreateWindow("Form1", 40, 30, 400, 300, 0)
+Opt("GUIOnEventMode", 1)
+Opt("GUIResizeMode", 0)
+$Form1 = GUICreate("Form1", 402, 344, 0, 0, -1798701056, 256)
+GUISetCursor(2, 0, $Form1)
+GUISetFont(0,400,0,"default")
+GUISetBkColor(0xF0F0F0, $Form1)
+GUISetState(@SW_SHOW)
+GUISetOnEvent(-3, "Form1Close_Exit", $Form1)
+Global $PerformClose=True
+Func Form1Close_Exit()
+  If ($PerformClose = True) Then Exit
+EndFunc
