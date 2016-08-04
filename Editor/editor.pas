@@ -416,6 +416,7 @@ begin
   moveright := True;
   Parser := TUnitParser.Create(True);
   Highlight := Tau3SynHighlight.Create(nil);
+  FToolTip.Highlighter:=Highlight;
   CodeEditor.Highlighter := Highlight;
   FFunctions := TFuncList.Create;
   FVars := TVarList.Create;
@@ -704,7 +705,7 @@ begin
           tkFunction:
             Font.Color := Highlight.FunctionAttribute.Foreground;
           tkUnknown:
-            Font.Color := Highlight.KeywordAttribute.Foreground;
+            Font.Color := Highlight.NumberAttribute.Foreground;
           tkNumber:
             Font.Color := Highlight.NumberAttribute.Foreground;
           tkString:
@@ -1539,15 +1540,14 @@ procedure TEditorFrame.CheckSelTimerTimer(Sender: TObject);
       instr := not instr;
       while (i > 0) and (i <= Length(ln)) and (d > 0) do
       begin
+        if ln[i] = '"' then
+          instr := not instr
+        else if not instr then
         if ln[i] = ')' then
           Inc(d)
-        else if ln[i] = '"' then
-        begin
-          instr := not instr;
-        end
         else if ln[i] = '(' then
           Dec(d);
-        if (d = 1) and (ln[i] = ',') and not instr then
+        if (d = 1) and (ln[i] = ',') then
           Inc(n);
         Dec(i);
       end;

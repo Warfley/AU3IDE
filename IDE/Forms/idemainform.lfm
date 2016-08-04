@@ -1066,7 +1066,6 @@ object MainForm: TMainForm
     TabOrder = 3
     inherited ProjectFileTreeView: TTreeView
       Height = 295
-      DefaultItemHeight = 32
     end
     inherited FileInfoPanel: TPanel
       Top = 352

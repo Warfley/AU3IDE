@@ -5,7 +5,7 @@ unit ToolTip;
 interface
 
 uses
-  Classes, SysUtils, Forms, Graphics, Controls, Math, windows;
+  Classes, SysUtils, Forms, Graphics, Controls, Math, au3Highlighter, au3Types;
 
 type
   TEditorToolTip = class(TGraphicControl)
@@ -14,6 +14,7 @@ type
     FParams: TStringList;
     FInfo: string;
     FSelectedParam: integer;
+    hl: Tau3SynHighlight;
     procedure SetSelectedParam(x: integer);
     function GetFunc: string;
     function GetSummarySize: integer;
@@ -29,6 +30,7 @@ type
     property SelectedParam: integer read FSelectedParam write SetSelectedParam;
     property Func: string read getFunc write SetFunc;
     property Info: string read FInfo write SetInfo;
+    property Highlighter: Tau3SynHighlight read hl write hl;
   end;
 
 implementation
@@ -107,8 +109,10 @@ end;
 
 procedure TEditorToolTip.Paint;
 var
-  p, i: integer;
+  p, i, s,l: integer;
   sl: TStringList;
+  AKey, tok: String;
+  curr: TTokenType;
 begin
   Canvas.Brush.Color := Color;
   Canvas.Brush.Style := bsSolid;
@@ -119,22 +123,80 @@ begin
   Canvas.Pen.Style := psClear;
   Canvas.Font := Font;
   p := 2;
-  Canvas.TextOut(p, 1, FFunc + '(');
-  Inc(p, Canvas.TextWidth(FFunc + '('));
+  Canvas.Font.Color:=hl.FunctionAttribute.Foreground;
+  Canvas.TextOut(p, 1, FFunc);
+  Inc(p, Canvas.TextWidth(FFunc));
+  Canvas.Font.Color:=hl.SymbolAttribute.Foreground;
+  Canvas.TextOut(p, 1, '(');
+  Inc(p, Canvas.TextWidth('('));
   for i := 0 to FParams.Count - 1 do
   begin
-    if SelectedParam = i then
-      Canvas.Font.Style := Canvas.Font.Style + [fsBold];
-    Canvas.TextOut(p, 1, FParams[i]);
-    Inc(p, Canvas.TextWidth(FParams[i]));
-    Canvas.Font.Style := Canvas.Font.Style - [fsBold];
+    AKey:=FParams[i];
+    With Canvas do
+    if Length(AKey)>0 then
+    begin
+      s := 1;
+      while s <= Length(AKey) do
+      begin
+        case AKey[s] of
+          '$': curr := tkVar;
+          '#': curr := tkFunction;
+          '@', '0'..'9': curr := tkNumber;
+          'A'..'Z', 'a'..'z', '_': curr := tkUnknown;
+          '"': curr := tkString;
+          '{': curr := tkTemp;
+          #01..#32: curr := tkSpace;
+          else
+            curr := tkSymbol;
+        end;
+        l := 1;
+        while s + l <= Length(AKey) do
+          if ((AKey[s + l] in ['A'..'Z', 'a'..'z', '0'..'9', '_', '-']) and
+            (curr in [tkVar, tkFunction, tkUnknown, tkNumber])) or
+            ((AKey[s + l] in [#01..#32]) and (curr = tkSpace)) or
+            ((AKey[s + l] <> '"') and (curr = tkString)) or
+            ((AKey[s + l] <> '}') and (curr = tkTemp)) then
+            Inc(l)
+          else
+            break;
+        if curr in [tkString, tkTemp] then
+          Inc(l) ;
+        tok := Copy(AKey, s, l);
+        case curr of
+          tkVar:
+            Font.Color := hl.VariableAttribute.Foreground;
+          tkFunction:
+            Font.Color := hl.FunctionAttribute.Foreground;
+          tkUnknown:
+            Font.Color := hl.NumberAttribute.Foreground;
+          tkNumber:
+            Font.Color := hl.NumberAttribute.Foreground;
+          tkString:
+            Font.Color := hl.StringAttribute.Foreground;
+          tkSpace:
+            Font.Color := hl.SpaceAttribute.Foreground;
+          tkSymbol:
+            Font.Color := hl.SymbolAttribute.Foreground;
+          tkTemp:
+            Font.Color := hl.TempAttribute.Foreground;
+        end;
+    Canvas.Font.Bold:=SelectedParam=i;
+        TextOut(p, 1, tok);
+        Inc(s, l);
+        Inc(p, TextWidth(tok));
+      end;
+    end;
+    Canvas.Font.Bold:=False;
     if i <> FParams.Count - 1 then
     begin
+  Canvas.Font.Color:=hl.SymbolAttribute.Foreground;
       Canvas.TextOut(p, 1, ',');
-      Inc(p, Canvas.TextWidth(','));
+      Inc(p, Canvas.TextWidth(', '));
     end;
   end;
+  Canvas.Font.Color:=hl.SymbolAttribute.Foreground;
   Canvas.TextOut(p, 1, ')');
+  Canvas.Font.Color:=hl.CommentAttribute.Foreground;
   p:=Canvas.TextHeight(FFunc)+3;
   sl:=TStringList.Create;
   try
