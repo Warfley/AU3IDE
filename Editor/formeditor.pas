@@ -522,7 +522,7 @@ begin
         end;
         else
         begin
-          if Sender <> FFormular then
+          if MovingControl <> FFormular then
           begin
             MovingControl.Left :=
               ((Sender as TControl).Parent.ScreenToClient(
