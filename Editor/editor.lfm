@@ -604,8 +604,8 @@ object EditorFrame: TEditorFrame
       BevelOuter = bvNone
       BorderStyle = bsSingle
       Caption = 'Code Explorer'
-      ClientHeight = 30
-      ClientWidth = 231
+      ClientHeight = 34
+      ClientWidth = 235
       TabOrder = 0
       object CloseCodeExplorerButton: TSpeedButton
         Left = 193
