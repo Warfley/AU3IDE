@@ -27,7 +27,7 @@ type
   end;
 
 const
-  SDownloadURL = 'http://kehrein.org/AET/Install/';
+  SDownloadURL = 'http://kehrein.org/AS/Install/';
 
   procedure TPrintObject.PrintOutput(Sender: TObject;
   const ContentLength, CurrentPos: int64);
@@ -85,7 +85,7 @@ begin
   WriteLn(UTF8Decode('Bitte das Zielverzeichnis wählen'));
   fd := TSelectDirectoryDialog.Create(nil);
   try
-    fd.InitialDir := GetEnvironmentVariable('PROGRAMFILES(x86)') + PathDelim + 'AET';
+    fd.InitialDir := GetEnvironmentVariable('PROGRAMFILES(x86)') + PathDelim + 'AutomateStudio';
     fd.FileName := fd.InitialDir;
     fd.Title := 'Installationsverzeichnis wählen';
     if not fd.Execute then
@@ -132,15 +132,15 @@ begin
         WriteLn('Fertig');
       end;
     TextColor(White);
-    Write(UTF8Decode('.AU3proj Dateien verknüpfen? (y/n)'));
+    Write(UTF8Decode('.au3proj Dateien verknüpfen? (y/n)'));
     ReadLn(inp);
     if LowerCase(inp) = 'y' then
     begin
       a := TFileAssociation.Create(nil);
       try
-        a.ApplicationDescription := 'AET: AU3 IDE';
-        a.Extension := '.AU3proj';
-        a.ExtensionName := 'AET Project';
+        a.ApplicationDescription := 'Automate Studio: Autoit IDE';
+        a.Extension := '.au3proj';
+        a.ExtensionName := 'Automate Studio Project';
         a.Action := '"' + selDir + 'AU3IDE.exe" "%1"';
         a.ActionName := 'Open';
         a.Execute;
@@ -154,11 +154,11 @@ begin
     begin
       CreateLink(selDir + 'AU3IDE.exe', GetEnvironmentVariable('HOMEDRIVE') +
         GetEnvironmentVariable('HOMEPATH') +
-        PathDelim + 'AppData\Roaming\Microsoft\Windows\Start Menu\Programs\AET.lnk', 'AET AU3 IDE');
+        PathDelim + 'AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Automate.lnk', 'Automate Studio');
     end;
     TextColor(Yellow);
     WriteLn('Installation abgeschlossen');
-    Write(UTF8Decode('AET IDE öffnen? (y/n)'));
+    Write(UTF8Decode('Automate Studio öffnen? (y/n)'));
     ReadLn(inp);
     if LowerCase(inp) = 'y' then
     begin

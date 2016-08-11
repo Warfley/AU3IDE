@@ -5,7 +5,7 @@ object StartupScreen: TStartupScreen
   Width = 605
   ActiveControl = LastOpendBox
   BorderStyle = bsToolWindow
-  Caption = 'AU3 IDE'
+  Caption = 'Projekt Auswahl'
   ClientHeight = 325
   ClientWidth = 605
   Color = clWhite
@@ -15,6 +15,7 @@ object StartupScreen: TStartupScreen
   OnShow = FormShow
   Position = poScreenCenter
   ShowInTaskBar = stAlways
+  LCLVersion = '1.6.0.4'
   Visible = False
   object NewButton: TSpeedButton
     Left = 392
@@ -311,9 +312,9 @@ object StartupScreen: TStartupScreen
     OnPaint = LastOpendPanelPaint
     object Label1: TLabel
       Left = 8
-      Height = 16
+      Height = 25
       Top = 136
-      Width = 101
+      Width = 126
       Caption = 'Zuletzt geöffnet'
       ParentColor = False
     end
@@ -660,15 +661,15 @@ object StartupScreen: TStartupScreen
     end
     object Label2: TLabel
       Left = 6
-      Height = 16
+      Height = 25
       Top = 224
-      Width = 36
+      Width = 47
       Caption = 'Name'
       ParentColor = False
     end
     object NewProjectNameEdit: TEdit
       Left = 64
-      Height = 22
+      Height = 33
       Top = 220
       Width = 154
       OnChange = NewProjectNameEditChange
@@ -677,7 +678,7 @@ object StartupScreen: TStartupScreen
     end
     object NewProjectDirEdit: TDirectoryEdit
       Left = 64
-      Height = 22
+      Height = 33
       Top = 256
       Width = 318
       ShowHidden = False
@@ -688,9 +689,9 @@ object StartupScreen: TStartupScreen
     end
     object Label3: TLabel
       Left = 6
-      Height = 16
+      Height = 25
       Top = 260
-      Width = 44
+      Width = 56
       Caption = 'Ordner'
       ParentColor = False
     end

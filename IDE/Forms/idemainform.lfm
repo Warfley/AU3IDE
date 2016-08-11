@@ -4,7 +4,7 @@ object MainForm: TMainForm
   Top = 51
   Width = 1260
   ActiveControl = SelectModeBox
-  Caption = 'AET'
+  Caption = 'Automate Studio'
   ClientHeight = 597
   ClientWidth = 1260
   Color = clBtnFace

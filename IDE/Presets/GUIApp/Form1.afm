@@ -1,6 +1,6 @@
 Opt("GUIOnEventMode", 1)
 Opt("GUIResizeMode", 0)
-$Form1 = GUICreate("Form1", 402, 344, 0, 0, -1798701056, 256)
+$Form1 = GUICreate("Form1", 402, 344, 200, 200, -1798701056, 256)
 GUISetCursor(2, 0, $Form1)
 GUISetFont(0,400,0,"default")
 GUISetBkColor(0xF0F0F0, $Form1)

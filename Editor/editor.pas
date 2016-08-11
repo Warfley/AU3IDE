@@ -19,7 +19,6 @@ type
     CodeExplorerPanel: TPanel;
     CodeExplorerHead: TPanel;
     CodeExplorerImages: TImageList;
-    Label2: TLabel;
     SearchButton: TButton;
     ReplaceButton: TButton;
     ReplaceAllButton: TButton;
@@ -446,6 +445,7 @@ var
   p, ni, nv, nf, tmp: TTreeNode;
   s: string;
 begin
+  if not CodeExplorer.Visible then exit;
   CodeExplorer.BeginUpdate;
   try
     for i := 0 to CodeExplorer.Items.Count - 1 do
@@ -1547,7 +1547,7 @@ procedure TEditorFrame.CheckSelTimerTimer(Sender: TObject);
           Inc(d)
         else if ln[i] = '(' then
           Dec(d);
-        if (d = 1) and (ln[i] = ',') then
+        if (d = 1) and (ln[i] = ',') and not instr then
           Inc(n);
         Dec(i);
       end;
@@ -1675,7 +1675,21 @@ end;
 
 procedure TEditorFrame.CloseCodeExplorerButtonClick(Sender: TObject);
 begin
-  CodeExplorerPanel.Hide;
+  if CloseCodeExplorerButton.Caption='x' then
+  begin
+    CodeExplorer.Hide;
+    CodeExplorerPanel.Width:=32;
+    CloseCodeExplorerButton.Caption:='<';
+    CodeExplorerHead.Caption:='';
+  end
+  else
+  begin
+    CodeExplorer.Show;
+    CodeExplorerPanel.Width:=235;
+    CloseCodeExplorerButton.Caption:='x';
+    CodeExplorerHead.Caption:='Code Explorer';
+    UpdateTimerTimer(nil);
+  end;
 end;
 
 procedure TEditorFrame.CloseSearchButtonClick(Sender: TObject);

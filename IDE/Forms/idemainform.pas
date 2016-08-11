@@ -1097,7 +1097,7 @@ begin
     sl.Clear;
     sl.Add('Opt("GUIOnEventMode", 1)');
     sl.Add('Opt("GUIResizeMode", 0)');
-    sl.Add(Format('$%s = GUICreate("%s", 402, 344, 0, 0, -1798701056, 256)',
+    sl.Add(Format('$%s = GUICreate("%s", 402, 344, 200, 200, -1798701056, 256)',
       ['Form' + IntToStr(i), 'Form' + IntToStr(i)]));
     sl.Add(Format('GUISetCursor(2, 0, $%s)', ['Form' + IntToStr(i)]));
     sl.Add('GUISetFont(0,400,0,"default")');

@@ -83,7 +83,7 @@ type
 
 const
   Version = '0.0.5';
-  SUpdateURL = 'http://kehrein.org/AET/Updates/';
+  SUpdateURL = 'http://kehrein.org/AS/Updates/';
 
 function OpendFileInfo(Name: string; Line: integer = 1;
   Pos: integer = 1): TOpendFileInfo;

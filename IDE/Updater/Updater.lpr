@@ -23,7 +23,7 @@ type
   end;
 
 const
-  SUpdateURL = 'http://kehrein.org/AET/Updates/';
+  SUpdateURL = 'http://kehrein.org/AS/Updates/';
 
 
   procedure TPrintObject.PrintOutput(Sender: TObject;

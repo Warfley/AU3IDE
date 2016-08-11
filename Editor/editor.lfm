@@ -604,14 +604,15 @@ object EditorFrame: TEditorFrame
       BevelOuter = bvNone
       BorderStyle = bsSingle
       Caption = 'Code Explorer'
-      ClientHeight = 34
-      ClientWidth = 235
+      ClientHeight = 30
+      ClientWidth = 231
       TabOrder = 0
       object CloseCodeExplorerButton: TSpeedButton
-        Left = 193
-        Height = 28
+        Left = 203
+        Height = 30
         Top = 0
         Width = 28
+        Align = alRight
         Anchors = [akTop, akRight]
         Caption = 'x'
         Flat = True
@@ -639,14 +640,6 @@ object EditorFrame: TEditorFrame
         0000000000000000090000005661726961626C656E0000000000000000FFFFFF
         FFFFFFFFFF0000000000000000000A00000046756E6B74696F6E656E
       }
-    end
-    object Label2: TLabel
-      Left = 121
-      Height = 25
-      Top = 206
-      Width = 51
-      Caption = 'Label2'
-      ParentColor = False
     end
   end
   object CESplitter: TSplitter

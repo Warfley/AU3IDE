@@ -7,7 +7,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, StdCtrls, ExtCtrls, Buttons, ValEdit,
-  LCLIntf, LCLType, LCLProc, strutils;
+  LCLIntf, LCLType, LCLProc, strutils, au3Types;
 
 type
   TAU3Cursor =
@@ -211,6 +211,7 @@ type
     function GetColor: TColor;
 
     function GetStyle: TWindowStyles;
+    function GetStyleEx: TWindowExStyles;
     function GetLeft: integer;
     function GetTop: integer;
     function GetWidth: integer;
@@ -261,6 +262,7 @@ type
     property Icon: string read FIcon write SetIcon;
     property IconID: integer read FIconID write SetIconID;
     property Resize: TResizeModes read GetResize write SetResize;
+    property StyleEx: TWindowExStyles read GetStyleEx write SetStyleEX;
 
     property OnClick;
     property OnEnter;
@@ -437,7 +439,7 @@ type
     FTabOrder: integer;
     FIsVisible: boolean;
     FResizing: TResizeModes;
-    FPicture: string;
+    FPicture: TFilename;
     FHotKey: TShortCut;
   protected
     procedure SetName(const Value: TComponentName); override;
@@ -456,7 +458,7 @@ type
     procedure SetFont(f: TFont);
     procedure SetHint(const Value: TTranslateString); override;
     procedure SetHotKey(h: TShortCut);
-    procedure SetPicture(p: string);
+    procedure SetPicture(p: TFilename);
     procedure SetTabOrder(i: integer);
     procedure SetisVisible(b: boolean);
     procedure SetResizing(b: TResizeModes);
@@ -511,7 +513,7 @@ type
     property Enabled: boolean read FisEnabled write SetisEnabled;
     property Font: TFont read GetFont write SetFont;
     property HotKey: TShortCut read FHotKey write SetHotKey;
-    property Picture: string read FPicture write SetPicture;
+    property Picture: TFilename read FPicture write SetPicture;
     property Resizing: TResizeModes read FResizing write SetResizing;
     property TabOrder: integer read FTabOrder write SetTabOrder;
     property Visible: boolean read FIsVisible write SetisVisible;
@@ -566,6 +568,12 @@ type
     FStyleEX: cardinal;
     FEvents: TStringList;
     FOnChangeProp: TPropertyChangeEvent;
+    FCursorIcon: TAU3Cursor;
+    FisEnabled: boolean;
+    FTabOrder: integer;
+    FIsVisible: boolean;
+    FResizing: TResizeModes;
+    FChecked: boolean;
   protected
     procedure Click; override;
     procedure SetName(const Value: TComponentName); override;
@@ -577,6 +585,19 @@ type
     procedure SetStyle(val: TWindowStyles);
     procedure SetButtonStyle(val: TButtonStyles);
     procedure SetStyleEx(val: TWindowExStyles);
+
+    procedure SetColor(Value: TColor); override;
+    procedure SetCursorIcon(c: TAU3Cursor);
+    procedure SetisEnabled(b: boolean);
+    procedure SetFont(f: TFont);
+    procedure SetHint(const Value: TTranslateString); override;
+    procedure SetTabOrder(i: integer);
+    procedure SetisVisible(b: boolean);
+    procedure SetResizing(b: TResizeModes);
+    procedure SetChecked(Value: boolean); override;
+
+    function GetFont: TFont;
+
     function GetStyle: TWindowStyles;
     function GetButtonStyle: TButtonStyles;
     function GetStyleEx: TWindowExStyles;
@@ -619,6 +640,14 @@ type
     property CompleteStyle: cardinal read FStyle write FStyle;
     property Text: string read GetText write SetText;
     property Caption: string read GetText write SetText;
+
+    property CursorIcon: TAU3Cursor read FCursorIcon write SetCursorIcon;
+    property Enabled: boolean read FisEnabled write SetisEnabled;
+    property Font: TFont read GetFont write SetFont;
+    property Resizing: TResizeModes read FResizing write SetResizing;
+    property TabOrder: integer read FTabOrder write SetTabOrder;
+    property Visible: boolean read FIsVisible write SetisVisible;
+
     property Action;
     property Align;
     property Alignment;
@@ -634,8 +663,6 @@ type
     property DragCursor;
     property DragKind;
     property DragMode;
-    property Enabled;
-    property Font;
     property Hint;
     property OnChange;
     property OnChangeBounds;
@@ -668,9 +695,7 @@ type
     property PopupMenu;
     property ShowHint;
     property State;
-    property TabOrder;
     property TabStop default True;
-    property Visible;
   end;
 
   Tau3Label = class(TCustomControl, Iau3Component)
@@ -680,6 +705,11 @@ type
     FEvents: TStringList;
     FOnChangeProp: TPropertyChangeEvent;
     FCaption: string;
+    FCursorIcon: TAU3Cursor;
+    FisEnabled: boolean;
+    FTabOrder: integer;
+    FIsVisible: boolean;
+    FResizing: TResizeModes;
   protected
     procedure SetName(const Value: TComponentName); override;
     procedure SetLeft(Val: integer);
@@ -690,6 +720,18 @@ type
     procedure SetStyle(val: TWindowStyles);
     procedure SetStaticStyle(val: TStaticStyles);
     procedure SetStyleEx(val: TWindowExStyles);
+
+    procedure SetColor(Value: TColor); override;
+    procedure SetCursorIcon(c: TAU3Cursor);
+    procedure SetisEnabled(b: boolean);
+    procedure SetFont(f: TFont);
+    procedure SetHint(const Value: TTranslateString); override;
+    procedure SetTabOrder(i: integer);
+    procedure SetisVisible(b: boolean);
+    procedure SetResizing(b: TResizeModes);
+
+    function GetFont: TFont;
+
     function GetStyle: TWindowStyles;
     function GetStaticStyle: TStaticStyles;
     function GetStyleEx: TWindowExStyles;
@@ -732,6 +774,14 @@ type
     property CompleteStyle: cardinal read FStyle write FStyle;
     property Text: string read FCaption write SetText;
     property Caption: string read FCaption write SetText;
+
+    property CursorIcon: TAU3Cursor read FCursorIcon write SetCursorIcon;
+    property Enabled: boolean read FisEnabled write SetisEnabled;
+    property Font: TFont read GetFont write SetFont;
+    property Resizing: TResizeModes read FResizing write SetResizing;
+    property TabOrder: integer read FTabOrder write SetTabOrder;
+    property Visible: boolean read FIsVisible write SetisVisible;
+
     property OnClick;
     property OnEnter;
     property OnExit;
@@ -761,19 +811,90 @@ const
   GUI_EVENT_RESIZED = -12;
   GUI_EVENT_DROPPED = -13;
 
+function GUIEventToString(e: integer): string;
+function AuColToColor(s: string): TColor;
+procedure SetFontString(f: TFont; s: string);
+function AU3KeyToHotKey(h: string): string;
+
 implementation
 
-function ColorToAUString(c: TColor): String;
+function GUIEventToString(e: integer): string;
+begin
+  case e of
+    GUI_EVENT_CLOSE: Result := 'onClose';
+    GUI_EVENT_MINIMIZE: Result := 'onMinimize';
+    GUI_EVENT_RESTORE: Result := 'onRestore';
+    GUI_EVENT_MAXIMIZE: Result := 'onMaximize';
+    GUI_EVENT_MOUSEMOVE: Result := 'onMouseMove';
+    GUI_EVENT_PRIMARYDOWN: Result := 'onLMouseDown';
+    GUI_EVENT_PRIMARYUP: Result := 'onLMouseUp';
+    GUI_EVENT_SECONDARYUP: Result := 'onRMouseUp';
+    GUI_EVENT_SECONDARYDOWN: Result := 'onRMouseDown';
+    GUI_EVENT_RESIZED: Result := 'onResize';
+    GUI_EVENT_DROPPED: Result := 'onDrop';
+  end;
+end;
+
+function AuColToColor(s: string): TColor;
 type
   TRGBCol = record
-    case Boolean of
-    True: (R,G,B: Byte);
-    False: (Col:TColor);
+    case boolean of
+      True: (R, G, B: byte);
+      False: (Col: TColor);
   end;
-var col: TRGBCol;
+var
+  col: TRGBCol;
 begin
-  col.Col:=ColorToRGB(c) and $00FFFFFF;
-  Result:=Format('0x%s%s%s', [IntToHex(col.R, 2),IntToHex(col.G, 2),IntToHex(col.B, 2)]);
+  col.Col := 0;
+  if pos('0x', s) = 1 then
+    Delete(s, 1, 2);
+  if Length(s) <> 6 then
+    Exit(0);
+  col.R := Hex2Dec(Copy(s, 1, 2));
+  col.G := Hex2Dec(Copy(s, 3, 2));
+  col.B := Hex2Dec(Copy(s, 5, 2));
+  Result := col.Col;
+end;
+
+function ColorToAUString(c: TColor): string;
+type
+  TRGBCol = record
+    case boolean of
+      True: (R, G, B: byte);
+      False: (Col: TColor);
+  end;
+var
+  col: TRGBCol;
+begin
+  col.Col := ColorToRGB(c) and $00FFFFFF;
+  Result := Format('0x%s%s%s', [IntToHex(col.R, 2), IntToHex(col.G, 2),
+    IntToHex(col.B, 2)]);
+end;
+
+function AU3KeyToHotKey(h: string): string;
+var
+  sl: TStringList;
+  i: Integer;
+begin
+  sl := TStringList.Create;
+  try
+    for i := 1 to Length(h) do
+      case h[i] of
+        '!': sl.Add('Alt');
+        '^': sl.Add('Ctrl');
+        '+': sl.Add('Shift');
+        'A'..'Z': sl.Add(h[i]);
+        '{':
+        begin
+          sl.Add(ExtractBetween(h, '{', '}'));
+          Break;
+        end;
+      end;
+    sl.Delimiter := '+';
+    Result := sl.DelimitedText;
+  finally
+    sl.Free;
+  end;
 end;
 
 function HotKeyToAu3Key(k: TShortCut): string;
@@ -825,7 +946,7 @@ function GetFontString(f: TFont): string;
   end;
 
 begin
-  Result := Format('%d,%d,%d,"%s"', [f.Size, GetWeight, GetAttr, f.Name]);
+  Result := Format('%d, %d, %d, "%s"', [f.Size, GetWeight, GetAttr, f.Name]);
 end;
 
 procedure SetFontString(f: TFont; s: string);
@@ -854,7 +975,7 @@ begin
   sl := TStringList.Create;
   try
     sl.CommaText := s;
-    f.Name := ExtractBetween(sl[3], '"', '"');
+    f.Name := sl[3];
     f.Size := StrToInt(Trim(sl[0]));
     f.Bold := Trim(sl[1]) = '700';
     attr := StrToInt(Trim(sl[2]));
@@ -927,8 +1048,8 @@ begin
     (prop = 'y') or (prop = 'width') or (prop = 'height') or
     (prop = 'style') or (Pos('ws_', prop) = 1) or (Pos('rz', prop) = 1) or
     (prop = 'enabled') or (prop = 'color') or (prop = 'cursoricon') or
-    (prop = 'font') or (prop = 'icon') or (prop = 'resizing') or
-    (prop = 'visible') or (prop = 'iconid') or (prop = 'styleex') or (prop = 'resize');
+    (prop = 'font') or (prop = 'icon') or (prop = 'visible') or
+    (prop = 'iconid') or (prop = 'styleex') or (prop = 'resize');
 end;
 
 function Tau3Form.GetEvents: TStringList;
@@ -1089,6 +1210,11 @@ end;
 function Tau3Form.GetStyle: TWindowStyles;
 begin
   Result := TWindowStyles(FStyle shr 16);
+end;
+
+function Tau3Form.GetStyleEx: TWindowExStyles;
+begin
+  Result := TWindowExStyles(FStyleEx);
 end;
 
 function Tau3Form.GetOnChangeProp: TPropertyChangeEvent;
@@ -1254,8 +1380,7 @@ begin
       sl.Add(Format('GUISetIcon("%s", %d, $%s)', [FIcon, FIconID, Name]));
     sl.Add(Format('GUISetCursor(%d, 0, $%s)', [Ord(FMyCursor), Name]));
     sl.Add(Format('GUISetFont(%s)', [GetFontString(Font)]));
-    sl.Add(Format('GUISetBkColor(%s, $%s)',
-      [ColorToAUString(Color), Name]));
+    sl.Add(Format('GUISetBkColor(%s, $%s)', [ColorToAUString(Color), Name]));
     if not FEnabled then
       sl.Add('GUISetState(@SW_DISABLE)')
     else if not Visible then
@@ -1318,16 +1443,16 @@ begin
             hkey.Add(s);
         end;
       end;
-        if hkey.Count > 0 then
-          s := Format('Dim $%s_AccelTable[3][2] = [', [Name]);
-        for k := 0 to hkey.Count - 1 do
-          s += hkey[i] + ',';
-        if Length(s) > 0 then
-        begin
-          s[Length(s)] := ']';
-          sl.Add(s);
-          sl.Add(Format('GUISetAccelerators($%s_AccelTable)', [Name]));
-        end;
+      if hkey.Count > 0 then
+        s := Format('Dim $%s_AccelTable[3][2] = [', [Name]);
+      for k := 0 to hkey.Count - 1 do
+        s += hkey[k] + ',';
+      if Length(s) > 0 then
+      begin
+        s[Length(s)] := ']';
+        sl.Add(s);
+        sl.Add(Format('GUISetAccelerators($%s_AccelTable)', [Name]));
+      end;
     finally
       hkey.Free;
     end;
@@ -1493,14 +1618,17 @@ procedure Tau3Edit.SetFont(f: TFont);
 begin
   inherited Font := f;
   if Assigned(FOnChangeProp) then
+  begin
     FOnChangeProp(Self, 'Font', GetFontString(f));
+    FOnChangeProp(Self, 'FontColor', IntToStr(ColorToRGB(Font.Color)));
+  end;
 end;
 
 procedure Tau3Edit.SetMaxLen(l: integer);
 begin
   inherited MaxLength := l;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'MaxLength', IntToStr(l));
+    FOnChangeProp(Self, 'Limit', IntToStr(l));
 end;
 
 procedure Tau3Edit.SetHint(const Value: TTranslateString);
@@ -1579,6 +1707,8 @@ begin
     Result := IntToStr(FStyleEX)
   else if prop = 'color' then
     Result := IntToStr(ColorToRGB(Color))
+  else if prop = 'fontcolor' then
+    Result := IntToStr(ColorToRGB(Font.Color))
   else if prop = 'cursor' then
     Result := IntToStr(cardinal(FCursorIcon))
   else if prop = 'enabled' then
@@ -1587,7 +1717,7 @@ begin
     Result := GetFontString(Font)
   else if prop = 'hint' then
     Result := Hint
-  else if prop = 'maxlength' then
+  else if prop = 'limit' then
     Result := IntToStr(MaxLength)
   else if prop = 'resizing' then
     Result := IntToStr(cardinal(FResizing))
@@ -1620,6 +1750,8 @@ begin
     FStyleEX := StrToInt(val)
   else if (prop = 'color') and isNumeric(val) then
     inherited Color := TColor(StrToInt(val))
+  else if (prop = 'fontcolor') and isNumeric(val) then
+    Font.Color := TColor(StrToInt(val))
   else if (prop = 'cursor') and isNumeric(val) then
     FCursorIcon := TAU3Cursor(StrToInt(val))
   else if (prop = 'enabled') then
@@ -1628,7 +1760,7 @@ begin
     SetFontString(Font, val)
   else if (prop = 'hint') then
     Hint := (val)
-  else if (prop = 'maxlength') and isNumeric(val) then
+  else if (prop = 'limit') and isNumeric(val) then
     MaxLength := StrToInt(val)
   else if (prop = 'resizing') and isNumeric(val) then
     FResizing := TResizeModes(StrToInt(val))
@@ -1710,12 +1842,10 @@ begin
       sl.Add(Format('GUICtrlSetLimit($%s, %d)', [Name, MaxLength]));
     // Font
     sl.Add(Format('GUICtrlSetFont($%s, %s)', [Name, GetFontString(Font)]));
-    if font.Color<>clBlack then
-    sl.Add(Format('GUICtrlSetColor($%s, %s)',
-      [Name, ColorToAUString(Font.Color)]));
+    if font.Color <> clBlack then
+      sl.Add(Format('GUICtrlSetColor($%s, %s)', [Name, ColorToAUString(Font.Color)]));
     // Background Color
-    sl.Add(Format('GUICtrlSetBkColor($%s, %s)',
-      [Name, ColorToAUString(Color)]));
+    sl.Add(Format('GUICtrlSetBkColor($%s, %s)', [Name, ColorToAUString(Color)]));
     // Resizing
     sl.Add(Format('GUICtrlSetResizing($%s, %d)', [Name, cardinal(FResizing)]));
     // Visible/Enabled
@@ -1881,7 +2011,10 @@ procedure Tau3Button.SetFont(f: TFont);
 begin
   inherited Font := f;
   if Assigned(FOnChangeProp) then
+  begin
     FOnChangeProp(Self, 'Font', GetFontString(f));
+    FOnChangeProp(Self, 'FontColor', IntToStr(ColorToRGB(Font.Color)));
+  end;
 end;
 
 procedure Tau3Button.SetHint(const Value: TTranslateString);
@@ -1898,7 +2031,7 @@ begin
     FOnChangeProp(Self, 'Hotkey', ShortCutToText(h));
 end;
 
-procedure Tau3Button.SetPicture(p: string);
+procedure Tau3Button.SetPicture(p: TFilename);
 var
   pic: TPicture;
   ext: string;
@@ -1912,8 +2045,8 @@ begin
   else
   begin
     ext := LowerCase(ExtractFileExt(p));
-    if (ext <> '.png') or (ext <> '.ico') or (ext <> '.tga') or
-      (ext <> '.jpg') or (ext <> '.gif') or (ext <> '.bmp') then
+    if (ext <> '.png') and (ext <> '.ico') and (ext <> '.tga') and
+      (ext <> '.jpg') and (ext <> '.gif') and (ext <> '.bmp') then
     begin
       FPicture := p;
       exit;
@@ -2004,7 +2137,9 @@ begin
   else if p = 'styleex' then
     Result := IntToStr(FStyleEX)
   else if p = 'color' then
-    Result := IntToStr(Color)
+    Result := IntToStr(ColorToRGB(Color))
+  else if p = 'fontcolor' then
+    Result := IntToStr(ColorToRGB(Font.Color))
   else if p = 'cursor' then
     Result := IntToStr(Ord(FCursorIcon))
   else if p = 'enabled' then
@@ -2048,6 +2183,8 @@ begin
     FStyleEX := StrToInt(val)
   else if (p = 'color') and isNumeric(val) then
     Color := StrToInt(val)
+  else if (p = 'fontcolor') and isNumeric(val) then
+    Font.Color := StrToInt(val)
   else if (p = 'cursor') and isNumeric(val) then
     FCursorIcon := TAU3Cursor(StrToInt(val))
   else if (p = 'enabled') then
@@ -2079,8 +2216,12 @@ begin
 end;
 
 function Tau3Button.GetHotkey: string;
+var
+  s: string;
 begin
-  Result := Format('["%s", $%s]', [HotKeyToAu3Key(FHotKey), Name]);
+  s := HotKeyToAu3Key(FHotKey);
+  if Length(s) > 0 then
+    Result := Format('["%s", $%s]', [s, Name]);
 end;
 
 procedure Tau3Button.Click;
@@ -2103,7 +2244,6 @@ begin
   FCursorIcon := craARROW;
   FIsVisible := True;
   FisEnabled := True;
-  { TODO : StdStyles }
 end;
 
 destructor Tau3Button.Destroy;
@@ -2137,7 +2277,7 @@ var
 begin
   sl := TStringList.Create;
   try
-    sl.Add('$%s = GUICtrlCreateButton("%s", %d, %d, %d, %d, %d)',
+    sl.Add('$%s = GUICtrlCreateButton("%s", %d, %d, %d, %d, %d, %d)',
       [Name, Caption, Left, Top, Width, Height, FStyle, FStyleEX]);
     // Picture
     if Length(FPicture) > 0 then
@@ -2145,13 +2285,11 @@ begin
     // Font
     //if Font.Name<>'default' then
     sl.Add(Format('GUICtrlSetFont($%s, %s)', [Name, GetFontString(Font)]));
-    if Font.Color<>clBlack then
-    sl.Add(Format('GUICtrlSetColor($%s, %s)',
-      [Name, ColorToAUString(Font.Color)]));
+    if Font.Color <> clBlack then
+      sl.Add(Format('GUICtrlSetColor($%s, %s)', [Name, ColorToAUString(Font.Color)]));
     // Background Color
-    if Color<>clDefault then
-    sl.Add(Format('GUICtrlSetBkColor($%s, %s)',
-      [Name, ColorToAUString(Color)]));
+    if Color <> clDefault then
+      sl.Add(Format('GUICtrlSetBkColor($%s, %s)', [Name, ColorToAUString(Color)]));
     // Resizing
     sl.Add(Format('GUICtrlSetResizing($%s, %d)', [Name, cardinal(FResizing)]));
     // Visible/Enabled
@@ -2190,7 +2328,10 @@ begin
   Result := (prop = 'name') or (prop = 'text') or (prop = 'x') or
     (prop = 'y') or (prop = 'width') or (prop = 'height') or
     (prop = 'style') or (prop = 'styleex') or (prop = 'buttonstyle') or
-    (Pos('ws_', prop) = 1) or (Pos('bs_', prop) = 1);
+    (Pos('ws_', prop) = 1) or (Pos('bs_', prop) = 1) or (Pos('rz', prop) = 1) or
+    (prop = 'color') or (prop = 'cursoricon') or (prop = 'enabled') or
+    (prop = 'font') or (prop = 'hint') or (prop = 'checked') or
+    (prop = 'resizing') or (prop = 'taborder') or (prop = 'visible');
 end;
 
 function Tau3CheckBox.GetEvents: TStringList;
@@ -2288,6 +2429,78 @@ begin
     FOnChangeProp(Self, 'StyleEx', IntToStr(cardinal(Val)));
 end;
 
+procedure Tau3Checkbox.SetColor(Value: TColor);
+begin
+  inherited SetColor(Value);
+  if Assigned(FOnChangeProp) then
+    FOnChangeProp(Self, 'Color', IntToStr(ColorToRGB(Value)));
+end;
+
+procedure Tau3Checkbox.SetCursorIcon(c: TAU3Cursor);
+begin
+  FCursorIcon := c;
+  if Assigned(FOnChangeProp) then
+    FOnChangeProp(Self, 'Cursor', IntToStr(Ord(c)));
+end;
+
+procedure Tau3Checkbox.SetisEnabled(b: boolean);
+begin
+  FisEnabled := b;
+  if Assigned(FOnChangeProp) then
+    FOnChangeProp(Self, 'Enabled', BoolToStr(b, True));
+end;
+
+procedure Tau3Checkbox.SetFont(f: TFont);
+begin
+  inherited Font := f;
+  if Assigned(FOnChangeProp) then
+  begin
+    FOnChangeProp(Self, 'Font', GetFontString(f));
+    FOnChangeProp(Self, 'FontColor', IntToStr(ColorToRGB(Font.Color)));
+  end;
+end;
+
+procedure Tau3Checkbox.SetHint(const Value: TTranslateString);
+begin
+  inherited SetHint(Value);
+  if Assigned(FOnChangeProp) then
+    FOnChangeProp(Self, 'Hint', Value);
+end;
+
+procedure Tau3Checkbox.SetChecked(Value: boolean);
+begin
+  FChecked := Value;
+  inherited SetChecked(Value);
+  if Assigned(FOnChangeProp) then
+    FOnChangeProp(Self, 'Checked', BoolToStr(Value, True));
+end;
+
+procedure Tau3Checkbox.SetTabOrder(i: integer);
+begin
+  FTabOrder := i;
+  if Assigned(FOnChangeProp) then
+    FOnChangeProp(Self, 'TabOrder', IntToStr(i));
+end;
+
+procedure Tau3Checkbox.SetisVisible(b: boolean);
+begin
+  FIsVisible := b;
+  if Assigned(FOnChangeProp) then
+    FOnChangeProp(Self, 'Visible', BoolToStr(b, True));
+end;
+
+procedure Tau3Checkbox.SetResizing(b: TResizeModes);
+begin
+  FResizing := b;
+  if Assigned(FOnChangeProp) then
+    FOnChangeProp(Self, 'Resizing', IntToStr(cardinal(b)));
+end;
+
+function Tau3Checkbox.GetFont: TFont;
+begin
+  Result := inherited Font;
+end;
+
 function Tau3Checkbox.GetStyle: TWindowStyles;
 begin
   Result := TWindowStyles(FStyle shr 16);
@@ -2333,7 +2546,27 @@ begin
   else if p = 'buttonstyle' then
     Result := IntToStr(cardinal(GetButtonStyle))
   else if p = 'styleex' then
-    Result := IntToStr(FStyleEX);
+    Result := IntToStr(FStyleEX)
+  else if p = 'color' then
+    Result := IntToStr(ColorToRGB(Color))
+  else if p = 'fontcolor' then
+    Result := IntToStr(ColorToRGB(Font.Color))
+  else if p = 'cursor' then
+    Result := IntToStr(Ord(FCursorIcon))
+  else if p = 'enabled' then
+    Result := BoolToStr(FisEnabled, True)
+  else if p = 'font' then
+    Result := GetFontString(Font)
+  else if p = 'hint' then
+    Result := Hint
+  else if p = 'checked' then
+    Result := BoolToStr(FChecked, True)
+  else if p = 'resizing' then
+    Result := IntToStr(cardinal(Resizing))
+  else if p = 'taborder' then
+    Result := IntToStr(FTabOrder)
+  else if p = 'visible' then
+    Result := BoolToStr(FIsVisible, True);
 end;
 
 procedure Tau3Checkbox.SetProp(p, val: string);
@@ -2356,7 +2589,27 @@ begin
   else if (p = 'buttonstyle') and isNumeric(val) then
     SetButtonStyle(TButtonStyles(StrToInt(val)))
   else if (p = 'styleex') and isNumeric(val) then
-    FStyleEX := StrToInt(val);
+    FStyleEX := StrToInt(val)
+  else if (p = 'color') and isNumeric(val) then
+    Color := StrToInt(val)
+  else if (p = 'fontcolor') and isNumeric(val) then
+    Font.Color := StrToInt(val)
+  else if (p = 'cursor') and isNumeric(val) then
+    FCursorIcon := TAU3Cursor(StrToInt(val))
+  else if (p = 'enabled') then
+    FisEnabled := val = 'True'
+  else if (p = 'font') then
+    SetFontString(Font, val)
+  else if (p = 'hint') then
+    Hint := val
+  else if (p = 'checked') then
+    Checked := val = 'True'
+  else if (p = 'resizing') and isNumeric(val) then
+    FResizing := TResizeModes(StrToInt(val))
+  else if (p = 'taborder') and isNumeric(val) then
+    FTabOrder := StrToInt(val)
+  else if (p = 'visible') then
+    FIsVisible := val = 'True';
 end;
 
 function Tau3Checkbox.GetEvent(e: string): string;
@@ -2371,7 +2624,7 @@ end;
 
 procedure Tau3Checkbox.Click;
 begin
-  Checked := False;
+  inherited SetChecked(FChecked);
   inherited;
 end;
 
@@ -2380,6 +2633,9 @@ begin
   inherited;
   FEvents := TStringList.Create;
   FEvents.Values['onClick'] := '';
+  ButtonStyle := [BS_DEFPUSHBUTTON, BS_CHECKBOX];
+  FIsVisible := True;
+  FisEnabled := True;
 end;
 
 destructor Tau3Checkbox.Destroy;
@@ -2404,12 +2660,45 @@ begin
     (c as Tau3Checkbox).StyleEX := StyleEX;
     (c as Tau3Checkbox).Events.Assign(FEvents);
   end;
+  { TODO : Extend }
 end;
 
 function Tau3Checkbox.Getau3String(FormName: string): string;
+var
+  sl: TStringList;
 begin
-  Result := Format('$%s = CreateCheckbox($%s, "%s", %d, %d, %d, %d, %d, %d)',
-    [Name, FormName, Caption, Left, Top, Width, Height, FStyle, FStyleEX]);
+  sl := TStringList.Create;
+  try
+    sl.Add('$%s = GUICtrlCreateCheckbox("%s", %d, %d, %d, %d, %d, %d)',
+      [Name, Caption, Left, Top, Width, Height, FStyle, FStyleEX]);
+    // Checked
+    if FChecked then
+      sl.Add(Format('GUICtrlSetState($%s, 1)', [Name]));
+    // Font
+    //if Font.Name<>'default' then
+    sl.Add(Format('GUICtrlSetFont($%s, %s)', [Name, GetFontString(Font)]));
+    if Font.Color <> clBlack then
+      sl.Add(Format('GUICtrlSetColor($%s, %s)', [Name, ColorToAUString(Font.Color)]));
+    // Background Color
+    if Color <> clDefault then
+      sl.Add(Format('GUICtrlSetBkColor($%s, %s)', [Name, ColorToAUString(Color)]));
+    // Resizing
+    sl.Add(Format('GUICtrlSetResizing($%s, %d)', [Name, cardinal(FResizing)]));
+    // Visible/Enabled
+    if not FIsVisible then
+      sl.Add(Format('GUICtrlSetState($%s, %d)', [Name, 32]))
+    else if not FisEnabled then
+      sl.Add(Format('GUICtrlSetState($%s, %d)', [Name, 128]));
+    // Hint
+    sl.Add(Format('GUICtrlSetTip($%s, "%s")', [Name, Hint]));
+    // Cursor
+    sl.Add(Format('GUICtrlSetCursor($%s, %d)', [Name, cardinal(FCursorIcon)]));
+    if Length(FEvents.Values['onClick']) > 0 then
+      sl.Add(Format('GUICtrlSetOnEvent($%s, "%s")', [Name, FEvents.Values['onClick']]));
+    Result := sl.Text;
+  finally
+    sl.Free;
+  end;
 end;
 
 procedure Tau3Checkbox.FillEvents(g: TValueListEditor);
@@ -2431,7 +2720,10 @@ begin
   Result := (prop = 'name') or (prop = 'text') or (prop = 'x') or
     (prop = 'y') or (prop = 'width') or (prop = 'height') or
     (prop = 'style') or (prop = 'styleex') or (prop = 'staticstyle') or
-    (Pos('ws_', prop) = 1) or (Pos('ss_', prop) = 1);
+    (Pos('ws_', prop) = 1) or (Pos('ss_', prop) = 1) or (Pos('rz', prop) = 1) or
+    (prop = 'color') or (prop = 'cursoricon') or (prop = 'enabled') or
+    (prop = 'font') or (prop = 'hint') or (prop = 'resizing') or
+    (prop = 'taborder') or (prop = 'visible');
 end;
 
 function Tau3Label.GetEvents: TStringList;
@@ -2517,6 +2809,70 @@ begin
     FOnChangeProp(Self, 'StyleEx', IntToStr(cardinal(Val)));
 end;
 
+procedure Tau3Label.SetColor(Value: TColor);
+begin
+  inherited SetColor(Value);
+  if Assigned(FOnChangeProp) then
+    FOnChangeProp(Self, 'Color', IntToStr(ColorToRGB(Value)));
+end;
+
+procedure Tau3Label.SetCursorIcon(c: TAU3Cursor);
+begin
+  FCursorIcon := c;
+  if Assigned(FOnChangeProp) then
+    FOnChangeProp(Self, 'Cursor', IntToStr(Ord(c)));
+end;
+
+procedure Tau3Label.SetisEnabled(b: boolean);
+begin
+  FisEnabled := b;
+  if Assigned(FOnChangeProp) then
+    FOnChangeProp(Self, 'Enabled', BoolToStr(b, True));
+end;
+
+procedure Tau3Label.SetFont(f: TFont);
+begin
+  inherited Font := f;
+  if Assigned(FOnChangeProp) then
+  begin
+    FOnChangeProp(Self, 'Font', GetFontString(f));
+    FOnChangeProp(Self, 'FontColor', IntToStr(ColorToRGB(Font.Color)));
+  end;
+end;
+
+procedure Tau3Label.SetHint(const Value: TTranslateString);
+begin
+  inherited SetHint(Value);
+  if Assigned(FOnChangeProp) then
+    FOnChangeProp(Self, 'Hint', Value);
+end;
+
+procedure Tau3Label.SetTabOrder(i: integer);
+begin
+  FTabOrder := i;
+  if Assigned(FOnChangeProp) then
+    FOnChangeProp(Self, 'TabOrder', IntToStr(i));
+end;
+
+procedure Tau3Label.SetisVisible(b: boolean);
+begin
+  FIsVisible := b;
+  if Assigned(FOnChangeProp) then
+    FOnChangeProp(Self, 'Visible', BoolToStr(b, True));
+end;
+
+procedure Tau3Label.SetResizing(b: TResizeModes);
+begin
+  FResizing := b;
+  if Assigned(FOnChangeProp) then
+    FOnChangeProp(Self, 'Resizing', IntToStr(cardinal(b)));
+end;
+
+function Tau3Label.GetFont: TFont;
+begin
+  Result := inherited Font;
+end;
+
 function Tau3Label.GetStyle: TWindowStyles;
 begin
   Result := TWindowStyles(FStyle shr 16);
@@ -2562,7 +2918,25 @@ begin
   else if p = 'staticstyle' then
     Result := IntToStr(cardinal(GetStaticStyle))
   else if p = 'styleex' then
-    Result := IntToStr(FStyleEX);
+    Result := IntToStr(FStyleEX)
+  else if p = 'color' then
+    Result := IntToStr(ColorToRGB(Color))
+  else if p = 'fontcolor' then
+    Result := IntToStr(ColorToRGB(Font.Color))
+  else if p = 'cursor' then
+    Result := IntToStr(Ord(FCursorIcon))
+  else if p = 'enabled' then
+    Result := BoolToStr(FisEnabled, True)
+  else if p = 'font' then
+    Result := GetFontString(Font)
+  else if p = 'hint' then
+    Result := Hint
+  else if p = 'resizing' then
+    Result := IntToStr(cardinal(Resizing))
+  else if p = 'taborder' then
+    Result := IntToStr(FTabOrder)
+  else if p = 'visible' then
+    Result := BoolToStr(FIsVisible, True);
 end;
 
 procedure Tau3Label.SetProp(p, val: string);
@@ -2585,7 +2959,25 @@ begin
   else if (p = 'staticstyle') and isNumeric(val) then
     SetStaticStyle(TStaticStyles(StrToInt(val)))
   else if (p = 'styleex') and isNumeric(val) then
-    FStyleEX := StrToInt(val);
+    FStyleEX := StrToInt(val)
+  else if (p = 'color') and isNumeric(val) then
+    Color := StrToInt(val)
+  else if (p = 'fontcolor') and isNumeric(val) then
+    Font.Color := StrToInt(val)
+  else if (p = 'cursor') and isNumeric(val) then
+    FCursorIcon := TAU3Cursor(StrToInt(val))
+  else if (p = 'enabled') then
+    FisEnabled := val = 'True'
+  else if (p = 'font') then
+    SetFontString(Font, val)
+  else if (p = 'hint') then
+    Hint := val
+  else if (p = 'resizing') and isNumeric(val) then
+    FResizing := TResizeModes(StrToInt(val))
+  else if (p = 'taborder') and isNumeric(val) then
+    FTabOrder := StrToInt(val)
+  else if (p = 'visible') then
+    FIsVisible := val = 'True';
 end;
 
 function Tau3Label.GetEvent(e: string): string;
@@ -2605,6 +2997,8 @@ var
 begin
   p := 0;
   sl := TStringList.Create;
+  Canvas.Brush.Style := bsSolid;
+  Canvas.Brush.Color := Color;
   try
     sl.Text := Caption;
     for i := 0 to sl.Count - 1 do
@@ -2623,6 +3017,9 @@ begin
   inherited;
   FEvents := TStringList.Create;
   FEvents.Values['onClick'] := '';
+  FisEnabled := True;
+  FIsVisible := True;
+  FCursorIcon := craARROW;
 end;
 
 destructor Tau3Label.Destroy;
@@ -2647,12 +3044,42 @@ begin
     (c as Tau3Label).StyleEX := StyleEX;
     (c as Tau3Label).Events.Assign(FEvents);
   end;
+  { TODO : Extend }
 end;
 
 function Tau3Label.Getau3String(FormName: string): string;
+var
+  sl: TStringList;
 begin
-  Result := Format('$%s = CreateLabel($%s, "%s", %d, %d, %d, %d, %d, %d)',
-    [Name, FormName, Caption, Left, Top, Width, Height, FStyle, FStyleEX]);
+  sl := TStringList.Create;
+  try
+    sl.Add('$%s = GUICtrlCreateLabel("%s", %d, %d, %d, %d, %d, %d)',
+      [Name, Caption, Left, Top, Width, Height, FStyle, FStyleEX]);
+    // Font
+    //if Font.Name<>'default' then
+    sl.Add(Format('GUICtrlSetFont($%s, %s)', [Name, GetFontString(Font)]));
+    if Font.Color <> clBlack then
+      sl.Add(Format('GUICtrlSetColor($%s, %s)', [Name, ColorToAUString(Font.Color)]));
+    // Background Color
+    if Color <> clDefault then
+      sl.Add(Format('GUICtrlSetBkColor($%s, %s)', [Name, ColorToAUString(Color)]));
+    // Resizing
+    sl.Add(Format('GUICtrlSetResizing($%s, %d)', [Name, cardinal(FResizing)]));
+    // Visible/Enabled
+    if not FIsVisible then
+      sl.Add(Format('GUICtrlSetState($%s, %d)', [Name, 32]))
+    else if not FisEnabled then
+      sl.Add(Format('GUICtrlSetState($%s, %d)', [Name, 128]));
+    // Hint
+    sl.Add(Format('GUICtrlSetTip($%s, "%s")', [Name, Hint]));
+    // Cursor
+    sl.Add(Format('GUICtrlSetCursor($%s, %d)', [Name, cardinal(FCursorIcon)]));
+    if Length(FEvents.Values['onClick']) > 0 then
+      sl.Add(Format('GUICtrlSetOnEvent($%s, "%s")', [Name, FEvents.Values['onClick']]));
+    Result := sl.Text;
+  finally
+    sl.Free;
+  end;
 end;
 
 procedure Tau3Label.SetText(val: string);

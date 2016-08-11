@@ -17,6 +17,7 @@ uses
 {$R *.res}
 
 begin
+  Application.Title:='Automate Studio';
   RequireDerivedFormResource:=True;
   Application.Initialize;
   Application.CreateForm(TMainForm, MainForm);
