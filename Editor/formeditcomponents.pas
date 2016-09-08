@@ -1,5 +1,7 @@
 unit FormEditComponents;
 
+{ TODO : OnPropChanged for Events }
+
 {$mode objfpc}{$H+}
 {$Interfaces CORBA}
 
@@ -136,9 +138,6 @@ type
     SS_SUNKEN
     );
   TStaticStyles = set of TStaticStyle;
-
-  TPropertyChangeEvent = procedure(Sender: TObject;
-    PropName, PropVal: string) of object;
 
   IHotKeyComponent = interface
     ['{B757A944-5526-4336-8F66-314AE6E2046C}']
@@ -815,8 +814,39 @@ function GUIEventToString(e: integer): string;
 function AuColToColor(s: string): TColor;
 procedure SetFontString(f: TFont; s: string);
 function AU3KeyToHotKey(h: string): string;
+procedure SetPos(c: TControl; pos: String);
+procedure SetSize(c: TControl; Size: String);
 
 implementation
+
+procedure SetPos(c: TControl; pos: String);
+var sl: TStringList;
+begin
+  sl:=TStringList.Create;
+  try
+    sl.Delimiter:=':';
+    sl.DelimitedText:=pos;
+    (c as Iau3Component).SetProp('Left', sl[0]);
+    (c as Iau3Component).SetProp('Top', sl[1]);
+  finally
+    sl.Free;
+  end;
+end;
+
+
+procedure SetSize(c: TControl; Size: String);
+var sl: TStringList;
+begin
+  sl:=TStringList.Create;
+  try
+    sl.Delimiter:=':';
+    sl.DelimitedText:=Size;
+    (c as Iau3Component).SetProp('Width', sl[0]);
+    (c as Iau3Component).SetProp('Height', sl[1]);
+  finally
+    sl.Free;
+  end;
+end;
 
 function GUIEventToString(e: integer): string;
 begin
@@ -1044,8 +1074,8 @@ end;
 function Tau3Form.CheckProperty(prop: string): boolean;
 begin
   prop := LowerCase(prop);
-  Result := (prop = 'name') or (prop = 'text') or (prop = 'x') or
-    (prop = 'y') or (prop = 'width') or (prop = 'height') or
+  Result := (prop = 'name') or (prop = 'text') or (prop = 'left') or
+    (prop = 'top') or (prop = 'width') or (prop = 'height') or
     (prop = 'style') or (Pos('ws_', prop) = 1) or (Pos('rz', prop) = 1) or
     (prop = 'enabled') or (prop = 'color') or (prop = 'cursoricon') or
     (prop = 'font') or (prop = 'icon') or (prop = 'visible') or
@@ -1058,41 +1088,51 @@ begin
 end;
 
 procedure Tau3Form.SetName(const Value: TComponentName);
+var oldVal: String;
 begin
+  oldVal:=Name;
   if Text = Name then
     Text := Value;
   inherited SetName(Value);
   inherited Caption := '';
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Name', Value);
+    FOnChangeProp(Self, 'Name', Value, oldVal);
 end;
 
 procedure Tau3Form.SetLeft(Val: integer);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(FLeft);
   FLeft := Val;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Left', IntToStr(Val));
+    FOnChangeProp(Self, 'Left', IntToStr(Val), oldVal);
 end;
 
 procedure Tau3Form.SetTop(Val: integer);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(FTop);
   FTop := Val;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Top', IntToStr(Val));
+    FOnChangeProp(Self, 'Top', IntToStr(Val), oldVal);
 end;
 
 procedure Tau3Form.SetWidth(Val: integer);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(Width);
   inherited Width := Val;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Width', IntToStr(Val));
+    FOnChangeProp(Self, 'Width', IntToStr(Val), oldVal);
 end;
 
 procedure Tau3Form.SetHeight(Val: integer);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(Height);
   inherited Height := Val;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Height', IntToStr(Val));
+    FOnChangeProp(Self, 'Height', IntToStr(Val), oldVal);
 end;
 
 function Tau3Form.GetLeft: integer;
@@ -1121,66 +1161,82 @@ begin
 end;
 
 procedure Tau3Form.SetFormEnabled(Value: boolean);
+var oldVal: String;
 begin
+  oldVal:=BoolToStr(FEnabled, 'True', 'False');
   FEnabled := Value;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Enabled', BoolToStr(Value, 'True', 'False'));
+    FOnChangeProp(Self, 'Enabled', BoolToStr(Value, 'True', 'False'), oldVal);
 end;
 
 procedure Tau3Form.SetFormCursor(Value: TAU3Cursor);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(ord(FMyCursor));
   FMyCursor := Value;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Cursor', IntToStr(Ord(Value)));
+    FOnChangeProp(Self, 'Cursor', IntToStr(Ord(Value)), oldVal);
 end;
 
 procedure Tau3Form.SetIcon(s: string);
+var oldVal: String;
 begin
+  oldVal:=FIcon;
   FIcon := s;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Icon', s);
+    FOnChangeProp(Self, 'Icon', s, oldVal);
 end;
 
 procedure Tau3Form.SetIconID(i: integer);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(FIconID);
   FIconID := i;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'IconID', IntToStr(i));
+    FOnChangeProp(Self, 'IconID', IntToStr(i), oldVal);
 end;
 
 procedure Tau3Form.SetIsMainForm(b: boolean);
 begin
   FIsMainForm := b;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, '', '');
+    FOnChangeProp(Self, '', '', '');
 end;
 
 procedure Tau3Form.SetResize(val: TResizeModes);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(Cardinal(FResize));
   FResize := cardinal(val);
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Resize', IntToStr(cardinal(val)));
+    FOnChangeProp(Self, 'Resize', IntToStr(cardinal(val)), oldVal);
 end;
 
 procedure Tau3Form.SetColor(Value: TColor);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(ColorToRGB(Color) and $FFFFFF);
   inherited;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Color', IntToStr(Ord(Value)));
+    FOnChangeProp(Self, 'Color', IntToStr(ColorToRGB(Value) and $FFFFFF), oldVal);
 end;
 
 procedure Tau3Form.SetFont(f: TFont);
+var oldVal: String;
 begin
+  oldVal:=GetFontString(Font);
   inherited Font := f;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Font', GetFontString(f));
+    FOnChangeProp(Self, 'Font', GetFontString(f), oldVal);
 end;
 
 procedure Tau3Form.SetFormVisible(Value: boolean);
+var oldVal: String;
 begin
+  oldVal:=BoolToStr(FVisible, 'True', 'False');
   FVisible := Value;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Visible', BoolToStr(Value, 'True', 'False'));
+    FOnChangeProp(Self, 'Visible', BoolToStr(Value, 'True', 'False'), oldVal);
 end;
 
 function Tau3Form.GetFont: TFont;
@@ -1194,17 +1250,21 @@ begin
 end;
 
 procedure Tau3Form.SetStyle(val: TWindowStyles);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(FStyle);
   FStyle := DWord(val) shl 16;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Style', IntToStr(FStyle));
+    FOnChangeProp(Self, 'Style', IntToStr(FStyle), oldVal);
 end;
 
 procedure Tau3Form.SetStyleEX(val: TWindowExStyles);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(FStyleEx);
   FStyleEX := cardinal(val);
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'StyleEx', IntToStr(cardinal(Val)));
+    FOnChangeProp(Self, 'StyleEx', IntToStr(cardinal(Val)), oldVal);
 end;
 
 function Tau3Form.GetStyle: TWindowStyles;
@@ -1234,9 +1294,9 @@ begin
     Result := Name
   else if p = 'text' then
     Result := Caption
-  else if p = 'x' then
+  else if p = 'left' then
     Result := IntToStr(Left)
-  else if p = 'y' then
+  else if p = 'top' then
     Result := IntToStr(Top)
   else if p = 'width' then
     Result := IntToStr(Width)
@@ -1261,7 +1321,11 @@ begin
   else if p = 'visible' then
     Result := BoolToStr(FVisible, 'True', 'False')
   else if p = 'resize' then
-    Result := IntToStr(FResize);
+    Result := IntToStr(FResize)
+  else if p = 'pos' then
+    Result := Format('%d:%d', [Left, Top])
+  else if p = 'size' then
+    Result := Format('%d:%d', [Width, Height]);
 end;
 
 procedure Tau3Form.SetProp(p, val: string);
@@ -1271,9 +1335,9 @@ begin
     Name := val
   else if p = 'text' then
     Caption := val
-  else if (p = 'x') and isNumeric(val) then
+  else if (p = 'left') and isNumeric(val) then
     Left := StrToInt(val)
-  else if (p = 'y') and isNumeric(val) then
+  else if (p = 'top') and isNumeric(val) then
     Top := StrToInt(val)
   else if (p = 'width') and isNumeric(val) then
     Width := StrToInt(val)
@@ -1298,7 +1362,11 @@ begin
   else if (p = 'font') then
     SetFontString(Font, val)
   else if (p = 'visible') then
-    FVisible := val = 'True';
+    FVisible := val = 'True'
+  else if (p='pos') then
+  SetPos(Self, val)
+  else if (p='size') then
+  SetSize(Self, val);
 end;
 
 function Tau3Form.GetEvent(e: string): string;
@@ -1463,13 +1531,15 @@ begin
 end;
 
 procedure Tau3Form.SetText(val: string);
+var oldVal: String;
 begin
+  oldVal:=FCaption;
   FCaption := val;
   Invalidate;
   if Assigned(FOnChangeCaption) then
     FOnChangeCaption(Self);
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Text', val);
+    FOnChangeProp(Self, 'Text', val, oldVal);
 end;
 
 procedure Tau3Form.FillEvents(g: TValueListEditor);
@@ -1489,8 +1559,8 @@ end;
 function Tau3Edit.CheckProperty(prop: string): boolean;
 begin
   prop := LowerCase(prop);
-  Result := (prop = 'name') or (prop = 'text') or (prop = 'x') or
-    (prop = 'y') or (prop = 'width') or (prop = 'height') or
+  Result := (prop = 'name') or (prop = 'text') or (prop = 'left') or
+    (prop = 'top') or (prop = 'width') or (prop = 'height') or
     (prop = 'style') or (prop = 'styleex') or (prop = 'editstyle') or
     (Pos('ws_', prop) = 1) or (Pos('es_', prop) = 1) or (Pos('rz', prop) = 1) or
     (prop = 'color') or (prop = 'cursoricon') or (prop = 'enabled') or
@@ -1504,40 +1574,50 @@ begin
 end;
 
 procedure Tau3Edit.SetName(const Value: TComponentName);
+var oldVal: String;
 begin
+  oldVal:=Name;
   if Text = Name then
     Text := Value;
   inherited SetName(Value);
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Name', Value);
+    FOnChangeProp(Self, 'Name', Value, oldVal);
 end;
 
 procedure Tau3Edit.SetLeft(Val: integer);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(Left);
   inherited Left := Val;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Left', IntToStr(Val));
+    FOnChangeProp(Self, 'Left', IntToStr(Val), oldVal);
 end;
 
 procedure Tau3Edit.SetTop(Val: integer);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(Top);
   inherited Top := Val;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Top', IntToStr(Val));
+    FOnChangeProp(Self, 'Top', IntToStr(Val), oldVal);
 end;
 
 procedure Tau3Edit.SetWidth(Val: integer);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(Width);
   inherited Width := Val;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Width', IntToStr(Val));
+    FOnChangeProp(Self, 'Width', IntToStr(Val), oldVal);
 end;
 
 procedure Tau3Edit.SetHeight(Val: integer);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(Height);
   inherited Height := Val;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Height', IntToStr(Val));
+    FOnChangeProp(Self, 'Height', IntToStr(Val), oldVal);
 end;
 
 function Tau3Edit.GetLeft: integer;
@@ -1566,97 +1646,124 @@ begin
 end;
 
 procedure Tau3Edit.SetText(val: string);
+var oldVal: String;
 begin
+  oldVal:=Text;
   inherited Text := val;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Text', Val);
+    FOnChangeProp(Self, 'Text', Val, oldVal);
 end;
 
 procedure Tau3Edit.SetStyle(val: TWindowStyles);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(Cardinal(GetStyle));
   FStyle := (FStyle and $FFFF) or (DWord(val) shl 16);
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Style', IntToStr(cardinal(val)));
+    FOnChangeProp(Self, 'Style', IntToStr(cardinal(val)), oldVal);
 end;
 
 procedure Tau3Edit.SetEditStyle(val: TEditStyles);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(Cardinal(GetEditStyle));
   FStyle := (FStyle and (not $FFFF)) or DWord(val);
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'EditStyle', IntToStr(cardinal(val)));
+    FOnChangeProp(Self, 'EditStyle', IntToStr(cardinal(val)), oldVal);
 end;
 
 procedure Tau3Edit.SetStyleEx(val: TWindowExStyles);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(FStyleEX);
   FStyleEX := cardinal(val);
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'StyleEx', IntToStr(cardinal(Val)));
+    FOnChangeProp(Self, 'StyleEx', IntToStr(cardinal(Val)), oldVal);
 end;
 
 procedure Tau3Edit.SetColor(Value: TColor);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(ColorToRGB(Color) and $FFFFFF);
   inherited SetColor(Value);
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Color', IntToStr(ColorToRGB(Value) and $FFFFFF));
+    FOnChangeProp(Self, 'Color', IntToStr(ColorToRGB(Value) and $FFFFFF), oldVal);
 end;
 
 procedure Tau3Edit.SetCursorIcon(c: TAU3Cursor);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(Cardinal(FCursorIcon));
   FCursorIcon := c;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Cursor', IntToStr(cardinal(c)));
+    FOnChangeProp(Self, 'Cursor', IntToStr(cardinal(c)), oldVal);
 end;
 
 procedure Tau3Edit.SetisEnabled(b: boolean);
+var oldVal: String;
 begin
+  oldVal:=BoolToStr(FisEnabled, 'True','False');
   FisEnabled := b;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Enabled', BoolToStr(b, True));
+    FOnChangeProp(Self, 'Enabled', BoolToStr(b, 'True', 'False'), oldVal);
 end;
 
 procedure Tau3Edit.SetFont(f: TFont);
+var oldVal1, oldVal2: String;
 begin
+  oldVal1:=GetFontString(Font);
+  oldVal2:=IntToStr(ColorToRGB(Font.Color));
   inherited Font := f;
   if Assigned(FOnChangeProp) then
   begin
-    FOnChangeProp(Self, 'Font', GetFontString(f));
-    FOnChangeProp(Self, 'FontColor', IntToStr(ColorToRGB(Font.Color)));
+    FOnChangeProp(Self, 'Font', GetFontString(f), oldVal1);
+    FOnChangeProp(Self, 'FontColor', IntToStr(ColorToRGB(Font.Color)), oldVal2);
   end;
 end;
 
 procedure Tau3Edit.SetMaxLen(l: integer);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(MaxLength);
   inherited MaxLength := l;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Limit', IntToStr(l));
+    FOnChangeProp(Self, 'Limit', IntToStr(l), oldVal);
 end;
 
 procedure Tau3Edit.SetHint(const Value: TTranslateString);
+var oldVal: String;
 begin
+  oldVal:=Hint;
   inherited SetHint(Value);
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Hint', Value);
+    FOnChangeProp(Self, 'Hint', Value, oldVal);
 end;
 
 procedure Tau3Edit.SetTabOrder(i: integer);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(TabOrder);
   FTabOrder := i;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Taborder', IntToStr(i));
+    FOnChangeProp(Self, 'Taborder', IntToStr(i), oldVal);
 end;
 
 procedure Tau3Edit.SetisVisible(b: boolean);
+var oldVal: String;
 begin
+  oldVal:=BoolToStr(FIsVisible, 'True', 'False');
   FIsVisible := b;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Visible', BoolToStr(b, True));
+    FOnChangeProp(Self, 'Visible', BoolToStr(b, 'True', 'False'), oldVal);
 end;
 
 procedure Tau3Edit.SetResizing(b: TResizeModes);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(Cardinal(FResizing));
   FResizing := b;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Resizing', IntToStr(cardinal(b)));
+    FOnChangeProp(Self, 'Resizing', IntToStr(cardinal(b)), oldVal);
 end;
 
 function Tau3Edit.GetFont: TFont;
@@ -1691,9 +1798,9 @@ begin
     Result := Name
   else if prop = 'text' then
     Result := Text
-  else if prop = 'x' then
+  else if prop = 'left' then
     Result := IntToStr(Left)
-  else if prop = 'y' then
+  else if prop = 'top' then
     Result := IntToStr(Top)
   else if prop = 'width' then
     Result := IntToStr(Width)
@@ -1724,7 +1831,11 @@ begin
   else if prop = 'taborder' then
     Result := IntToStr(FTabOrder)
   else if prop = 'Visible' then
-    Result := BoolToStr(FIsVisible, True);
+    Result := BoolToStr(FIsVisible, True)
+  else if prop = 'pos' then
+    Result := Format('%d:%d', [Left, Top])
+  else if prop = 'size' then
+    Result := Format('%d:%d', [Width, Height]);
 end;
 
 procedure Tau3Edit.SetProp(prop, val: string);
@@ -1734,9 +1845,9 @@ begin
     Name := val
   else if prop = 'text' then
     Text := val
-  else if (prop = 'x') and isNumeric(val) then
+  else if (prop = 'left') and isNumeric(val) then
     Left := StrToInt(val)
-  else if (prop = 'y') and isNumeric(val) then
+  else if (prop = 'top') and isNumeric(val) then
     Top := StrToInt(val)
   else if (prop = 'width') and isNumeric(val) then
     Width := StrToInt(val)
@@ -1767,7 +1878,11 @@ begin
   else if (prop = 'taborder') and isNumeric(val) then
     FTabOrder := StrToInt(val)
   else if (prop = 'visible') then
-    FIsVisible := val = 'True';
+    FIsVisible := val = 'True'
+  else if (prop='pos') then
+  SetPos(Self, val)
+  else if (prop='size') then
+  SetSize(Self, val);
 end;
 
 function Tau3Edit.GetEvent(e: string): string;
@@ -1881,8 +1996,8 @@ end;
 function Tau3Button.CheckProperty(prop: string): boolean;
 begin
   prop := LowerCase(prop);
-  Result := (prop = 'name') or (prop = 'text') or (prop = 'x') or
-    (prop = 'y') or (prop = 'width') or (prop = 'height') or
+  Result := (prop = 'name') or (prop = 'text') or (prop = 'left') or
+    (prop = 'top') or (prop = 'width') or (prop = 'height') or
     (prop = 'style') or (prop = 'styleex') or (prop = 'buttonstyle') or
     (Pos('ws_', prop) = 1) or (Pos('bs_', prop) = 1) or (Pos('rz', prop) = 1) or
     (prop = 'color') or (prop = 'cursoricon') or (prop = 'enabled') or
@@ -1897,40 +2012,50 @@ begin
 end;
 
 procedure Tau3Button.SetName(const Value: TComponentName);
+var oldVal: String;
 begin
+  oldVal:=Name;
   if Text = Name then
     Text := Value;
   inherited SetName(Value);
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Name', Value);
+    FOnChangeProp(Self, 'Name', Value, oldVal);
 end;
 
 procedure Tau3Button.SetLeft(Val: integer);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(Left);
   inherited Left := Val;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Left', IntToStr(Val));
+    FOnChangeProp(Self, 'Left', IntToStr(Val), oldVal);
 end;
 
 procedure Tau3Button.SetTop(Val: integer);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(Top);
   inherited Top := Val;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Top', IntToStr(Val));
+    FOnChangeProp(Self, 'Top', IntToStr(Val), oldVal);
 end;
 
 procedure Tau3Button.SetWidth(Val: integer);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(Width);
   inherited Width := Val;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Width', IntToStr(Val));
+    FOnChangeProp(Self, 'Width', IntToStr(Val), oldVal);
 end;
 
 procedure Tau3Button.SetHeight(Val: integer);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(Height);
   inherited Height := Val;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Height', IntToStr(Val));
+    FOnChangeProp(Self, 'Height', IntToStr(Val), oldVal);
 end;
 
 function Tau3Button.GetLeft: integer;
@@ -1959,83 +2084,106 @@ begin
 end;
 
 procedure Tau3Button.SetText(val: string);
+var oldVal: String;
 begin
+  oldVal:=Caption;
   inherited Caption := val;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Text', Val);
+    FOnChangeProp(Self, 'Text', Val, oldVal);
 end;
 
 procedure Tau3Button.SetStyle(val: TWindowStyles);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(Cardinal(GetStyle));
   FStyle := (FStyle and $FFFF) or (DWord(val) shl 16);
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Style', IntToStr(cardinal(val)));
+    FOnChangeProp(Self, 'Style', IntToStr(cardinal(val)), oldVal);
 end;
 
 procedure Tau3Button.SetButtonStyle(val: TButtonStyles);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(Cardinal(GetButtonStyle));
   FStyle := (FStyle and (not $FFFF)) or (DWord(val));
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'ButtonStyle', IntToStr(cardinal(val)));
+    FOnChangeProp(Self, 'ButtonStyle', IntToStr(cardinal(val)), oldVal);
 end;
 
 procedure Tau3Button.SetStyleEx(val: TWindowExStyles);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(FStyleEX);
   FStyleEX := cardinal(val);
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'StyleEx', IntToStr(cardinal(Val)));
+    FOnChangeProp(Self, 'StyleEx', IntToStr(cardinal(Val)), oldVal);
 end;
 
 procedure Tau3Button.SetColor(Value: TColor);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(ColorToRGB(Color));
   inherited SetColor(Value);
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Color', IntToStr(ColorToRGB(Value)));
+    FOnChangeProp(Self, 'Color', IntToStr(ColorToRGB(Value)), oldVal);
 end;
 
 procedure Tau3Button.SetCursorIcon(c: TAU3Cursor);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(Ord(FCursorIcon));
   FCursorIcon := c;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Cursor', IntToStr(Ord(c)));
+    FOnChangeProp(Self, 'Cursor', IntToStr(Ord(c)), oldVal);
 end;
 
 procedure Tau3Button.SetisEnabled(b: boolean);
+var oldVal: String;
 begin
+  oldVal:=BoolToStr(FisEnabled, 'True', 'False');
   FisEnabled := b;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Enabled', BoolToStr(b, True));
+    FOnChangeProp(Self, 'Enabled', BoolToStr(b, 'True', 'False'), oldVal);
 end;
 
 procedure Tau3Button.SetFont(f: TFont);
+var oldVal1,oldVal2: String;
 begin
+  oldVal1:=GetFontString(Font);
+  oldVal2:=IntToStr(ColorToRGB(Font.Color));
   inherited Font := f;
   if Assigned(FOnChangeProp) then
   begin
-    FOnChangeProp(Self, 'Font', GetFontString(f));
-    FOnChangeProp(Self, 'FontColor', IntToStr(ColorToRGB(Font.Color)));
+    FOnChangeProp(Self, 'Font', GetFontString(f), oldVal1);
+    FOnChangeProp(Self, 'FontColor', IntToStr(ColorToRGB(Font.Color)), oldVal2);
   end;
 end;
 
 procedure Tau3Button.SetHint(const Value: TTranslateString);
+var oldVal: String;
 begin
+  oldVal:=Hint;
   inherited SetHint(Value);
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Hint', Value);
+    FOnChangeProp(Self, 'Hint', Value, Hint);
 end;
 
 procedure Tau3Button.SetHotKey(h: TShortCut);
+var oldVal: String;
 begin
+  oldVal:=ShortCutToText(FHotKey);
   FHotKey := h;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Hotkey', ShortCutToText(h));
+    FOnChangeProp(Self, 'Hotkey', ShortCutToText(h), oldVal);
 end;
 
 procedure Tau3Button.SetPicture(p: TFilename);
 var
   pic: TPicture;
-  ext: string;
+ext: string;
+oldVal: String;
 begin
+  oldVal:=FPicture;
   if not FileExists(p) then
   begin
     Glyph.Clear;
@@ -2061,28 +2209,34 @@ begin
     ButtonStyle := ButtonStyle + [BS_ICON];
   end;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Picture', p);
+    FOnChangeProp(Self, 'Picture', p, oldVal);
 end;
 
 procedure Tau3Button.SetTabOrder(i: integer);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(FTabOrder);
   FTabOrder := i;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'TabOrder', IntToStr(i));
+    FOnChangeProp(Self, 'TabOrder', IntToStr(i), oldVal);
 end;
 
 procedure Tau3Button.SetisVisible(b: boolean);
+var oldVal: String;
 begin
+  oldVal:=BoolToStr(FIsVisible,'True','False');
   FIsVisible := b;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Visible', BoolToStr(b, True));
+    FOnChangeProp(Self, 'Visible', BoolToStr(b, 'True', 'False'), oldVal);
 end;
 
 procedure Tau3Button.SetResizing(b: TResizeModes);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(Cardinal(FResizing));
   FResizing := b;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Resizing', IntToStr(cardinal(b)));
+    FOnChangeProp(Self, 'Resizing', IntToStr(cardinal(b)), oldVal);
 end;
 
 function Tau3Button.GetFont: TFont;
@@ -2122,9 +2276,9 @@ begin
     Result := Name
   else if p = 'text' then
     Result := Caption
-  else if p = 'x' then
+  else if p = 'left' then
     Result := IntToStr(Left)
-  else if p = 'y' then
+  else if p = 'top' then
     Result := IntToStr(Top)
   else if p = 'width' then
     Result := IntToStr(Width)
@@ -2157,7 +2311,11 @@ begin
   else if p = 'taborder' then
     Result := IntToStr(FTabOrder)
   else if p = 'visible' then
-    Result := BoolToStr(FIsVisible, True);
+    Result := BoolToStr(FIsVisible, True)
+  else if p = 'pos' then
+    Result := Format('%d:%d', [Left, Top])
+  else if p = 'size' then
+    Result := Format('%d:%d', [Width, Height]);
 end;
 
 procedure Tau3Button.SetProp(p, val: string);
@@ -2167,9 +2325,9 @@ begin
     Name := val
   else if p = 'text' then
     Caption := val
-  else if (p = 'x') and isNumeric(val) then
+  else if (p = 'left') and isNumeric(val) then
     Left := StrToInt(val)
-  else if (p = 'y') and isNumeric(val) then
+  else if (p='top') and isNumeric(val) then
     Top := StrToInt(val)
   else if (p = 'width') and isNumeric(val) then
     Width := StrToInt(val)
@@ -2202,7 +2360,11 @@ begin
   else if (p = 'taborder') and isNumeric(val) then
     FTabOrder := StrToInt(val)
   else if (p = 'visible') then
-    FIsVisible := val = 'True';
+    FIsVisible := val = 'True'
+  else if (p='pos') then
+  SetPos(Self, val)
+  else if (p='size') then
+  SetSize(Self, val);
 end;
 
 function Tau3Button.GetEvent(e: string): string;
@@ -2325,8 +2487,8 @@ end;
 function Tau3CheckBox.CheckProperty(prop: string): boolean;
 begin
   prop := LowerCase(prop);
-  Result := (prop = 'name') or (prop = 'text') or (prop = 'x') or
-    (prop = 'y') or (prop = 'width') or (prop = 'height') or
+  Result := (prop = 'name') or (prop = 'text') or (prop = 'left') or
+    (prop = 'top') or (prop = 'width') or (prop = 'height') or
     (prop = 'style') or (prop = 'styleex') or (prop = 'buttonstyle') or
     (Pos('ws_', prop) = 1) or (Pos('bs_', prop) = 1) or (Pos('rz', prop) = 1) or
     (prop = 'color') or (prop = 'cursoricon') or (prop = 'enabled') or
@@ -2340,40 +2502,50 @@ begin
 end;
 
 procedure Tau3CheckBox.SetName(const Value: TComponentName);
+var oldVal: String;
 begin
+  oldVal:=Name;
   if Text = Name then
     Text := Value;
   inherited SetName(Value);
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Name', Value);
+    FOnChangeProp(Self, 'Name', Value, oldVal);
 end;
 
 procedure Tau3CheckBox.SetLeft(Val: integer);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(Left);
   inherited Left := Val;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Left', IntToStr(Val));
+    FOnChangeProp(Self, 'Left', IntToStr(Val), oldVal);
 end;
 
 procedure Tau3CheckBox.SetTop(Val: integer);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(Top);
   inherited Top := Val;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Top', IntToStr(Val));
+    FOnChangeProp(Self, 'Top', IntToStr(Val), oldVal);
 end;
 
 procedure Tau3CheckBox.SetWidth(Val: integer);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(Width);
   inherited Width := Val;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Width', IntToStr(Val));
+    FOnChangeProp(Self, 'Width', IntToStr(Val), oldVal);
 end;
 
 procedure Tau3CheckBox.SetHeight(Val: integer);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(Height);
   inherited Height := Val;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Height', IntToStr(Val));
+    FOnChangeProp(Self, 'Height', IntToStr(Val), oldVal);
 end;
 
 function Tau3CheckBox.GetLeft: integer;
@@ -2402,98 +2574,125 @@ begin
 end;
 
 procedure Tau3CheckBox.SetText(val: string);
+var oldVal: String;
 begin
+  oldVal:=Caption;
   inherited Caption := val;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Text', Val);
+    FOnChangeProp(Self, 'Text', Val, oldVal);
 end;
 
 procedure Tau3Checkbox.SetStyle(val: TWindowStyles);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(Cardinal(GetStyle));
   FStyle := (FStyle and $FFFF) or (DWord(val) shl 16);
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Style', IntToStr(cardinal(val)));
+    FOnChangeProp(Self, 'Style', IntToStr(cardinal(val)), oldVal);
 end;
 
 procedure Tau3Checkbox.SetButtonStyle(val: TButtonStyles);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(Cardinal(GetButtonStyle));
   FStyle := (FStyle and (not $FFFF)) or (DWord(val));
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'ButtonStyle', IntToStr(cardinal(val)));
+    FOnChangeProp(Self, 'ButtonStyle', IntToStr(cardinal(val)), oldVal);
 end;
 
 procedure Tau3Checkbox.SetStyleEx(val: TWindowExStyles);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(FStyleEX);
   FStyleEX := cardinal(val);
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'StyleEx', IntToStr(cardinal(Val)));
+    FOnChangeProp(Self, 'StyleEx', IntToStr(cardinal(Val)), oldVal);
 end;
 
 procedure Tau3Checkbox.SetColor(Value: TColor);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(ColorToRGB(Color));
   inherited SetColor(Value);
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Color', IntToStr(ColorToRGB(Value)));
+    FOnChangeProp(Self, 'Color', IntToStr(ColorToRGB(Value)), oldVal);
 end;
 
 procedure Tau3Checkbox.SetCursorIcon(c: TAU3Cursor);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(Ord(FCursorIcon));
   FCursorIcon := c;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Cursor', IntToStr(Ord(c)));
+    FOnChangeProp(Self, 'Cursor', IntToStr(Ord(c)), oldVal);
 end;
 
 procedure Tau3Checkbox.SetisEnabled(b: boolean);
+var oldVal: String;
 begin
+  oldVal:=BoolToStr(FisEnabled, 'True', 'False');
   FisEnabled := b;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Enabled', BoolToStr(b, True));
+    FOnChangeProp(Self, 'Enabled', BoolToStr(b, 'True', 'False'), oldVal);
 end;
 
 procedure Tau3Checkbox.SetFont(f: TFont);
+var oldVal1, oldVal2: String;
 begin
+  oldVal1:=GetFontString(Font);
+  oldVal2:=IntToStr(ColorToRGB(Font.Color));
   inherited Font := f;
   if Assigned(FOnChangeProp) then
   begin
-    FOnChangeProp(Self, 'Font', GetFontString(f));
-    FOnChangeProp(Self, 'FontColor', IntToStr(ColorToRGB(Font.Color)));
+    FOnChangeProp(Self, 'Font', GetFontString(f), oldVal1);
+    FOnChangeProp(Self, 'FontColor', IntToStr(ColorToRGB(Font.Color)), oldVal2);
   end;
 end;
 
 procedure Tau3Checkbox.SetHint(const Value: TTranslateString);
+var oldVal: String;
 begin
+  oldVal:=Hint;
   inherited SetHint(Value);
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Hint', Value);
+    FOnChangeProp(Self, 'Hint', Value, oldVal);
 end;
 
 procedure Tau3Checkbox.SetChecked(Value: boolean);
+var oldVal: String;
 begin
+  oldVal:=BoolToStr(FChecked, 'True', 'False');
   FChecked := Value;
   inherited SetChecked(Value);
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Checked', BoolToStr(Value, True));
+    FOnChangeProp(Self, 'Checked', BoolToStr(Value, 'True', 'False'), oldVal);
 end;
 
 procedure Tau3Checkbox.SetTabOrder(i: integer);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(FTabOrder);
   FTabOrder := i;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'TabOrder', IntToStr(i));
+    FOnChangeProp(Self, 'TabOrder', IntToStr(i), oldVal);
 end;
 
 procedure Tau3Checkbox.SetisVisible(b: boolean);
+var oldVal: String;
 begin
+  oldVal:=BoolToStr(FIsVisible, 'True', 'False');
   FIsVisible := b;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Visible', BoolToStr(b, True));
+    FOnChangeProp(Self, 'Visible', BoolToStr(b, 'True', 'False'), oldVal);
 end;
 
 procedure Tau3Checkbox.SetResizing(b: TResizeModes);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(Cardinal(FResizing));
   FResizing := b;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Resizing', IntToStr(cardinal(b)));
+    FOnChangeProp(Self, 'Resizing', IntToStr(cardinal(b)), oldVal);
 end;
 
 function Tau3Checkbox.GetFont: TFont;
@@ -2533,9 +2732,9 @@ begin
     Result := Name
   else if p = 'text' then
     Result := Caption
-  else if p = 'x' then
+  else if p = 'left' then
     Result := IntToStr(Left)
-  else if p = 'y' then
+  else if p = 'top' then
     Result := IntToStr(Top)
   else if p = 'width' then
     Result := IntToStr(Width)
@@ -2566,7 +2765,11 @@ begin
   else if p = 'taborder' then
     Result := IntToStr(FTabOrder)
   else if p = 'visible' then
-    Result := BoolToStr(FIsVisible, True);
+    Result := BoolToStr(FIsVisible, True)
+  else if p = 'pos' then
+    Result := Format('%d:%d', [Left, Top])
+  else if p = 'size' then
+    Result := Format('%d:%d', [Width, Height]);
 end;
 
 procedure Tau3Checkbox.SetProp(p, val: string);
@@ -2576,9 +2779,9 @@ begin
     Name := val
   else if p = 'text' then
     Caption := val
-  else if (p = 'x') and isNumeric(val) then
+  else if (p = 'left') and isNumeric(val) then
     Left := StrToInt(val)
-  else if (p = 'y') and isNumeric(val) then
+  else if (p = 'top') and isNumeric(val) then
     Top := StrToInt(val)
   else if (p = 'width') and isNumeric(val) then
     Width := StrToInt(val)
@@ -2609,7 +2812,11 @@ begin
   else if (p = 'taborder') and isNumeric(val) then
     FTabOrder := StrToInt(val)
   else if (p = 'visible') then
-    FIsVisible := val = 'True';
+    FIsVisible := val = 'True'
+  else if (p='pos') then
+  SetPos(Self, val)
+  else if (p='size') then
+  SetSize(Self, val);
 end;
 
 function Tau3Checkbox.GetEvent(e: string): string;
@@ -2717,8 +2924,8 @@ end;
 function Tau3Label.CheckProperty(prop: string): boolean;
 begin
   prop := LowerCase(prop);
-  Result := (prop = 'name') or (prop = 'text') or (prop = 'x') or
-    (prop = 'y') or (prop = 'width') or (prop = 'height') or
+  Result := (prop = 'name') or (prop = 'text') or (prop = 'left') or
+    (prop = 'top') or (prop = 'width') or (prop = 'height') or
     (prop = 'style') or (prop = 'styleex') or (prop = 'staticstyle') or
     (Pos('ws_', prop) = 1) or (Pos('ss_', prop) = 1) or (Pos('rz', prop) = 1) or
     (prop = 'color') or (prop = 'cursoricon') or (prop = 'enabled') or
@@ -2732,40 +2939,50 @@ begin
 end;
 
 procedure Tau3Label.SetName(const Value: TComponentName);
+var oldVal: String;
 begin
+  oldVal:=Value;
   if Text = Name then
     Text := Value;
   inherited SetName(Value);
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Name', Value);
+    FOnChangeProp(Self, 'Name', Value, oldVal);
 end;
 
 procedure Tau3Label.SetLeft(Val: integer);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(Left);
   inherited Left := Val;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Left', IntToStr(Val));
+    FOnChangeProp(Self, 'Left', IntToStr(Val), oldVal);
 end;
 
 procedure Tau3Label.SetTop(Val: integer);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(Top);
   inherited Top := Val;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Top', IntToStr(Val));
+    FOnChangeProp(Self, 'Top', IntToStr(Val), oldVal);
 end;
 
 procedure Tau3Label.SetWidth(Val: integer);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(Width);
   inherited Width := Val;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Width', IntToStr(Val));
+    FOnChangeProp(Self, 'Width', IntToStr(Val), oldVal);
 end;
 
 procedure Tau3Label.SetHeight(Val: integer);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(Height);
   inherited Height := Val;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Height', IntToStr(Val));
+    FOnChangeProp(Self, 'Height', IntToStr(Val), oldVal);
 end;
 
 function Tau3Label.GetLeft: integer;
@@ -2789,83 +3006,106 @@ begin
 end;
 
 procedure Tau3Label.SetStyle(val: TWindowStyles);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(Cardinal(GetStyle));
   FStyle := (FStyle and $FFFF) or (DWord(val) shl 16);
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Style', IntToStr(cardinal(val)));
+    FOnChangeProp(Self, 'Style', IntToStr(cardinal(val)), oldVal);
 end;
 
 procedure Tau3Label.SetStaticStyle(val: TStaticStyles);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(Cardinal(GetStaticStyle));
   FStyle := (FStyle and (not $FFFF)) or (DWord(val));
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'StaticStyle', IntToStr(cardinal(val)));
+    FOnChangeProp(Self, 'StaticStyle', IntToStr(cardinal(val)), oldVal);
 end;
 
 procedure Tau3Label.SetStyleEx(val: TWindowExStyles);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(FStyleEX);
   FStyleEX := cardinal(val);
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'StyleEx', IntToStr(cardinal(Val)));
+    FOnChangeProp(Self, 'StyleEx', IntToStr(cardinal(Val)), oldVal);
 end;
 
 procedure Tau3Label.SetColor(Value: TColor);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(ColorToRGB(Color));
   inherited SetColor(Value);
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Color', IntToStr(ColorToRGB(Value)));
+    FOnChangeProp(Self, 'Color', IntToStr(ColorToRGB(Value)), oldVal);
 end;
 
 procedure Tau3Label.SetCursorIcon(c: TAU3Cursor);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(ord(FCursorIcon));
   FCursorIcon := c;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Cursor', IntToStr(Ord(c)));
+    FOnChangeProp(Self, 'Cursor', IntToStr(Ord(c)), oldVal);
 end;
 
 procedure Tau3Label.SetisEnabled(b: boolean);
+var oldVal: String;
 begin
+  oldVal:=BoolToStr(FisEnabled, 'True', 'False');
   FisEnabled := b;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Enabled', BoolToStr(b, True));
+    FOnChangeProp(Self, 'Enabled', BoolToStr(b, 'True', 'False'), oldVal);
 end;
 
 procedure Tau3Label.SetFont(f: TFont);
+var oldVal1, oldVal2: String;
 begin
+  oldVal1:=GetFontString(Font);
+  oldVal2:=IntToStr(ColorToRGB(Font.Color));
   inherited Font := f;
   if Assigned(FOnChangeProp) then
   begin
-    FOnChangeProp(Self, 'Font', GetFontString(f));
-    FOnChangeProp(Self, 'FontColor', IntToStr(ColorToRGB(Font.Color)));
+    FOnChangeProp(Self, 'Font', GetFontString(f), oldVal1);
+    FOnChangeProp(Self, 'FontColor', IntToStr(ColorToRGB(Font.Color)), oldVal2);
   end;
 end;
 
 procedure Tau3Label.SetHint(const Value: TTranslateString);
+var oldVal: String;
 begin
+  oldVal:=Hint;
   inherited SetHint(Value);
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Hint', Value);
+    FOnChangeProp(Self, 'Hint', Value, oldVal);
 end;
 
 procedure Tau3Label.SetTabOrder(i: integer);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(FTabOrder);
   FTabOrder := i;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'TabOrder', IntToStr(i));
+    FOnChangeProp(Self, 'TabOrder', IntToStr(i), oldVal);
 end;
 
 procedure Tau3Label.SetisVisible(b: boolean);
+var oldVal: String;
 begin
+  oldVal:=BoolToStr(FIsVisible, 'True', 'False');
   FIsVisible := b;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Visible', BoolToStr(b, True));
+    FOnChangeProp(Self, 'Visible', BoolToStr(b, 'True', 'False'), oldVal);
 end;
 
 procedure Tau3Label.SetResizing(b: TResizeModes);
+var oldVal: String;
 begin
+  oldVal:=IntToStr(Cardinal(FResizing));
   FResizing := b;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Resizing', IntToStr(cardinal(b)));
+    FOnChangeProp(Self, 'Resizing', IntToStr(cardinal(b)), oldVal);
 end;
 
 function Tau3Label.GetFont: TFont;
@@ -2905,9 +3145,9 @@ begin
     Result := Name
   else if p = 'text' then
     Result := Caption
-  else if p = 'x' then
+  else if p = 'left' then
     Result := IntToStr(Left)
-  else if p = 'y' then
+  else if p = 'top' then
     Result := IntToStr(Top)
   else if p = 'width' then
     Result := IntToStr(Width)
@@ -2936,7 +3176,11 @@ begin
   else if p = 'taborder' then
     Result := IntToStr(FTabOrder)
   else if p = 'visible' then
-    Result := BoolToStr(FIsVisible, True);
+    Result := BoolToStr(FIsVisible, True)
+  else if p = 'pos' then
+    Result := Format('%d:%d', [Left, Top])
+  else if p = 'size' then
+    Result := Format('%d:%d', [Width, Height]);
 end;
 
 procedure Tau3Label.SetProp(p, val: string);
@@ -2946,9 +3190,9 @@ begin
     Name := val
   else if p = 'text' then
     Caption := val
-  else if (p = 'x') and isNumeric(val) then
+  else if (p = 'left') and isNumeric(val) then
     Left := StrToInt(val)
-  else if (p = 'y') and isNumeric(val) then
+  else if (p = 'top') and isNumeric(val) then
     Top := StrToInt(val)
   else if (p = 'width') and isNumeric(val) then
     Width := StrToInt(val)
@@ -2977,7 +3221,11 @@ begin
   else if (p = 'taborder') and isNumeric(val) then
     FTabOrder := StrToInt(val)
   else if (p = 'visible') then
-    FIsVisible := val = 'True';
+    FIsVisible := val = 'True'
+  else if (p='pos') then
+  SetPos(Self, val)
+  else if (p='size') then
+  SetSize(Self, val);
 end;
 
 function Tau3Label.GetEvent(e: string): string;
@@ -3083,13 +3331,15 @@ begin
 end;
 
 procedure Tau3Label.SetText(val: string);
+var oldVal: String;
 begin
+  oldVal:=FCaption;
   Width := Canvas.TextWidth(val);
   Height := Canvas.TextHeight(val);
   FCaption := val;
   Invalidate;
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Text', val);
+    FOnChangeProp(Self, 'Text', val, oldVal);
 end;
 
 procedure Tau3Label.FillEvents(g: TValueListEditor);

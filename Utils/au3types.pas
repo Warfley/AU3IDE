@@ -5,9 +5,21 @@ unit au3Types;
 interface
 
 uses
-  Classes, SysUtils, fgl, ListRecords, Graphics, LazFileUtils, strutils, Dialogs;
+  Classes, SysUtils, fgl, ListRecords, Graphics, LazFileUtils, strutils, Dialogs,
+  gstack;
 
 type
+
+  TPropertyChangeEvent = procedure(Sender: TObject;
+    PropName, PropVal, OldVal: string) of object;
+
+  TChangeData = record
+    Comp: TObject;
+    Prop, OldVal, NewVal: String;
+  end;
+
+  TPropChangeStack = specialize TStack<TChangeData>;
+
   TTokenType = (tkComment, tkIdentifier, tkFunction, tkSymbol, tkNumber, tkSpace,
     tkString, tkUnknown, tkVar, tkUndefined, tkDoc, tkTemp);
   PHashInfo = ^THashInfo;

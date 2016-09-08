@@ -119,6 +119,7 @@ type
     procedure NewProjectItemClick(Sender: TObject);
     procedure NextTabItemClick(Sender: TObject);
     procedure PrevTabItemClick(Sender: TObject);
+    procedure RedoMenuItemClick(Sender: TObject);
     procedure RunBtnClick(Sender: TObject);
     procedure RunMenuItemClick(Sender: TObject);
     procedure SampeButtonClick(Sender: TObject);
@@ -130,6 +131,7 @@ type
     procedure StopBtnClick(Sender: TObject);
     procedure TextEditorOptionsItemClick(Sender: TObject);
     procedure MainToolbarPaint(Sender: TObject);
+    procedure UndoMenuItemClick(Sender: TObject);
     procedure UpdateMenuItemClick(Sender: TObject);
   private
     FFirstLoad: boolean;
@@ -755,6 +757,13 @@ begin
   MainToolbar.Canvas.LineTo(MainToolbar.Width, MainToolbar.Height - 1);
 end;
 
+procedure TMainForm.UndoMenuItemClick(Sender: TObject);
+begin
+  { TODO : Use Interface instead of this bullshit }
+  if EditorManager1.CurrentEditor is TFormEditFrame then
+    (EditorManager1.CurrentEditor as TFormEditFrame).DoUndo;
+end;
+
 procedure TMainForm.UpdateMenuItemClick(Sender: TObject);
 begin
   if CheckForUpdates then
@@ -1138,6 +1147,13 @@ end;
 procedure TMainForm.PrevTabItemClick(Sender: TObject);
 begin
   EditorManager1.EditorIndex := Max(EditorManager1.EditorIndex - 1, 0);
+end;
+
+procedure TMainForm.RedoMenuItemClick(Sender: TObject);
+begin
+  { TODO : Use Interface instead of this bullshit }
+  if EditorManager1.CurrentEditor is TFormEditFrame then
+    (EditorManager1.CurrentEditor as TFormEditFrame).DoRedo;
 end;
 
 procedure TMainForm.RunBtnClick(Sender: TObject);

@@ -1,6 +1,7 @@
 unit FormEditor;
 
-{ TODO : Impelement Undo, Redo with Stack, using extended ChangeProp with oldValue }
+{ TODO : Impelement Undo, Redo for Creation/Deletion of Components }
+{ TODO : Persitent Undo }
 
 {$mode objfpc}{$H+}
 
@@ -70,15 +71,18 @@ type
     FChangeProps: boolean;
     FFileName: string;
     FConf: TFormEditorConfig;
+    UndoStack, RedoStack: TPropChangeStack;
     Moved: boolean;
     FLastClickTime: cardinal;
     FLastClickRow: integer;
+    sizing: boolean;
     FDrawLines: boolean;
     FMousePoint: TPoint;
     FPanelMousePoint: TPoint;
     FSelPoint: TPoint;
     FCopyLst: TObjectList;
     FOldLeft, FOldTop: integer;
+    FStartTop, FStartLeft: integer;
     FOnChange: TNotifyEvent;
     FOpenEditor: TOpenEditorEvent;
     FEnterFunc: TOpenFunctionEvent;
@@ -92,10 +96,12 @@ type
     function CreateLabel(P: TWinControl): Tau3Label;
     function CreateEdit(P: TWinControl): Tau3Edit;
     procedure LoadControlData(c: TComponent);
-    procedure PropChanged(Sender: TObject; PropName, PropVal: string);
+    procedure PropChanged(Sender: TObject; PropName, PropVal, OldVal: string);
     procedure UpdateFormCaption(Sender: TObject);
   public
     procedure ReLoadConf;
+    procedure DoUndo;
+    procedure DoRedo;
     constructor Create(TheOwner: TComponent); override;
     procedure AddToVarlist(l: TVarList);
     destructor Destroy; override;
@@ -111,23 +117,39 @@ type
     property OnVarChanged: TNotifyEvent read FOnVarChanged write FOnVarChanged;
   end;
 
+function ChangeDataToString(c: TChangeData): string; inline;
+
 implementation
 
 {$R *.lfm}
+
+function ChangeDataToString(c: TChangeData): string; inline;
+begin
+  Result := Format('[%s]%s: %s->%s', [(c.comp as TControl).Name,
+    c.Prop, c.OldVal, c.NewVal]);
+end;
 
 procedure TFormEditFrame.UpdateFormCaption(Sender: TObject);
 begin
   FormCaptionLabel.Caption := FFormular.Caption;
 end;
 
-procedure TFormEditFrame.PropChanged(Sender: TObject; PropName, PropVal: string);
+procedure TFormEditFrame.PropChanged(Sender: TObject; PropName, PropVal, OldVal: string);
 var
   i: integer;
+  undoItem: TChangeData;
 begin
-  if not FChangeProps then
+  if (not FChangeProps) and (FormControlView.SelectionCount > 0) then
   begin
     FChangeProps := True;
     try
+      undoItem.comp := Sender;
+      undoItem.Prop := PropName;
+      undoItem.NewVal := PropVal;
+      undoItem.OldVal := OldVal;
+      if Length(PropName) > 0 then
+        UndoStack.Push(undoItem);
+
       PropName := LowerCase(PropName);
       if PropName = 'name' then
       begin
@@ -141,15 +163,25 @@ begin
       else
       begin
         for i := 0 to FormControlView.Items.Count - 1 do
-          if FormControlView.Items[i].Selected then
+          if FormControlView.Items[i].Selected and
+            (TObject(FormControlView.Items[i].Data) as
+            Iau3Component).CheckProperty(PropName) and
+            (Sender <> TObject(FormControlView.Items[i].Data)) then
+          begin
+            undoItem.OldVal :=
+              (TObject(FormControlView.Items[i].Data) as
+              Iau3Component).GetProp(PropName);
             (TObject(FormControlView.Items[i].Data) as Iau3Component).SetProp(
               PropName, PropVal);
+            undoItem.comp := TObject(FormControlView.Items[i].Data);
+            UndoStack.Push(undoItem);
+          end;
         (Sender as TControl).Parent.Invalidate;
       end;
     finally
       FChangeProps := False;
     end;
-    Parent.Caption:='*'+ExtractFileName(FFileName);
+    Parent.Caption := '*' + ExtractFileName(FFileName);
   end;
 end;
 
@@ -200,6 +232,46 @@ begin
     FormControlView.TreeLineColor := GetHighLightColor(ForeCol);
     FormControlView.SeparatorColor := GetHighLightColor(ForeCol);
     Invalidate;
+  end;
+end;
+
+procedure TFormEditFrame.DoUndo;
+var
+  undoitem: TChangeData;
+begin
+  if UndoStack.Size > 0 then
+  begin
+    undoitem := UndoStack.Top();
+    UndoStack.Pop();
+    RedoStack.Push(undoitem);
+    FChangeProps := True;
+    try
+      with undoitem do
+        (comp as Iau3Component).SetProp(Prop, OldVal);
+    finally
+      FChangeProps := False;
+    end;
+  FFormular.Invalidate;
+  end;
+end;
+
+procedure TFormEditFrame.DoRedo;
+var
+  redoitem: TChangeData;
+begin
+  if RedoStack.Size > 0 then
+  begin
+    redoitem := RedoStack.Top();
+    RedoStack.Pop();
+    UndoStack.Push(redoitem);
+    FChangeProps := True;
+    try
+      with redoitem do
+        (comp as Iau3Component).SetProp(Prop, NewVal);
+    finally
+      FChangeProps := False;
+    end;
+  FFormular.Invalidate;
   end;
 end;
 
@@ -257,7 +329,7 @@ begin
       end;
 end;
 
-function TFormEditFrame.CreateCheckBox(P: TWinControl): Tau3Checkbox;
+function TFormEditFrame.CreateCheckBox(P: TWinControl): Tau3CheckBox;
 var
   i: integer;
 begin
@@ -403,6 +475,8 @@ begin
   FormControlView.Items[0].ImageIndex := 0;
   FormControlView.Items[0].SelectedIndex := 0;
   EventEditor.ColWidths[0] := EventEditor.Width div 2;
+  UndoStack := TPropChangeStack.Create;
+  RedoStack := TPropChangeStack.Create;
   FCopyLst := TObjectList.Create(False);
   ReLoadConf;
 end;
@@ -412,6 +486,8 @@ begin
   DeleteItem(FormControlView.Items[0]);
   FFuncList.Free;
   FCopyLst.Free;
+  UndoStack.Free;
+  RedoStack.Free;
   inherited;
 end;
 
@@ -606,7 +682,10 @@ end;
 procedure TFormEditFrame.FormPanelMouseUp(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: integer);
 var
+  d: TPoint;
   c: TControl;
+  i: integer;
+  cd: TChangeData;
 begin
   if mbLeft = Button then
   begin
@@ -632,8 +711,41 @@ begin
       if Assigned(FOnChange) then
         FOnChange(Self);
     end;
-    if Moved and Assigned(FOnChange) then
-      FOnChange(Self);
+    if Moved then
+    begin
+      if sizing then
+      begin
+        d.x := MovingControl.Width - FStartLeft;
+        d.y := MovingControl.Height - FStartTop;
+      end
+      else
+      begin
+        d.x := MovingControl.Left - FStartLeft;
+        d.y := MovingControl.Top - FStartTop;
+      end;
+      for i := 0 to FormControlView.Items.Count - 1 do
+        if FormControlView.Items[i].Selected then
+        begin
+          c := TControl(FormControlView.Items[i].Data);
+          cd.comp := c;
+          if sizing then
+          begin
+            cd.Prop := 'Size';
+            cd.OldVal := IntToStr(c.Width - d.x) + ':' + IntToStr(c.Height - d.y);
+            cd.NewVal := IntToStr(c.Width) + ':' + IntToStr(c.Height);
+          end
+          else
+          begin
+            cd.Prop := 'Pos';
+            cd.OldVal := IntToStr(c.Left - d.x) + ':' + IntToStr(c.Top - d.y);
+            cd.NewVal := IntToStr(c.Left) + ':' + IntToStr(c.Top);
+          end;
+          UndoStack.Push(cd);
+        end;
+
+      if Assigned(FOnChange) then
+        FOnChange(Self);
+    end;
     Moved := False;
     PositionPickerPanel.Show;
     FMousePoint := Point(-1, -1);
@@ -843,6 +955,18 @@ begin
     EditorScrollBox.Invalidate;
     FOldLeft := (Sender as TControl).Left;
     FOldTop := (Sender as TControl).Top;
+    if (Sender as TControl).Cursor = crDefault then
+    begin
+      FStartLeft := (Sender as TControl).Left;
+      FStartTop := (Sender as TControl).Top;
+      sizing := False;
+    end
+    else
+    begin
+      FStartLeft := (Sender as TControl).Width;
+      FStartTop := (Sender as TControl).Height;
+      sizing := True;
+    end;
     if not Assigned(ToolSelect.Selected) then
       for i := 0 to FormControlView.Items.Count - 1 do
         if FormControlView.Items[i].Data = Pointer(Sender) then
@@ -985,7 +1109,7 @@ end;
 
 procedure TFormEditFrame.DeleteItem(n: TTreeNode);
 var
-  i: integer;
+  tmpStack: TPropChangeStack;
 begin
   if not Assigned(n) then
     Exit;
@@ -996,6 +1120,37 @@ begin
     TObject(n.Data).Free;
     FormControlView.Items.Delete(n);
   end;
+
+  tmpStack := TPropChangeStack.Create;
+  try
+    // Deleting all occurances in Undo
+    while not UndoStack.IsEmpty() do
+    begin
+      if UndoStack.Top.comp <> TObject(n.Data) then
+        tmpStack.Push(UndoStack.Top());
+      UndoStack.Pop();
+    end;
+    while not tmpStack.IsEmpty() do
+    begin
+      UndoStack.Push(tmpStack.Top());
+      tmpStack.Pop();
+    end;
+    // Deleting all occurances in Redo
+    while not RedoStack.IsEmpty() do
+    begin
+      if RedoStack.Top.comp <> TObject(n.Data) then
+        tmpStack.Push(RedoStack.Top());
+      RedoStack.Pop();
+    end;
+    while not tmpStack.IsEmpty() do
+    begin
+      RedoStack.Push(tmpStack.Top());
+      tmpStack.Pop();
+    end;
+  finally
+    tmpStack.Free;
+  end;
+
   FFormular.Invalidate;
   if Assigned(FOnChange) then
     FOnChange(Self);
@@ -1115,7 +1270,7 @@ procedure TFormEditFrame.Load(p: string = '');
   function IsNumeric(s: string): boolean;
   var
     i, st: integer;
-    cs: set of Char;
+    cs: set of char;
   begin
     st := 1;
     Result := Length(s) > 0;
@@ -1124,12 +1279,13 @@ procedure TFormEditFrame.Load(p: string = '');
       st := 2;
       Result := Length(s) > 1;
     end;
-    if pos('0x', s)=1 then
+    if pos('0x', s) = 1 then
     begin
-      cs:=['0'..'9', 'A'..'F', 'a'..'f'];
-      inc(st, 2);
+      cs := ['0'..'9', 'A'..'F', 'a'..'f'];
+      Inc(st, 2);
     end
-    else cs:=['0'..'9'];
+    else
+      cs := ['0'..'9'];
     for i := st to Length(s) do
       if not (s[i] in cs) then
       begin
@@ -1227,7 +1383,7 @@ begin
   FChangeProps := True;
   try
     currParent := nil;
-    rm:=[];
+    rm := [];
     curr := 1;
     DeleteItem(FormControlView.Items[0]);
     FormFound := False;
@@ -1270,9 +1426,9 @@ begin
             FFormular.Style := TWindowStyles(StrToInt(FuncParams[5]) shr 16);
             FFormular.StyleEx := TWindowExStyles(StrToInt(FuncParams[6]));
             FormFound := True;
-            FFormular.Resize:=rm;
-            FFormular.Visible:=True;
-            FFormular.Enabled:=True;
+            FFormular.Resize := rm;
+            FFormular.Visible := True;
+            FFormular.Enabled := True;
             currParent := FormControlView.Items[0];
           end
           else if FuncName = 'guictrlcreatebutton' then
@@ -1367,257 +1523,259 @@ begin
         // Resize Modes
         else if isEnd(Lines[i], 'opt') then
         begin
-          FuncName:=ReadFunc(Lines[i], FuncParams);
+          FuncName := ReadFunc(Lines[i], FuncParams);
           // Syntax Check
-          if not ((LowerCase(FuncParams[0])= 'guiresizemode') and IsNumeric(FuncParams[1])) then
-          Continue;
-          rm:=TResizeModes(StrToInt(FuncParams[1]));
+          if not ((LowerCase(FuncParams[0]) = 'guiresizemode') and
+            IsNumeric(FuncParams[1])) then
+            Continue;
+          rm := TResizeModes(StrToInt(FuncParams[1]));
         end
         else if FormFound then
-        // GUI Event
-        if isEnd(Lines[i], 'guisetonevent') then
-        begin
-          FuncName := ReadFunc(Lines[i], FuncParams);
-          // Syntax Check
-          if not ((FuncParams.Count = 3) and IsNumeric(FuncParams[0]) and
-            (Length(FuncParams[2]) > 0) and (FuncParams[2][1] = '$') and
-            (StrToInt(FuncParams[0]) <> GUI_EVENT_CLOSE)) then
-            Continue;
-          FFormular.Event[GUIEventToString(StrToInt(FuncParams[0]))]
-            := FuncParams[1];
-        end
-        // Control Event
-        else if isEnd(Lines[i], 'guictrlsetonevent') then
-        begin
-          FuncName := ReadFunc(Lines[i], FuncParams);
-          // Syntax Check
-          if not ((FuncParams.Count = 2) and (Length(FuncParams[0]) > 0) and
-          (FuncParams[0][1] = '$')) then
-            Continue;
-          idx := FindControl(Copy(FuncParams[0], 2, length(FuncParams[0])));
+          // GUI Event
+          if isEnd(Lines[i], 'guisetonevent') then
+          begin
+            FuncName := ReadFunc(Lines[i], FuncParams);
+            // Syntax Check
+            if not ((FuncParams.Count = 3) and IsNumeric(FuncParams[0]) and
+              (Length(FuncParams[2]) > 0) and (FuncParams[2][1] = '$') and
+              (StrToInt(FuncParams[0]) <> GUI_EVENT_CLOSE)) then
+              Continue;
+            FFormular.Event[GUIEventToString(StrToInt(FuncParams[0]))] :=
+              FuncParams[1];
+          end
+          // Control Event
+          else if isEnd(Lines[i], 'guictrlsetonevent') then
+          begin
+            FuncName := ReadFunc(Lines[i], FuncParams);
+            // Syntax Check
+            if not ((FuncParams.Count = 2) and (Length(FuncParams[0]) > 0) and
+              (FuncParams[0][1] = '$')) then
+              Continue;
+            idx := FindControl(Copy(FuncParams[0], 2, length(FuncParams[0])));
             if (idx < 0) or (idx > FormControlView.Items.Count - 1) then
               Continue;
             a := TObject(FormControlView.Items[idx].Data) as Iau3Component;
             a.Events[0] := FuncParams[1];
-        end
-        // Form Close Event
-        else if isEnd(Lines[i], 'func') then
-        begin
-          idx := i+1;
-          FuncName:=Lines[idx];
-          if isEnd(Lines[idx], 'if') then
-           inc(idx);
-          FuncName:=ReadFunc(Lines[idx], FuncParams);
-          FFormular.Event['onClose']:=FuncName;
-        end
-        // Form Color
-        else if isEnd(Lines[i], 'guisetbkcolor') then
-        begin
-          FuncName:=ReadFunc(Lines[i],FuncParams);
-          // Syntax Check
-          if not ((FuncParams.Count>0) and IsNumeric(FuncParams[0])) then
-            Continue;
-          FFormular.Color:=AuColToColor(FuncParams[0]);
-        end
-        // Form Cursor
-        else if isEnd(Lines[i], 'guisetcursor') then
-        begin
-          FuncName:=ReadFunc(Lines[i],FuncParams);
-          // Syntax Check
-          if not ((FuncParams.Count=3) and IsNumeric(FuncParams[0])) then
-            Continue;
-          FFormular.CursorIcon:=TAU3Cursor(StrToInt(FuncParams[0]));
-        end
-        // Form Font
-        else if isEnd(Lines[i], 'guisetfont') then
-        begin
-          FuncName:=ReadFunc(Lines[i],FuncParams);
-          // Syntax Check
-          if not ((FuncParams.Count=4) and IsNumeric(FuncParams[0])
-           and IsNumeric(FuncParams[1]) and IsNumeric(FuncParams[2])) then
-            Continue;
-          SetFontString(FFormular.Font, ExtractBetween(Lines[i], '(', ')'));
-        end
-        // Form Icon
-        else if isEnd(Lines[i], 'guiseticon') then
-        begin
-          FuncName:=ReadFunc(Lines[i],FuncParams);
-          // Syntax Check
-          if not ((FuncParams.Count=3) and IsNumeric(FuncParams[1])) then
-            Continue;
-          FFormular.Icon:=FuncParams[0];
-          FFormular.IconID:=StrToInt(FuncParams[1]);
-        end
-        // Form State
-        else if isEnd(Lines[i], 'guisetstate') then
-        begin
-          FuncName:=ReadFunc(Lines[i],FuncParams);
-          // Syntax Check
-          if not (FuncParams.Count=1) then
-            Continue;
-          if FuncParams[0]='@SW_DISABLE' then
-            FFormular.Enabled:=False
-          else if FuncParams[0]='@SW_HIDE' then
-            FFormular.Visible:=False
-          else
+          end
+          // Form Close Event
+          else if isEnd(Lines[i], 'func') then
           begin
-            FFormular.Visible:=True;
-            FFormular.Enabled:=True;
-          end;
-        end
-        // Control Font
-        else if isEnd(Lines[i], 'guictrlsetfont') then
-        begin
-          FuncName := ReadFunc(Lines[i], FuncParams);
-          // Syntax Check
-          if not ((FuncParams.Count = 5) and (Length(FuncParams[0]) > 0) and
-          (FuncParams[0][1] = '$') and IsNumeric(FuncParams[1]) and IsNumeric(FuncParams[2])
-           and IsNumeric(FuncParams[3])) then
-            Continue;
-          idx := FindControl(Copy(FuncParams[0], 2, length(FuncParams[0])));
+            idx := i + 1;
+            FuncName := Lines[idx];
+            if isEnd(Lines[idx], 'if') then
+              Inc(idx);
+            FuncName := ReadFunc(Lines[idx], FuncParams);
+            FFormular.Event['onClose'] := FuncName;
+          end
+          // Form Color
+          else if isEnd(Lines[i], 'guisetbkcolor') then
+          begin
+            FuncName := ReadFunc(Lines[i], FuncParams);
+            // Syntax Check
+            if not ((FuncParams.Count > 0) and IsNumeric(FuncParams[0])) then
+              Continue;
+            FFormular.Color := AuColToColor(FuncParams[0]);
+          end
+          // Form Cursor
+          else if isEnd(Lines[i], 'guisetcursor') then
+          begin
+            FuncName := ReadFunc(Lines[i], FuncParams);
+            // Syntax Check
+            if not ((FuncParams.Count = 3) and IsNumeric(FuncParams[0])) then
+              Continue;
+            FFormular.CursorIcon := TAU3Cursor(StrToInt(FuncParams[0]));
+          end
+          // Form Font
+          else if isEnd(Lines[i], 'guisetfont') then
+          begin
+            FuncName := ReadFunc(Lines[i], FuncParams);
+            // Syntax Check
+            if not ((FuncParams.Count = 4) and IsNumeric(FuncParams[0]) and
+              IsNumeric(FuncParams[1]) and IsNumeric(FuncParams[2])) then
+              Continue;
+            SetFontString(FFormular.Font, ExtractBetween(Lines[i], '(', ')'));
+          end
+          // Form Icon
+          else if isEnd(Lines[i], 'guiseticon') then
+          begin
+            FuncName := ReadFunc(Lines[i], FuncParams);
+            // Syntax Check
+            if not ((FuncParams.Count = 3) and IsNumeric(FuncParams[1])) then
+              Continue;
+            FFormular.Icon := FuncParams[0];
+            FFormular.IconID := StrToInt(FuncParams[1]);
+          end
+          // Form State
+          else if isEnd(Lines[i], 'guisetstate') then
+          begin
+            FuncName := ReadFunc(Lines[i], FuncParams);
+            // Syntax Check
+            if not (FuncParams.Count = 1) then
+              Continue;
+            if FuncParams[0] = '@SW_DISABLE' then
+              FFormular.Enabled := False
+            else if FuncParams[0] = '@SW_HIDE' then
+              FFormular.Visible := False
+            else
+            begin
+              FFormular.Visible := True;
+              FFormular.Enabled := True;
+            end;
+          end
+          // Control Font
+          else if isEnd(Lines[i], 'guictrlsetfont') then
+          begin
+            FuncName := ReadFunc(Lines[i], FuncParams);
+            // Syntax Check
+            if not ((FuncParams.Count = 5) and (Length(FuncParams[0]) > 0) and
+              (FuncParams[0][1] = '$') and IsNumeric(FuncParams[1]) and
+              IsNumeric(FuncParams[2]) and IsNumeric(FuncParams[3])) then
+              Continue;
+            idx := FindControl(Copy(FuncParams[0], 2, length(FuncParams[0])));
             if (idx < 0) or (idx > FormControlView.Items.Count - 1) then
               Continue;
             a := TObject(FormControlView.Items[idx].Data) as Iau3Component;
-            a.ComponentProp['Font']:=Format('%s, %s, %s, "%s"', [FuncParams[1],
-              FuncParams[2], FuncParams[3], FuncParams[4]]);
-        end
-        // Control Resizing
-        else if isEnd(Lines[i], 'guictrlsetresizing') then
-        begin
-          FuncName := ReadFunc(Lines[i], FuncParams);
-          // Syntax Check
-          if not ((FuncParams.Count = 2) and (Length(FuncParams[0]) > 0) and
-          (FuncParams[0][1] = '$') and IsNumeric(FuncParams[1])) then
-            Continue;
-          idx := FindControl(Copy(FuncParams[0], 2, length(FuncParams[0])));
+            a.ComponentProp['Font'] :=
+              Format('%s, %s, %s, "%s"', [FuncParams[1], FuncParams[2],
+              FuncParams[3], FuncParams[4]]);
+          end
+          // Control Resizing
+          else if isEnd(Lines[i], 'guictrlsetresizing') then
+          begin
+            FuncName := ReadFunc(Lines[i], FuncParams);
+            // Syntax Check
+            if not ((FuncParams.Count = 2) and (Length(FuncParams[0]) > 0) and
+              (FuncParams[0][1] = '$') and IsNumeric(FuncParams[1])) then
+              Continue;
+            idx := FindControl(Copy(FuncParams[0], 2, length(FuncParams[0])));
             if (idx < 0) or (idx > FormControlView.Items.Count - 1) then
               Continue;
             a := TObject(FormControlView.Items[idx].Data) as Iau3Component;
-            a.ComponentProp['Resizing']:=FuncParams[1];
-        end
-        // Control Cursor
-        else if isEnd(Lines[i], 'guictrlsetcursor') then
-        begin
-          FuncName := ReadFunc(Lines[i], FuncParams);
-          // Syntax Check
-          if not ((FuncParams.Count = 2) and (Length(FuncParams[0]) > 0) and
-          (FuncParams[0][1] = '$') and IsNumeric(FuncParams[1])) then
-            Continue;
-          idx := FindControl(Copy(FuncParams[0], 2, length(FuncParams[0])));
+            a.ComponentProp['Resizing'] := FuncParams[1];
+          end
+          // Control Cursor
+          else if isEnd(Lines[i], 'guictrlsetcursor') then
+          begin
+            FuncName := ReadFunc(Lines[i], FuncParams);
+            // Syntax Check
+            if not ((FuncParams.Count = 2) and (Length(FuncParams[0]) > 0) and
+              (FuncParams[0][1] = '$') and IsNumeric(FuncParams[1])) then
+              Continue;
+            idx := FindControl(Copy(FuncParams[0], 2, length(FuncParams[0])));
             if (idx < 0) or (idx > FormControlView.Items.Count - 1) then
               Continue;
             a := TObject(FormControlView.Items[idx].Data) as Iau3Component;
-            a.ComponentProp['cursor']:=FuncParams[1];
-        end
-        // Control Color
-        else if isEnd(Lines[i], 'guictrlsetbkcolor') then
-        begin
-          FuncName := ReadFunc(Lines[i], FuncParams);
-          // Syntax Check
-          if not ((FuncParams.Count = 2) and (Length(FuncParams[0]) > 0) and
-          (FuncParams[0][1] = '$') and IsNumeric(FuncParams[1])) then
-            Continue;
-          idx := FindControl(Copy(FuncParams[0], 2, length(FuncParams[0])));
+            a.ComponentProp['cursor'] := FuncParams[1];
+          end
+          // Control Color
+          else if isEnd(Lines[i], 'guictrlsetbkcolor') then
+          begin
+            FuncName := ReadFunc(Lines[i], FuncParams);
+            // Syntax Check
+            if not ((FuncParams.Count = 2) and (Length(FuncParams[0]) > 0) and
+              (FuncParams[0][1] = '$') and IsNumeric(FuncParams[1])) then
+              Continue;
+            idx := FindControl(Copy(FuncParams[0], 2, length(FuncParams[0])));
             if (idx < 0) or (idx > FormControlView.Items.Count - 1) then
               Continue;
             a := TObject(FormControlView.Items[idx].Data) as Iau3Component;
-            a.ComponentProp['Color']:=IntToStr(AuColToColor(FuncParams[1]));
-        end
-        // Control Hint
-        else if isEnd(Lines[i], 'guictrlsettip') then
-        begin
-          FuncName := ReadFunc(Lines[i], FuncParams);
-          // Syntax Check
-          if not ((FuncParams.Count = 2) and (Length(FuncParams[0]) > 0) and
-          (FuncParams[0][1] = '$')) then
-            Continue;
-          idx := FindControl(Copy(FuncParams[0], 2, length(FuncParams[0])));
+            a.ComponentProp['Color'] := IntToStr(AuColToColor(FuncParams[1]));
+          end
+          // Control Hint
+          else if isEnd(Lines[i], 'guictrlsettip') then
+          begin
+            FuncName := ReadFunc(Lines[i], FuncParams);
+            // Syntax Check
+            if not ((FuncParams.Count = 2) and (Length(FuncParams[0]) > 0) and
+              (FuncParams[0][1] = '$')) then
+              Continue;
+            idx := FindControl(Copy(FuncParams[0], 2, length(FuncParams[0])));
             if (idx < 0) or (idx > FormControlView.Items.Count - 1) then
               Continue;
             a := TObject(FormControlView.Items[idx].Data) as Iau3Component;
-            a.ComponentProp['Hint']:=FuncParams[1];
-        end
-        // Control State
-        else if isEnd(Lines[i], 'guictrlsetstate') then
-        begin
-          FuncName := ReadFunc(Lines[i], FuncParams);
-          // Syntax Check
-          if not ((FuncParams.Count = 2) and (Length(FuncParams[0]) > 0) and
-          (FuncParams[0][1] = '$') and IsNumeric(FuncParams[1])) then
-            Continue;
-          idx := FindControl(Copy(FuncParams[0], 2, length(FuncParams[0])));
+            a.ComponentProp['Hint'] := FuncParams[1];
+          end
+          // Control State
+          else if isEnd(Lines[i], 'guictrlsetstate') then
+          begin
+            FuncName := ReadFunc(Lines[i], FuncParams);
+            // Syntax Check
+            if not ((FuncParams.Count = 2) and (Length(FuncParams[0]) > 0) and
+              (FuncParams[0][1] = '$') and IsNumeric(FuncParams[1])) then
+              Continue;
+            idx := FindControl(Copy(FuncParams[0], 2, length(FuncParams[0])));
             if (idx < 0) or (idx > FormControlView.Items.Count - 1) then
               Continue;
             a := TObject(FormControlView.Items[idx].Data) as Iau3Component;
-            if FuncParams[1]='32' then
-              a.ComponentProp['Visible']:='False'
-            else if FuncParams[1]='128' then
-              a.ComponentProp['Enabled']:='False'
+            if FuncParams[1] = '32' then
+              a.ComponentProp['Visible'] := 'False'
+            else if FuncParams[1] = '128' then
+              a.ComponentProp['Enabled'] := 'False'
             else if FuncParams[1] = '1' then
               a.ComponentProp['Checked'] := 'True';
-        end
-        // Control Limit
-        else if isEnd(Lines[i], 'guictrlsetlimit') then
-        begin
-          FuncName := ReadFunc(Lines[i], FuncParams);
-          // Syntax Check
-          if not ((FuncParams.Count = 2) and (Length(FuncParams[0]) > 0) and
-          (FuncParams[0][1] = '$') and IsNumeric(FuncParams[1])) then
-            Continue;
-          idx := FindControl(Copy(FuncParams[0], 2, length(FuncParams[0])));
-            if (idx < 0) or (idx > FormControlView.Items.Count - 1) then
-              Continue;
-            a := TObject(FormControlView.Items[idx].Data) as Iau3Component;
-            a.ComponentProp['limit']:=FuncParams[1];
-        end
-        // Control Font Color
-        else if isEnd(Lines[i], 'guictrlsetcolor') then
-        begin
-          FuncName := ReadFunc(Lines[i], FuncParams);
-          // Syntax Check
-          if not ((FuncParams.Count = 2) and (Length(FuncParams[0]) > 0) and
-          (FuncParams[0][1] = '$') and IsNumeric(FuncParams[1])) then
-            Continue;
-          idx := FindControl(Copy(FuncParams[0], 2, length(FuncParams[0])));
-            if (idx < 0) or (idx > FormControlView.Items.Count - 1) then
-              Continue;
-            a := TObject(FormControlView.Items[idx].Data) as Iau3Component;
-            a.ComponentProp['FontColor']:=IntToStr(AuColToColor(FuncParams[1]));
-        end
-        // Control Image
-        else if isEnd(Lines[i], 'guictrlsetimage') then
-        begin
-          FuncName := ReadFunc(Lines[i], FuncParams);
-          // Syntax Check
-          if not ((FuncParams.Count = 2) and (Length(FuncParams[0]) > 0) and
-          (FuncParams[0][1] = '$')) then
-            Continue;
-          idx := FindControl(Copy(FuncParams[0], 2, length(FuncParams[0])));
-            if (idx < 0) or (idx > FormControlView.Items.Count - 1) then
-              Continue;
-            a := TObject(FormControlView.Items[idx].Data) as Iau3Component;
-            a.ComponentProp['Picture']:=FuncParams[1];
-        end
-        // Hotkeys
-        else if IsEnd(Lines[i], 'dim') then
-        begin
-          FuncName:=Copy(Lines[i], Pos('=', Lines[i])+1, Length(Lines[i]));
-          FuncName:=Copy(FuncName, Pos('[', FuncName)+1, Length(FuncName));
-          while (Length(FuncName)>1) do
+          end
+          // Control Limit
+          else if isEnd(Lines[i], 'guictrlsetlimit') then
           begin
-          FuncParams.Clear;
-          FuncParams.CommaText:=ExtractBetween(FuncName, '[', ']');
-          idx := FindControl(Copy(FuncParams[1], 2, length(FuncParams[1])));
-            if (idx < 0) or (idx > FormControlView.Items.Count - 1) then
-            begin
-              Delete(FuncName,1, Pos(']', FuncName));
+            FuncName := ReadFunc(Lines[i], FuncParams);
+            // Syntax Check
+            if not ((FuncParams.Count = 2) and (Length(FuncParams[0]) > 0) and
+              (FuncParams[0][1] = '$') and IsNumeric(FuncParams[1])) then
               Continue;
-            end;
+            idx := FindControl(Copy(FuncParams[0], 2, length(FuncParams[0])));
+            if (idx < 0) or (idx > FormControlView.Items.Count - 1) then
+              Continue;
             a := TObject(FormControlView.Items[idx].Data) as Iau3Component;
-            a.ComponentProp['HotKey']:=AU3KeyToHotKey(FuncParams[0]);
-              Delete(FuncName,1, Pos(']', FuncName));
+            a.ComponentProp['limit'] := FuncParams[1];
+          end
+          // Control Font Color
+          else if isEnd(Lines[i], 'guictrlsetcolor') then
+          begin
+            FuncName := ReadFunc(Lines[i], FuncParams);
+            // Syntax Check
+            if not ((FuncParams.Count = 2) and (Length(FuncParams[0]) > 0) and
+              (FuncParams[0][1] = '$') and IsNumeric(FuncParams[1])) then
+              Continue;
+            idx := FindControl(Copy(FuncParams[0], 2, length(FuncParams[0])));
+            if (idx < 0) or (idx > FormControlView.Items.Count - 1) then
+              Continue;
+            a := TObject(FormControlView.Items[idx].Data) as Iau3Component;
+            a.ComponentProp['FontColor'] := IntToStr(AuColToColor(FuncParams[1]));
+          end
+          // Control Image
+          else if isEnd(Lines[i], 'guictrlsetimage') then
+          begin
+            FuncName := ReadFunc(Lines[i], FuncParams);
+            // Syntax Check
+            if not ((FuncParams.Count = 2) and (Length(FuncParams[0]) > 0) and
+              (FuncParams[0][1] = '$')) then
+              Continue;
+            idx := FindControl(Copy(FuncParams[0], 2, length(FuncParams[0])));
+            if (idx < 0) or (idx > FormControlView.Items.Count - 1) then
+              Continue;
+            a := TObject(FormControlView.Items[idx].Data) as Iau3Component;
+            a.ComponentProp['Picture'] := FuncParams[1];
+          end
+          // Hotkeys
+          else if IsEnd(Lines[i], 'dim') then
+          begin
+            FuncName := Copy(Lines[i], Pos('=', Lines[i]) + 1, Length(Lines[i]));
+            FuncName := Copy(FuncName, Pos('[', FuncName) + 1, Length(FuncName));
+            while (Length(FuncName) > 1) do
+            begin
+              FuncParams.Clear;
+              FuncParams.CommaText := ExtractBetween(FuncName, '[', ']');
+              idx := FindControl(Copy(FuncParams[1], 2, length(FuncParams[1])));
+              if (idx < 0) or (idx > FormControlView.Items.Count - 1) then
+              begin
+                Delete(FuncName, 1, Pos(']', FuncName));
+                Continue;
+              end;
+              a := TObject(FormControlView.Items[idx].Data) as Iau3Component;
+              a.ComponentProp['HotKey'] := AU3KeyToHotKey(FuncParams[0]);
+              Delete(FuncName, 1, Pos(']', FuncName));
+            end;
           end;
-        end;
       end;
     finally
       FuncParams.Free;

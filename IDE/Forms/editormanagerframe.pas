@@ -1,3 +1,5 @@
+{ TODO : Multiview (1-4 Views)
+Fenster Views }
 unit EditorManagerFrame;
 
 {$mode objfpc}{$H+}
