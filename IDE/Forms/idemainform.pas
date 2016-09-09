@@ -39,6 +39,7 @@ type
 
   TMainForm = class(TForm)
     au3IDEProps: TApplicationProperties;
+    EditorManager1: TEditorManager;
     FormOptionsItem: TMenuItem;
     IDEOptionItem: TMenuItem;
     ExtrasMenuItem: TMenuItem;
@@ -62,7 +63,6 @@ type
     CloseAllBtn: TSpeedButton;
     CloseEditorBtn: TSpeedButton;
     SelectModeBox: TComboBox;
-    EditorManager1: TEditorManager;
     MainFormMenu: TMainMenu;
     FileMenuItem: TMenuItem;
     CloseFileItem: TMenuItem;
