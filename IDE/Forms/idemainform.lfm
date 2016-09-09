@@ -1086,6 +1086,9 @@ object MainForm: TMainForm
           end
           inherited ToolBar1: TToolBar
             Width = 444
+            inherited MoveToButton1: TSpeedButton
+              Left = 419
+            end
           end
         end
       end
@@ -1107,6 +1110,9 @@ object MainForm: TMainForm
           end
           inherited ToolBar4: TToolBar
             Width = 444
+            inherited MoveToButton4: TSpeedButton
+              Left = 419
+            end
           end
         end
       end

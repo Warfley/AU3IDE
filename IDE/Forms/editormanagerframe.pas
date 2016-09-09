@@ -25,12 +25,27 @@ type
     EditorControl2: TPageControl;
     EditorControl3: TPageControl;
     FilesPopUp: TPopupMenu;
+    BLMoveMenu: TMenuItem;
+    BRMoveMenu: TMenuItem;
+    MenuItem1: TMenuItem;
+    MoveToButton2: TSpeedButton;
+    MoveToButton3: TSpeedButton;
+    MoveToButton4: TSpeedButton;
+    NewWindowMoveMenu: TMenuItem;
+    OpenEditorButton2: TSpeedButton;
+    OpenEditorButton3: TSpeedButton;
+    OpenEditorButton4: TSpeedButton;
+    TRMoveMenu: TMenuItem;
+    TLMoveMenu: TMenuItem;
+    MoveToPopup: TPopupMenu;
     LPanelTop: TPanel;
     LPanelBot: TPanel;
     LRSplitterBot: TSplitter;
     RPanelTop: TPanel;
     LRSplitterTop: TSplitter;
     RPanelBot: TPanel;
+    OpenEditorButton1: TSpeedButton;
+    MoveToButton1: TSpeedButton;
     ToolBar1: TToolBar;
     ToolBar2: TToolBar;
     ToolBar3: TToolBar;
@@ -42,12 +57,19 @@ type
     SplitVButton: TSpeedButton;
     BotPanel: TPanel;
     ViewBar: TToolBar;
+    procedure BLMoveMenuClick(Sender: TObject);
+    procedure BRMoveMenuClick(Sender: TObject);
     procedure EditorControlChange(Sender: TObject);
     procedure EditorControlMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: integer);
+    procedure MoveToButton1Click(Sender: TObject);
+    procedure NewWindowMoveMenuClick(Sender: TObject);
+    procedure OpenEditorButton1Click(Sender: TObject);
     procedure SplitBotButtonClick(Sender: TObject);
     procedure SplitTopButtonClick(Sender: TObject);
     procedure SplitVButtonClick(Sender: TObject);
+    procedure TLMoveMenuClick(Sender: TObject);
+    procedure TRMoveMenuClick(Sender: TObject);
   private
     { Fields }
     FFocused: integer;
@@ -128,8 +150,55 @@ begin
     CloseEditor(FindIndex(ec.Pages[EC.TabIndexAtClientPos(Point(X, Y))]));
 end;
 
+procedure TEditorManager.MoveToButton1Click(Sender: TObject);
+var
+  p: TPoint;
+  c: TControl;
+  e: TPageControl;
+begin
+  c := Sender as TControl;
+  NewWindowMoveMenu.Tag := c.Tag;
+  TRMoveMenu.Tag := c.Tag;
+  TLMoveMenu.Tag := c.Tag;
+  BRMoveMenu.Tag := c.Tag;
+  BLMoveMenu.Tag := c.Tag;
+  TRMoveMenu.Visible := SplitTopButton.Down;
+  BLMoveMenu.Visible := SplitVButton.Down;
+  BRMoveMenu.Visible := SplitVButton.Down and SplitBotButton.Down;
+  p := c.Parent.ClientToScreen(Point(c.Left, c.Top + c.Height));
+  case c.Tag of
+    0: e := EditorControl;
+    1: e := EditorControl1;
+    2: e := EditorControl2;
+    3: e := EditorControl3;
+  end;
+  if Assigned(e.ActivePage) then
+    MoveToPopup.PopUp(p.x, p.y);
+end;
+
+procedure TEditorManager.NewWindowMoveMenuClick(Sender: TObject);
+var
+  p: TMenuItem;
+begin
+  p := (Sender as TMenuItem);
+  case p.tag of
+    0: EditorControl.ActivePage.ManualDock(nil);
+    1: EditorControl1.ActivePage.ManualDock(nil);
+    2: EditorControl2.ActivePage.ManualDock(nil);
+    3: EditorControl3.ActivePage.ManualDock(nil);
+  end;
+end;
+
+procedure TEditorManager.OpenEditorButton1Click(Sender: TObject);
+begin
+
+end;
+
 procedure TEditorManager.SplitBotButtonClick(Sender: TObject);
 begin
+  if not SplitBotButton.Down then
+    while EditorControl3.PageCount > 0 do
+      EditorControl3.Pages[0].PageControl := EditorControl2;
   RPanelBot.Width := Self.Width div 2;
   RPanelBot.Visible := SplitBotButton.Down;
   LRSplitterBot.Visible := SplitBotButton.Down;
@@ -137,6 +206,9 @@ end;
 
 procedure TEditorManager.SplitTopButtonClick(Sender: TObject);
 begin
+  if not SplitTopButton.Down then
+    while EditorControl1.PageCount > 0 do
+      EditorControl1.Pages[0].PageControl := EditorControl;
   RPanelTop.Width := Self.Width div 2;
   RPanelTop.Visible := SplitTopButton.Down;
   LRSplitterTop.Visible := SplitTopButton.Down;
@@ -144,6 +216,13 @@ end;
 
 procedure TEditorManager.SplitVButtonClick(Sender: TObject);
 begin
+  if not SplitVButton.Down then
+  begin
+    while EditorControl2.PageCount > 0 do
+      EditorControl2.Pages[0].PageControl := EditorControl;
+    while EditorControl3.PageCount > 0 do
+      EditorControl3.Pages[0].PageControl := EditorControl;
+  end;
   BotPanel.Height := Self.Height div 2;
   BotPanel.Visible := SplitVButton.Down;
   SplitBotButton.Visible := SplitVButton.Down;
@@ -151,6 +230,32 @@ begin
   SplitBotButton.Left := 0;
   SplitVButton.Left := 0;
   SplitTopButton.Left := 0;
+end;
+
+procedure TEditorManager.TLMoveMenuClick(Sender: TObject);
+var
+  p: TMenuItem;
+begin
+  p := (Sender as TMenuItem);
+  case p.tag of
+    0: EditorControl.ActivePage.PageControl := (EditorControl);
+    1: EditorControl1.ActivePage.PageControl := (EditorControl);
+    2: EditorControl2.ActivePage.PageControl := (EditorControl);
+    3: EditorControl3.ActivePage.PageControl := (EditorControl);
+  end;
+end;
+
+procedure TEditorManager.TRMoveMenuClick(Sender: TObject);
+var
+  p: TMenuItem;
+begin
+  p := (Sender as TMenuItem);
+  case p.tag of
+    0: EditorControl.ActivePage.PageControl := (EditorControl1);
+    1: EditorControl1.ActivePage.PageControl := (EditorControl1);
+    2: EditorControl2.ActivePage.PageControl := (EditorControl1);
+    3: EditorControl3.ActivePage.PageControl := (EditorControl1);
+  end;
 end;
 
 procedure TEditorManager.EditorEnter(Sender: TObject);
@@ -162,6 +267,32 @@ procedure TEditorManager.EditorControlChange(Sender: TObject);
 begin
   if Assigned(FOnEditorChanged) then
     FOnEditorChanged(Self);
+end;
+
+procedure TEditorManager.BLMoveMenuClick(Sender: TObject);
+var
+  p: TMenuItem;
+begin
+  p := (Sender as TMenuItem);
+  case p.tag of
+    0: EditorControl.ActivePage.PageControl := (EditorControl2);
+    1: EditorControl1.ActivePage.PageControl := (EditorControl2);
+    2: EditorControl2.ActivePage.PageControl := (EditorControl2);
+    3: EditorControl3.ActivePage.PageControl := (EditorControl2);
+  end;
+end;
+
+procedure TEditorManager.BRMoveMenuClick(Sender: TObject);
+var
+  p: TMenuItem;
+begin
+  p := (Sender as TMenuItem);
+  case p.tag of
+    0: EditorControl.ActivePage.PageControl := (EditorControl3);
+    1: EditorControl1.ActivePage.PageControl := (EditorControl3);
+    2: EditorControl2.ActivePage.PageControl := (EditorControl3);
+    3: EditorControl3.ActivePage.PageControl := (EditorControl3);
+  end;
 end;
 
 procedure TEditorManager.SetIncludePath(s: string);
@@ -214,12 +345,15 @@ end;
 
 function TEditorManager.GetEditor(i: integer): TFrame;
 begin
-  Result := FTabs[i].Components[0] as TFrame;
+  if (i >= 0) and (i < Count) then
+    Result := FTabs[i].Components[0] as TFrame
+  else
+    Result := nil;
 end;
 
 function TEditorManager.GetCurrentEditor: TFrame;
 begin
-  if (FFocused >= 0) and (FFocused < Count) then
+  if (FFocused >= 0) and (FFocused < FTabs.Count) then
     Result := Editors[FFocused]
   else
     Result := nil;
@@ -241,18 +375,19 @@ end;
 
 function TEditorManager.GetIndex: integer;
 begin
-  Result:=FFocused;
+  Result := FFocused;
 end;
 
 procedure TEditorManager.SetIndex(i: integer);
 begin
   SetCurrentEditor(Editors[i]);
-  FFocused:=i;
+  FFocused := i;
 end;
 
 procedure TEditorManager.EditorChanged(Sender: TObject);
 begin
-  if not Assigned((Sender as TControl).Parent) then exit;
+  if not Assigned((Sender as TControl).Parent) then
+    exit;
   if not ((Sender as TFrame).Parent.Caption[1] = '*') then
     (Sender as TFrame).Parent.Caption := '*' + (Sender as TFrame).Parent.Caption;
   if Assigned(FOnEditorChanged) then
@@ -277,7 +412,7 @@ end;
 
 function TEditorManager.GetCount: integer;
 begin
-  Result := FTabs.Count-1;
+  Result := FTabs.Count;
 end;
 
 function TEditorManager.GetEditorCaret(i: integer): TPoint;
@@ -297,7 +432,7 @@ function TEditorManager.FindIndex(T: TTabSheet): integer;
 var
   i: integer;
 begin
-  Result:=-1;
+  Result := -1;
   for i := 0 to FTabs.Count - 1 do
     if FTabs[i] = T then
     begin
@@ -314,7 +449,7 @@ begin
   tmp := EditorControl.AddTabSheet;
   tmp.Caption := ExtractFileName(FName);
   tmp.Visible := True;
-  FTabs.Add(tmp);
+  FFocused := FTabs.Add(tmp);
   EditorControl.ActivePage := tmp;
   ext := ExtractFileExt(FName);
   if ext = '.afm' then
