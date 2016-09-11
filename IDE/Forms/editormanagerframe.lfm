@@ -1170,16 +1170,19 @@ object EditorManager: TEditorManager
       OnClick = TLMoveMenuClick
     end
     object TRMoveMenu: TMenuItem
+      Tag = 1
       Caption = 'Oben Rechts'
-      OnClick = TRMoveMenuClick
+      OnClick = TLMoveMenuClick
     end
     object BLMoveMenu: TMenuItem
+      Tag = 2
       Caption = 'Unten Links'
-      OnClick = BLMoveMenuClick
+      OnClick = TLMoveMenuClick
     end
     object BRMoveMenu: TMenuItem
+      Tag = 3
       Caption = 'Unten Rechts'
-      OnClick = BRMoveMenuClick
+      OnClick = TLMoveMenuClick
     end
     object MenuItem1: TMenuItem
       Caption = '-'
@@ -1188,5 +1191,11 @@ object EditorManager: TEditorManager
       Caption = 'Neues Fenster'
       OnClick = NewWindowMoveMenuClick
     end
+  end
+  object OpenAU3FileDialog: TOpenDialog
+    Filter = 'AU3 Quellcode|*.au3;*.afm;*.apr'
+    Options = [ofExtensionDifferent, ofFileMustExist, ofEnableSizing, ofViewDetail]
+    left = 440
+    top = 176
   end
 end

@@ -39,7 +39,6 @@ type
 
   TMainForm = class(TForm)
     au3IDEProps: TApplicationProperties;
-    EditorManager1: TEditorManager;
     FormOptionsItem: TMenuItem;
     IDEOptionItem: TMenuItem;
     ExtrasMenuItem: TMenuItem;
@@ -134,6 +133,7 @@ type
     procedure UndoMenuItemClick(Sender: TObject);
     procedure UpdateMenuItemClick(Sender: TObject);
   private
+    EditorManager: TEditorManager;
     FFirstLoad: boolean;
     FSaveOnClosing: boolean;
     FCompiler: Tau3Compiler;
@@ -205,7 +205,7 @@ var
 begin
   c := caNone;
   FormClose(Self, c);
-  if EditorManager1.Count > 0 then
+  if EditorManager.Count > 0 then
     exit;
   FCurrentProject.Clear;
   p := TProcess.Create(nil);
@@ -228,7 +228,7 @@ begin
     StartupScreen.SelectedPath := P;
     c := caNone;
     FormClose(Self, c);
-    if EditorManager1.Count > 0 then
+    if EditorManager.Count > 0 then
       exit;
     FCurrentProject.Clear;
     Application.QueueAsyncCall(@ShowStartupScreen, 1);
@@ -247,9 +247,9 @@ begin
     Result := True;
     FormEditorOptionsForm.Save(IncludeTrailingPathDelimiter(
       ExtractFilePath(ParamStr(0))) + 'foms.cfg');
-    for i := 0 to EditorManager1.Count - 1 do
-      if EditorManager1.Editors[i] is TFormEditFrame then
-        (EditorManager1.Editors[i] as TFormEditFrame).ReLoadConf;
+    for i := 0 to EditorManager.Count - 1 do
+      if EditorManager.Editors[i] is TFormEditFrame then
+        (EditorManager.Editors[i] as TFormEditFrame).ReLoadConf;
   end;
 end;
 
@@ -263,9 +263,9 @@ begin
   begin
     Result := True;
     EditorConf.Save(ExtractFilePath(ParamStr(0)));
-    for i := 0 to EditorManager1.Count - 1 do
-      if EditorManager1.Editors[i] is TEditorFrame then
-        (EditorManager1.Editors[i] as TEditorFrame).ReLoadConf;
+    for i := 0 to EditorManager.Count - 1 do
+      if EditorManager.Editors[i] is TEditorFrame then
+        (EditorManager.Editors[i] as TEditorFrame).ReLoadConf;
   end;
 end;
 
@@ -313,7 +313,7 @@ begin
     FCompiler.WriteConf(IncludeTrailingPathDelimiter(
       ExtractFilePath(ParamStr(0))) + 'compiler.cfg');
     IncludePath := IncludeTrailingPathDelimiter(FCompiler.Path) + 'Include';
-    EditorManager1.IncludePath := IncludePath;
+    EditorManager.IncludePath := IncludePath;
     Result := True;
   end;
 end;
@@ -322,7 +322,7 @@ procedure TMainForm.OpenFile(Filename: string; Pos: TPoint);
 begin
   if not FilenameIsAbsolute(Filename) then
     FileName := FCurrentProject.GetAbsPath(Filename);
-  EditorManager1.OpenEditor(Filename, Pos);
+  EditorManager.OpenEditor(Filename, Pos);
 end;
 
 procedure TMainForm.ShowStartupScreen(Data: IntPtr);
@@ -353,7 +353,7 @@ begin
     Exit;
   end;
   IncludePath := IncludeTrailingPathDelimiter(FCompiler.Path) + 'Include';
-  EditorManager1.IncludePath := IncludePath;
+  EditorManager.IncludePath := IncludePath;
   StartupScreen.LastOpend := FLastOpend;
   if FFirstLoad and (Paramcount > 0) and FileExists(ParamStr(1)) and
     (LowerCase(ExtractFileExt(ParamStr(1))) = '.au3proj') then
@@ -368,7 +368,7 @@ begin
     FCurrentProject.ReadFromFile(StartupScreen.SelectedPath);
     FCurrentProject.CheckInclude := @CheckInclude;
     FCurrentProject.AddInclude := @AddInclude;
-    EditorManager1.Project := FCurrentProject;
+    EditorManager.Project := FCurrentProject;
     ProjectInspector1.Project := FCurrentProject;
     Openau3FileDialog.InitialDir := FCurrentProject.ProjectDir;
     Saveau3FileDialog.InitialDir := FCurrentProject.ProjectDir;
@@ -376,16 +376,16 @@ begin
     for i := 0 to FCurrentProject.OpendFiles.Count - 1 do
       if FileExists(FCurrentProject.GetAbsPath(
         FCurrentProject.OpendFiles[i].Name)) then
-        EditorManager1.OpenEditor(FCurrentProject.GetAbsPath(
+        EditorManager.OpenEditor(FCurrentProject.GetAbsPath(
           FCurrentProject.OpendFiles[i].Name),
           Point(FCurrentProject.OpendFiles[i].Pos, FCurrentProject.OpendFiles[i].Line));
-    EditorManager1.EditorIndex := FCurrentProject.FocusedFile;
+    EditorManager.EditorIndex := FCurrentProject.FocusedFile;
     ProjectInspector1.OpenEditor := @OpenFile;
     ProjectInspector1.CloseEditor := @KillEditor;
-    EditorManager1.OnEditorClose := @EditorClosing;
-    EditorManager1.OnEditorChanged := @EditorChanged;
-    EditorManager1.OnEditorCreated := @EditorCreated;
-    EditorManager1.IncludePath := IncludePath;
+    EditorManager.OnEditorClose := @EditorClosing;
+    EditorManager.OnEditorChanged := @EditorChanged;
+    EditorManager.OnEditorCreated := @EditorCreated;
+    EditorManager.IncludePath := IncludePath;
   end
   else
     Close;
@@ -409,10 +409,10 @@ begin
       Exit;
     end;
   FFormIsClosing := True;
-  EditorManager1.OnEditorChanged := nil;
-  EditorManager1.OnEditorCreated := nil;
+  EditorManager.OnEditorChanged := nil;
+  EditorManager.OnEditorCreated := nil;
   CloseAllItemClick(Sender);
-  if EditorManager1.Count > 0 then
+  if EditorManager.Count > 0 then
     CloseAction := caNone
   else
   if FSaveOnClosing then
@@ -430,8 +430,8 @@ begin
   end;
   if CloseAction = caNone then
   begin
-    EditorManager1.OnEditorChanged := @EditorChanged;
-    EditorManager1.OnEditorCreated := @EditorCreated;
+    EditorManager.OnEditorChanged := @EditorChanged;
+    EditorManager.OnEditorCreated := @EditorCreated;
     FFormIsClosing := False;
     FSaveOnClosing := True;
   end;
@@ -450,7 +450,7 @@ end;
 
 procedure TMainForm.CloseFileItemClick(Sender: TObject);
 begin
-  EditorManager1.CloseEditor(EditorManager1.EditorIndex);
+  EditorManager.CloseEditor(EditorManager.EditorIndex);
 end;
 
 procedure TMainForm.CompileMenuItemClick(Sender: TObject);
@@ -472,12 +472,12 @@ procedure TMainForm.CloseAllItemClick(Sender: TObject);
 var
   i: integer;
 begin
-  i := EditorManager1.Count + 1;
-  while (EditorManager1.Count > 0) and (i > EditorManager1.Count) do
+  i := EditorManager.Count + 1;
+  while (EditorManager.Count > 0) and (i > EditorManager.Count) do
   begin
-    i := EditorManager1.Count;
-    EditorManager1.CloseEditor(EditorManager1.EditorIndex);
-    EditorManager1.Invalidate;
+    i := EditorManager.Count;
+    EditorManager.CloseEditor(0);
+    EditorManager.Invalidate;
   end;
 end;
 
@@ -488,7 +488,7 @@ end;
 
 procedure TMainForm.EnterFunc(Data: IntPtr);
 begin
-  EditorManager1.OpenEditor(PEnterFuncInfo(Data)^.FileName,
+  EditorManager.OpenEditor(PEnterFuncInfo(Data)^.FileName,
     PEnterFuncInfo(Data)^.Pos);
   Dispose(PEnterFuncInfo(Data));
 end;
@@ -500,7 +500,7 @@ var
 begin
   with PCreateFuncInfo(Data)^ do
   begin
-    e := EditorManager1.OpenEditor(FileName, Point(0, 0)) as TEditorFrame;
+    e := EditorManager.OpenEditor(FileName, Point(0, 0)) as TEditorFrame;
     e.CodeEditor.TextBetweenPoints[Point(
       Length(e.CodeEditor.Lines[e.CodeEditor.Lines.Count - 1]) + 1,
       e.CodeEditor.Lines.Count),
@@ -552,7 +552,7 @@ begin
   if FilenameIsAbsolute(IncludeFile) then
     IncludeFile := GetRelInclude(IncludeFile, IncludePath,
       ExtractFilePath(FileName), FCurrentProject.Paths);
-  e := EditorManager1.TextEditor[FileName];
+  e := EditorManager.TextEditor[FileName];
   if Assigned(e) then
     e.CodeEditor.TextBetweenPoints[Point(1, 1), Point(1, 1)] :=
       Format('#include<%s>'#13, [IncludeFile])
@@ -594,7 +594,7 @@ var
   sl: TStringList;
   fname: string;
 begin
-  e := EditorManager1.TextEditor[FileName];
+  e := EditorManager.TextEditor[FileName];
   Result := False;
   ;
   if Assigned(e) then
@@ -613,7 +613,7 @@ begin
           fname := GetFullPath(fname, IncludePath, ExtractFilePath(FileName),
             FCurrentProject.Paths);
         Result := Result or (IncludeFile = fname);
-        if not (FileExists(fname) or (EditorManager1.Editor[fname] >= 0)) then
+        if not (FileExists(fname) or (EditorManager.Editor[fname] >= 0)) then
         begin
           if i = e.CodeEditor.Lines.Count - 1 then
             e.CodeEditor.TextBetweenPoints[Point(1, i + 1),
@@ -645,7 +645,7 @@ begin
             fname := GetFullPath(fname, IncludePath, ExtractFilePath(FileName),
               FCurrentProject.Paths);
           Result := Result or (IncludeFile = fname);
-          if not (FileExists(fname) or (EditorManager1.Editor[fname] >= 0)) then
+          if not (FileExists(fname) or (EditorManager.Editor[fname] >= 0)) then
           begin
             sl.Delete(i);
             Continue;
@@ -665,10 +665,12 @@ procedure TMainForm.EditorClosing(Sender: TObject; Editor: integer;
 var
   res: TModalResult;
 begin
-  if EditorManager1.Editors[Editor].Parent.Caption[1] = '*' then
+  if Assigned(EditorManager.Editors[Editor]) and
+    Assigned(EditorManager.Editors[Editor].Parent) and
+    (EditorManager.Editors[Editor].Parent.Caption[1] = '*') then
   begin
-    EditorManager1.EditorIndex := Editor;
-    EditorManager1.Invalidate;
+    EditorManager.EditorIndex := Editor;
+    EditorManager.Invalidate;
     res := MessageDlg('Datei wurde Verändert',
       'Datei wurde Verändert'#10#13'Vor dem schließen Sichern?',
       mtConfirmation, mbYesNoCancel, 'Schließen?');
@@ -703,11 +705,11 @@ var
   i: integer;
 begin
   FCurrentProject.OpendFiles.Clear;
-  for i := 0 to EditorManager1.Count - 1 do
+  for i := 0 to EditorManager.Count - 1 do
     FCurrentProject.OpendFiles.Add(
-      OpendFileInfo(FCurrentProject.GetRelPath(EditorManager1.EditorFiles[i]),
-      EditorManager1.EditorCaret[i].Y, EditorManager1.EditorCaret[i].X));
-  FCurrentProject.FocusedFile := EditorManager1.EditorIndex;
+      OpendFileInfo(FCurrentProject.GetRelPath(EditorManager.EditorFiles[i]),
+      EditorManager.EditorCaret[i].Y, EditorManager.EditorCaret[i].X));
+  FCurrentProject.FocusedFile := EditorManager.EditorIndex;
   FCurrentProject.Changed := True;
 end;
 
@@ -715,11 +717,11 @@ procedure TMainForm.KillEditor(s: string);
 var
   i: integer;
 begin
-  for i := 0 to EditorManager1.Count - 1 do
-    if EditorManager1.EditorFiles[i] = s then
+  for i := 0 to EditorManager.Count - 1 do
+    if EditorManager.EditorFiles[i] = s then
     begin
-      EditorManager1.Editors[i].Free;
-      EditorManager1.EditorControl.Pages[i].Free;
+      EditorManager.Editors[i].Free;
+      EditorManager.EditorControl.Pages[i].Free;
       Break;
     end;
 end;
@@ -760,8 +762,8 @@ end;
 procedure TMainForm.UndoMenuItemClick(Sender: TObject);
 begin
   { TODO : Use Interface instead of this bullshit }
-  if EditorManager1.CurrentEditor is TFormEditFrame then
-    (EditorManager1.CurrentEditor as TFormEditFrame).DoUndo;
+  if EditorManager.CurrentEditor is TFormEditFrame then
+    (EditorManager.CurrentEditor as TFormEditFrame).DoUndo;
 end;
 
 procedure TMainForm.UpdateMenuItemClick(Sender: TObject);
@@ -823,7 +825,7 @@ begin
   end
   else if Sender is TEditorFrame then
   begin
-    e := EditorManager1.FormEditor[ChangeFileExt(
+    e := EditorManager.FormEditor[ChangeFileExt(
       (Sender as TEditorFrame).FileName, '.afm')];
     if Assigned(e) then
     begin
@@ -862,7 +864,7 @@ var
 begin
   if FilenameIsAbsolute(FileName) then
     FileName := FCurrentProject.GetRelPath(FileName);
-  e := EditorManager1.TextEditor[FCurrentProject.MainFile];
+  e := EditorManager.TextEditor[FCurrentProject.MainFile];
   if Assigned(e) then
   begin
     for i := 0 to e.CodeEditor.Lines.Count - 1 do
@@ -873,13 +875,13 @@ begin
             ChangeFileExt(FCurrentProject.MainForm, '.au3') then
             e.CodeEditor.TextBetweenPoints[Point(1, i + 1),
               Point(Length(e.CodeEditor.Lines[i]) + 1, i + 1)] :=
-              Format('#include<%s>', [ChangeFileExt(FileName,'.au3')]);
+              Format('#include<%s>', [ChangeFileExt(FileName, '.au3')]);
         end
         else if ExtractBetween(e.CodeEditor.Lines[i], '<', '>') =
           ChangeFileExt(FCurrentProject.MainForm, '.au3') then
           e.CodeEditor.TextBetweenPoints[Point(1, i + 1),
             Point(Length(e.CodeEditor.Lines[i]) + 1, i + 1)] :=
-            Format('#include<%s>', [ChangeFileExt(FileName,'.au3')]);
+            Format('#include<%s>', [ChangeFileExt(FileName, '.au3')]);
   end
   else if FileExists(FCurrentProject.MainFile) then
   begin
@@ -892,17 +894,17 @@ begin
           begin
             if ExtractBetween(sl[i], '"', '"') = ChangeFileExt(
               FCurrentProject.MainForm, '.au3') then
-              sl[i] := Format('#include<%s>', [ChangeFileExt(FileName,'.au3')]);
+              sl[i] := Format('#include<%s>', [ChangeFileExt(FileName, '.au3')]);
           end
           else if ExtractBetween(sl[i], '<', '>') = ChangeFileExt(
             FCurrentProject.MainForm, '.au3') then
-            sl[i] := Format('#include<%s>', [ChangeFileExt(FileName,'.au3')]);
+            sl[i] := Format('#include<%s>', [ChangeFileExt(FileName, '.au3')]);
     finally
       sl.Free;
     end;
   end;
   // Change exit
-  f := EditorManager1.FormEditor[GetFullPath(FCurrentProject.MainForm,
+  f := EditorManager.FormEditor[GetFullPath(FCurrentProject.MainForm,
     IncludePath, FCurrentProject.ProjectDir, FCurrentProject.Paths)];
   if Assigned(f) then
     f.SetMainForm(False, Silent)
@@ -926,7 +928,7 @@ begin
       sl.Free;
     end;
   end;
-  f := EditorManager1.FormEditor[GetFullPath(FileName, IncludePath,
+  f := EditorManager.FormEditor[GetFullPath(FileName, IncludePath,
     FCurrentProject.ProjectDir, FCurrentProject.Paths)];
   if Assigned(f) then
     f.SetMainForm(True, Silent)
@@ -985,6 +987,10 @@ begin
   Height := FCurrentState.Height;
   Left := FCurrentState.Left;
   Top := FCurrentState.Top;
+  EditorManager := TEditorManager.Create(Self);
+  EditorManager.Parent := CenterPanel;
+  EditorManager.Align := alClient;
+  EditorManager.Visible := True;
   WindowState := FCurrentState.State;
   IDEOptionItem.Checked := FCurrentState.PILeft;
   IDEOptionItemClick(IDEOptionItem);
@@ -997,10 +1003,10 @@ begin
   FCompiler.OnCompileError := @CompileError;
   FFormIsClosing := False;
   FCurrentProject := Tau3Project.Create;
-  EditorManager1.EnterFunc := @EnterFunction;
+  EditorManager.EnterFunc := @EnterFunction;
   FFileData := Tau3FileManager.Create;
-  EditorManager1.OnParserFinished := @EditorParserFinished;
-  EditorManager1.IDEOpenFile := @OpenFile;
+  EditorManager.OnParserFinished := @EditorParserFinished;
+  EditorManager.IDEOpenFile := @OpenFile;
   ProjectInspector1.ChangeMainForm := @ChangeMainForm;
   FLastOpend := TStringList.Create;
   FLastOpend.LoadFromFile(ExtractFilePath(ParamStr(0)) + 'LastOpend.txt');
@@ -1078,14 +1084,14 @@ var
   s: string;
 begin
   i := 1;
-  while (EditorManager1.Editor[IncludeTrailingPathDelimiter(
+  while (EditorManager.Editor[IncludeTrailingPathDelimiter(
       FCurrentProject.ProjectDir) + 'au3Unit' + IntToStr(i) + '.au3'] >= 0) or
     (FileExists(IncludeTrailingPathDelimiter(FCurrentProject.ProjectDir) +
       'au3Unit' + IntToStr(i) + '.au3')) do
     Inc(i);
   s := IncludeTrailingPathDelimiter(FCurrentProject.ProjectDir) +
     'au3Unit' + IntToStr(i) + '.au3';
-  EditorManager1.OpenEditor(s, Point(0, 0)).Parent.Caption := '*' + ExtractFileName(s);
+  EditorManager.OpenEditor(s, Point(0, 0)).Parent.Caption := '*' + ExtractFileName(s);
   FCurrentProject.AddFile(s);
 end;
 
@@ -1122,8 +1128,8 @@ begin
   end;
   FCurrentProject.AddFile(fName + '.au3');
   FCurrentProject.AddFile(fName + '.afm');
-  EditorManager1.OpenEditor(fName + '.au3', Point(0, 0));
-  EditorManager1.OpenEditor(fName + '.afm', Point(0, 0));
+  EditorManager.OpenEditor(fName + '.au3', Point(0, 0));
+  EditorManager.OpenEditor(fName + '.afm', Point(0, 0));
 end;
 
 procedure TMainForm.NewProjectItemClick(Sender: TObject);
@@ -1132,7 +1138,7 @@ var
 begin
   c := caNone;
   FormClose(Self, c);
-  if EditorManager1.Count > 0 then
+  if EditorManager.Count > 0 then
     exit;
   FCurrentProject.Clear;
   Application.QueueAsyncCall(@ShowStartupScreen, 0);
@@ -1140,20 +1146,20 @@ end;
 
 procedure TMainForm.NextTabItemClick(Sender: TObject);
 begin
-  EditorManager1.EditorIndex :=
-    Min(EditorManager1.EditorIndex + 1, EditorManager1.Count - 1);
+  EditorManager.EditorIndex :=
+    Min(EditorManager.EditorIndex + 1, EditorManager.Count - 1);
 end;
 
 procedure TMainForm.PrevTabItemClick(Sender: TObject);
 begin
-  EditorManager1.EditorIndex := Max(EditorManager1.EditorIndex - 1, 0);
+  EditorManager.EditorIndex := Max(EditorManager.EditorIndex - 1, 0);
 end;
 
 procedure TMainForm.RedoMenuItemClick(Sender: TObject);
 begin
   { TODO : Use Interface instead of this bullshit }
-  if EditorManager1.CurrentEditor is TFormEditFrame then
-    (EditorManager1.CurrentEditor as TFormEditFrame).DoRedo;
+  if EditorManager.CurrentEditor is TFormEditFrame then
+    (EditorManager.CurrentEditor as TFormEditFrame).DoRedo;
 end;
 
 procedure TMainForm.RunBtnClick(Sender: TObject);
@@ -1184,8 +1190,8 @@ procedure TMainForm.SaveAllItemClick(Sender: TObject);
 var
   i: integer;
 begin
-  for i := 0 to EditorManager1.Count - 1 do
-    EditorManager1.EditorSave(i);
+  for i := 0 to EditorManager.Count - 1 do
+    EditorManager.EditorSave(i);
   FCurrentProject.Save;
 end;
 
@@ -1194,7 +1200,7 @@ var
   ext, oldFile, newfile: string;
   i: integer;
 begin
-  oldFile := EditorManager1.EditorFiles[EditorManager1.EditorIndex];
+  oldFile := EditorManager.EditorFiles[EditorManager.EditorIndex];
   ext := ExtractFileExt(oldFile);
   if ext = '.afm' then
     Saveau3FileDialog.Filter := 'AutoIt Formular|*.afm'
@@ -1208,9 +1214,9 @@ begin
     newfile := Saveau3FileDialog.FileName;
     if FileExists(oldFile) then
       DeleteFile(oldFile);
-    FFileData.UnloadFile(FFileData.FileIndex[EditorManager1.EditorFiles[
-      EditorManager1.EditorIndex]]);
-    EditorManager1.EditorSave(EditorManager1.EditorIndex, Saveau3FileDialog.FileName);
+    FFileData.UnloadFile(FFileData.FileIndex[EditorManager.EditorFiles[
+      EditorManager.EditorIndex]]);
+    EditorManager.EditorSave(EditorManager.EditorIndex, Saveau3FileDialog.FileName);
     for i := 0 to FCurrentProject.Files.Count - 1 do
       if FCurrentProject.FilePath[i] = oldFile then
       begin
@@ -1230,8 +1236,8 @@ begin
         // Change Filename for new Form
         Saveau3FileDialog.FileName := ChangeFileExt(Saveau3FileDialog.FileName, '.afm');
         // Save form file with new name
-        if EditorManager1.Editor[oldFile] >= 0 then
-          EditorManager1.EditorSave(EditorManager1.Editor[oldFile],
+        if EditorManager.Editor[oldFile] >= 0 then
+          EditorManager.EditorSave(EditorManager.Editor[oldFile],
             Saveau3FileDialog.FileName)
         else
         begin
@@ -1264,8 +1270,8 @@ begin
         // Change Filename for new Form
         Saveau3FileDialog.FileName := ChangeFileExt(Saveau3FileDialog.FileName, '.au3');
         // Save form file with new name
-        if EditorManager1.Editor[oldFile] >= 0 then
-          EditorManager1.EditorSave(EditorManager1.Editor[oldFile],
+        if EditorManager.Editor[oldFile] >= 0 then
+          EditorManager.EditorSave(EditorManager.Editor[oldFile],
             Saveau3FileDialog.FileName)
         else
         begin
@@ -1308,8 +1314,8 @@ end;
 
 procedure TMainForm.SaveFileItemClick(Sender: TObject);
 begin
-  if FileExists(EditorManager1.EditorFiles[EditorManager1.EditorIndex]) then
-    EditorManager1.EditorSave(EditorManager1.EditorIndex)
+  if FileExists(EditorManager.EditorFiles[EditorManager.EditorIndex]) then
+    EditorManager.EditorSave(EditorManager.EditorIndex)
   else
     SaveAsItemClick(Sender);
 end;
