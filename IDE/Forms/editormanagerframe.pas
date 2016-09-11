@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Types, FileUtil, Forms, Controls, ComCtrls, Editor, FormEditor,
-  Dialogs, Buttons, Menus, ExtCtrls, au3Types, Project, fgl;
+  Dialogs, Buttons, Menus, ExtCtrls, au3Types, Project, fgl, EditorWindow;
 
 type
   TCloseEditorEvent = procedure(Sender: TObject; Editor: integer;
@@ -14,6 +14,7 @@ type
   TEditorNotifyEvent = procedure(Sender: TObject; Editor: integer) of object;
 
   TEditorList = specialize TFPGList<TTabSheet>;
+  TViewWindowList = specialize TFPGList<TEditorViewForm>;
 
   { TEditorManager }
 
@@ -78,6 +79,7 @@ type
     FEnterFunc: TOpenFunctionEvent;
     FOnParserFinished: TNotifyEvent;
     FTabs: TEditorList;
+    FViewWindows: TViewWindowList;
     { Functions & Procedures }
     function GetFocused(View: integer): integer;
     function GetPageControl(View: integer): TPageControl;
@@ -110,6 +112,8 @@ type
     function FindIndex(T: TTabSheet): integer;
     procedure SetViewOpened(View: integer; AValue: boolean);
     procedure SetWindowCount(AValue: integer);
+    function CreateViewWindow: TEditorViewForm;
+    procedure ViewWindowClose(Sender: TObject; var act: TCloseAction);
   public
     function OpenEditor(FileName: string; Pos: TPoint; View: integer = 0): TFrame;
     procedure CloseEditor(i: integer);
@@ -183,9 +187,11 @@ end;
 procedure TEditorManager.NewWindowMoveMenuClick(Sender: TObject);
 var
   p: TPageControl;
+  w: TEditorViewForm;
 begin
   p := GetPageControl(MoveToPopup.Tag);
-  { TODO : New Window }
+  w:=CreateViewWindow;
+  MoveTab(FindIndex(p.ActivePage), w.EditorControl);
 end;
 
 procedure TEditorManager.OpenEditorButton1Click(Sender: TObject);
@@ -298,6 +304,7 @@ begin
     1: Result := EditorControl1;
     2: Result := EditorControl2;
     3: Result := EditorControl3;
+    else Result:=FViewWindows[View-4].EditorControl;
   end;
 end;
 
@@ -324,8 +331,7 @@ end;
 
 function TEditorManager.GetWindowCount: integer;
 begin
-  Result := 0;
-  { TODO : Multiple Windows }
+  Result := FViewWindows.Count;
 end;
 
 procedure TEditorManager.SetFocused(View: integer; AValue: integer);
@@ -493,6 +499,7 @@ begin
       if Assigned(FTabs[i].PageControl) then
         FTabs[i].PageControl.ActivePage := FTabs[i];
       FTabs[i].SetFocus;
+      FFocused:=i;
       Break;
     end;
 end;
@@ -589,12 +596,56 @@ begin
       SplitBotButton.Down := AValue;
       SplitBotButtonClick(SplitBotButton);
     end;
+    else if not AValue then FViewWindows[View-4].Close;
   end;
 end;
 
 procedure TEditorManager.SetWindowCount(AValue: integer);
+var i: Integer;
 begin
-  { TODO : Multiple Windows }
+  i:=FViewWindows.Count+1;
+  while (FViewWindows.Count>AValue) and (i>FViewWindows.Count) do
+  begin
+    i:=FViewWindows.Count;
+    FViewWindows[FViewWindows.Count-1].Close;
+  end;
+  while FViewWindows.Count<AValue do
+    CreateViewWindow;
+end;
+
+function TEditorManager.CreateViewWindow: TEditorViewForm;
+begin
+  Result:=TEditorViewForm.Create(self);
+  Result.EditorControl.Tag:=FViewWindows.Add(Result)+4;
+  Result.OpenEditorButton2.Tag:=Result.Tag;
+  Result.EditorControl.OnChange:=@EditorControlChange;
+  Result.EditorControl.OnMouseUp:=@EditorControlMouseUp;
+  Result.OnClose:=@ViewWindowClose;
+  Result.OpenEditorButton2.OnClick:=@OpenEditorButton1Click;
+  Result.Show;
+end;
+
+procedure TEditorManager.ViewWindowClose(Sender: TObject; var act: TCloseAction);
+var i: Integer;
+ w: TEditorViewForm;
+begin
+  w:=Sender as TEditorViewForm;
+  i:=w.EditorControl.PageCount+1;
+  while (w.EditorControl.PageCount>0) and (i>w.EditorControl.PageCount) do
+  begin
+    i:=w.EditorControl.PageCount;
+    CloseEditor(FindIndex(w.EditorControl.Pages[0]));
+  end;
+  if w.EditorControl.PageCount>0 then
+    act:=caNone
+  else
+    act:=caFree;
+  FViewWindows.Delete(FViewWindows.IndexOf(w));
+  for i:=0 to FViewWindows.Count-1 do
+  begin
+    FViewWindows[i].EditorControl.Tag:=4+i;
+    FViewWindows[i].OpenEditorButton2.Tag:=4+i;
+  end;
 end;
 
 procedure TEditorManager.CreateEditor(FName: string; Line, Pos: integer;
@@ -741,11 +792,13 @@ constructor TEditorManager.Create(TheOwner: TComponent);
 begin
   inherited Create(TheOwner);
   FTabs := TEditorList.Create;
+  FViewWindows:=TViewWindowList.Create;
 end;
 
 destructor TEditorManager.Destroy;
 begin
   FTabs.Free;
+  FViewWindows.Free;
   inherited Destroy;
 end;
 

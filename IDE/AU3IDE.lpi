@@ -114,7 +114,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="24">
+    <Units Count="25">
       <Unit0>
         <Filename Value="AU3IDE.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -271,6 +271,13 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
       </Unit23>
+      <Unit24>
+        <Filename Value="Forms\editorwindow.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="EditorViewForm"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="EditorWindow"/>
+      </Unit24>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
