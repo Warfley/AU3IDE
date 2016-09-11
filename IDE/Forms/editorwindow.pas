@@ -14,8 +14,6 @@ type
 
   TEditorViewForm = class(TForm)
     EditorControl: TPageControl;
-    FilesPopUp: TPopupMenu;
-    OpenAU3FileDialog: TOpenDialog;
     OpenEditorButton2: TSpeedButton;
     ToolBar2: TToolBar;
   private

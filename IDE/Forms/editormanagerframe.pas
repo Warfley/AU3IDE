@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Types, FileUtil, Forms, Controls, ComCtrls, Editor, FormEditor,
-  Dialogs, Buttons, Menus, ExtCtrls, au3Types, Project, fgl, EditorWindow;
+  Dialogs, Buttons, Menus, ExtCtrls, au3Types, Project, fgl, EditorWindow, Math;
 
 type
   TCloseEditorEvent = procedure(Sender: TObject; Editor: integer;
@@ -112,10 +112,10 @@ type
     function FindIndex(T: TTabSheet): integer;
     procedure SetViewOpened(View: integer; AValue: boolean);
     procedure SetWindowCount(AValue: integer);
-    function CreateViewWindow: TEditorViewForm;
     procedure ViewWindowClose(Sender: TObject; var act: TCloseAction);
   public
-    function OpenEditor(FileName: string; Pos: TPoint; View: integer = 0): TFrame;
+    function CreateViewWindow: TEditorViewForm;
+    function OpenEditor(FileName: string; Pos: TPoint; View: integer = -1): TFrame;
     procedure CloseEditor(i: integer);
     procedure EditorSave(i: integer; p: string = ''); overload;
     procedure EditorSave(Editor: TFrame; p: string = ''); overload;
@@ -190,7 +190,7 @@ var
   w: TEditorViewForm;
 begin
   p := GetPageControl(MoveToPopup.Tag);
-  w:=CreateViewWindow;
+  w := CreateViewWindow;
   MoveTab(FindIndex(p.ActivePage), w.EditorControl);
 end;
 
@@ -219,16 +219,19 @@ begin
     tmpItem.OnClick := @ProjectItemClick;
     ProjItem.Add(tmpItem);
   end;
-  ProjItem := TMenuItem.Create(FilesPopUp);
-  FilesPopUp.Items.Add(ProjItem);
-  ProjItem.Caption := 'Offen';
-  for i := 0 to Count - 1 do
+  if Count > 0 then
   begin
-    tmpItem := TMenuItem.Create(ProjItem);
-    tmpItem.Caption := ExtractFileName(EditorFiles[i]);
-    tmpItem.Tag := i;
-    tmpItem.OnClick := @CurrentItemClick;
-    ProjItem.Add(tmpItem);
+    ProjItem := TMenuItem.Create(FilesPopUp);
+    FilesPopUp.Items.Add(ProjItem);
+    ProjItem.Caption := 'Offen';
+    for i := 0 to Count - 1 do
+    begin
+      tmpItem := TMenuItem.Create(ProjItem);
+      tmpItem.Caption := ExtractFileName(EditorFiles[i]);
+      tmpItem.Tag := i;
+      tmpItem.OnClick := @CurrentItemClick;
+      ProjItem.Add(tmpItem);
+    end;
   end;
   ProjItem := TMenuItem.Create(FilesPopUp);
   FilesPopUp.Items.Add(ProjItem);
@@ -304,7 +307,8 @@ begin
     1: Result := EditorControl1;
     2: Result := EditorControl2;
     3: Result := EditorControl3;
-    else Result:=FViewWindows[View-4].EditorControl;
+    else
+      Result := FViewWindows[View - 4].EditorControl;
   end;
 end;
 
@@ -321,11 +325,12 @@ end;
 function TEditorManager.GetViewOpened(View: integer): boolean;
 begin
   case View of
-    0: Result:=True;
-    1: Result:=SplitTopButton.Down;
-    2: Result:=SplitVButton.Down;
-    3: Result:=SplitVButton.Down and SplitBotButton.Down;
-    else Result:=(View>3) and (View<WindowCount-4);
+    0: Result := True;
+    1: Result := SplitTopButton.Down;
+    2: Result := SplitVButton.Down;
+    3: Result := SplitVButton.Down and SplitBotButton.Down;
+    else
+      Result := (View > 3) and (View < WindowCount - 4);
   end;
 end;
 
@@ -339,12 +344,14 @@ var
   i: integer;
   p: TPageControl;
 begin
-  if not ViewOpened[View] then exit;
+  if not ViewOpened[View] or (AValue < 0) or (AValue < FTabs.Count) or
+    (FTabs.Count = 0) then
+    exit;
   p := GetPageControl(View);
   if FTabs[FFocused].PageControl = p then
     SetIndex(AValue)
   else
-    for i := 0 to p.PageCount-1 do
+    for i := 0 to p.PageCount - 1 do
       if p.Page[i] = FTabs[AValue] then
         p.PageIndex := i;
 end;
@@ -499,7 +506,7 @@ begin
       if Assigned(FTabs[i].PageControl) then
         FTabs[i].PageControl.ActivePage := FTabs[i];
       FTabs[i].SetFocus;
-      FFocused:=i;
+      FFocused := i;
       Break;
     end;
 end;
@@ -596,55 +603,60 @@ begin
       SplitBotButton.Down := AValue;
       SplitBotButtonClick(SplitBotButton);
     end;
-    else if not AValue then FViewWindows[View-4].Close;
+    else
+      if not AValue then
+        FViewWindows[View - 4].Close;
   end;
 end;
 
 procedure TEditorManager.SetWindowCount(AValue: integer);
-var i: Integer;
+var
+  i: integer;
 begin
-  i:=FViewWindows.Count+1;
-  while (FViewWindows.Count>AValue) and (i>FViewWindows.Count) do
-  begin
-    i:=FViewWindows.Count;
-    FViewWindows[FViewWindows.Count-1].Close;
-  end;
-  while FViewWindows.Count<AValue do
+  i := FViewWindows.Count + 1;
+  if FViewWindows.Count > AValue then
+    while (FViewWindows.Count > AValue) and (i > FViewWindows.Count) do
+    begin
+      i := FViewWindows.Count;
+      FViewWindows[FViewWindows.Count - 1].Close;
+    end;
+  while FViewWindows.Count < AValue do
     CreateViewWindow;
 end;
 
 function TEditorManager.CreateViewWindow: TEditorViewForm;
 begin
-  Result:=TEditorViewForm.Create(self);
-  Result.EditorControl.Tag:=FViewWindows.Add(Result)+4;
-  Result.OpenEditorButton2.Tag:=Result.Tag;
-  Result.EditorControl.OnChange:=@EditorControlChange;
-  Result.EditorControl.OnMouseUp:=@EditorControlMouseUp;
-  Result.OnClose:=@ViewWindowClose;
-  Result.OpenEditorButton2.OnClick:=@OpenEditorButton1Click;
+  Result := TEditorViewForm.Create(self);
+  Result.EditorControl.Tag := FViewWindows.Add(Result) + 4;
+  Result.OpenEditorButton2.Tag := Result.Tag + 4;
+  Result.EditorControl.OnChange := @EditorControlChange;
+  Result.EditorControl.OnMouseUp := @EditorControlMouseUp;
+  Result.OnClose := @ViewWindowClose;
+  Result.OpenEditorButton2.OnClick := @OpenEditorButton1Click;
   Result.Show;
 end;
 
 procedure TEditorManager.ViewWindowClose(Sender: TObject; var act: TCloseAction);
-var i: Integer;
- w: TEditorViewForm;
+var
+  i: integer;
+  w: TEditorViewForm;
 begin
-  w:=Sender as TEditorViewForm;
-  i:=w.EditorControl.PageCount+1;
-  while (w.EditorControl.PageCount>0) and (i>w.EditorControl.PageCount) do
+  w := Sender as TEditorViewForm;
+  i := w.EditorControl.PageCount + 1;
+  while (w.EditorControl.PageCount > 0) and (i > w.EditorControl.PageCount) do
   begin
-    i:=w.EditorControl.PageCount;
+    i := w.EditorControl.PageCount;
     CloseEditor(FindIndex(w.EditorControl.Pages[0]));
   end;
-  if w.EditorControl.PageCount>0 then
-    act:=caNone
+  if w.EditorControl.PageCount > 0 then
+    act := caNone
   else
-    act:=caFree;
+    act := caFree;
   FViewWindows.Delete(FViewWindows.IndexOf(w));
-  for i:=0 to FViewWindows.Count-1 do
+  for i := 0 to FViewWindows.Count - 1 do
   begin
-    FViewWindows[i].EditorControl.Tag:=4+i;
-    FViewWindows[i].OpenEditorButton2.Tag:=4+i;
+    FViewWindows[i].EditorControl.Tag := 4 + i;
+    FViewWindows[i].OpenEditorButton2.Tag := 4 + i;
   end;
 end;
 
@@ -705,16 +717,17 @@ begin
 end;
 
 function TEditorManager.OpenEditor(FileName: string; Pos: TPoint;
-  View: integer = 0): TFrame;
+  View: integer = -1): TFrame;
 var
   Index: integer;
 begin
   Index := FindEditor(FileName);
   if Index = -1 then
-    CreateEditor(FileName, Pos.y, Pos.x, GetPageControl(View))
+    CreateEditor(FileName, Pos.y, Pos.x, GetPageControl(Max(View, 0)))
   else
   begin
-    EditorView[Index] := View;
+    if View >= 0 then
+      EditorView[Index] := View;
     SetCurrentEditor(Editors[Index]);
     if (GetCurrentEditor is TEditorFrame) then
     begin
@@ -727,6 +740,8 @@ begin
       (GetCurrentEditor as TFormEditFrame).EventEditor.Selection := Rect(0, 0, 0, 0);
   end;
   Result := GetCurrentEditor;
+  if GetView(FFocused) > 3 then
+    FViewWindows[GetView(FFocused) - 4].BringToFront;
 end;
 
 procedure TEditorManager.CloseEditor(i: integer);
@@ -792,7 +807,8 @@ constructor TEditorManager.Create(TheOwner: TComponent);
 begin
   inherited Create(TheOwner);
   FTabs := TEditorList.Create;
-  FViewWindows:=TViewWindowList.Create;
+  FViewWindows := TViewWindowList.Create;
+  SplitTopButton.Left := 0;
 end;
 
 destructor TEditorManager.Destroy;

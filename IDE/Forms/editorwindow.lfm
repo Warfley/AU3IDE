@@ -8,6 +8,7 @@ object EditorViewForm: TEditorViewForm
   Caption = 'Editor'
   ClientHeight = 405
   ClientWidth = 506
+  Position = poDefault
   LCLVersion = '1.6.0.4'
   Visible = False
   object ToolBar2: TToolBar
@@ -113,15 +114,5 @@ object EditorViewForm: TEditorViewForm
     Width = 506
     Align = alClient
     TabOrder = 1
-  end
-  object FilesPopUp: TPopupMenu
-    left = 472
-    top = 32
-  end
-  object OpenAU3FileDialog: TOpenDialog
-    Filter = 'AU3 Quellcode|*.au3;*.afm;*.apr'
-    Options = [ofExtensionDifferent, ofFileMustExist, ofEnableSizing, ofViewDetail]
-    left = 472
-    top = 88
   end
 end

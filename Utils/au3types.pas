@@ -94,7 +94,7 @@ type
   end;
 
 const
-  Version = '0.0.5';
+  Version = '0.0.6';
   SUpdateURL = 'http://kehrein.org/AS/Updates/';
 
 function OpendFileInfo(Name: string; Line: integer = 1;

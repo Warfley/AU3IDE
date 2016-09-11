@@ -44,6 +44,7 @@ type
     ExtrasMenuItem: TMenuItem;
     CompileMenuItem: TMenuItem;
     AboutAutoitItem: TMenuItem;
+    NewEditView: TMenuItem;
     NextTabItem: TMenuItem;
     CenterPanel: TPanel;
     PrevTabItem: TMenuItem;
@@ -113,6 +114,7 @@ type
     procedure FormWindowStateChange(Sender: TObject);
     procedure IDEOptionItemClick(Sender: TObject);
     procedure InfoMenuItemClick(Sender: TObject);
+    procedure NewEditViewClick(Sender: TObject);
     procedure NewFileItemClick(Sender: TObject);
     procedure NewFormItemClick(Sender: TObject);
     procedure NewProjectItemClick(Sender: TObject);
@@ -714,13 +716,13 @@ begin
     FCurrentProject.OpendFiles.Add(
       OpendFileInfo(FCurrentProject.GetRelPath(EditorManager.EditorFiles[i]),
       EditorManager.EditorCaret[i].Y, EditorManager.EditorCaret[i].X, EditorManager.EditorView[i]));
-  for i:=0 to 3+EditorManager.WindowCount do
-    FCurrentProject.FocusedFile[i]:=EditorManager.Focused[i];
-  FCurrentProject.Views:=[vwTopLeft];
   if EditorManager.ViewOpened[1] then FCurrentProject.Views:=FCurrentProject.Views+[vwTopRight];
   if EditorManager.ViewOpened[2] then FCurrentProject.Views:=FCurrentProject.Views+[vwBotLeft];
   if EditorManager.ViewOpened[3] then FCurrentProject.Views:=FCurrentProject.Views+[vwBotRight];
   FCurrentProject.ViewWindows:=EditorManager.WindowCount;
+  for i:=0 to 3+EditorManager.WindowCount do
+    FCurrentProject.FocusedFile[i]:=EditorManager.Focused[i];
+  FCurrentProject.Views:=[vwTopLeft];
   FCurrentProject.Changed := True;
 end;
 
@@ -1087,6 +1089,11 @@ end;
 procedure TMainForm.InfoMenuItemClick(Sender: TObject);
 begin
   AboutForm.ShowModal;
+end;
+
+procedure TMainForm.NewEditViewClick(Sender: TObject);
+begin
+  EditorManager.CreateViewWindow;
 end;
 
 procedure TMainForm.NewFileItemClick(Sender: TObject);

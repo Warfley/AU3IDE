@@ -1862,6 +1862,10 @@ object MainForm: TMainForm
           OnClick = NewFormItemClick
         end
       end
+      object NewEditView: TMenuItem
+        Caption = 'Neues Editorfenster'
+        OnClick = NewEditViewClick
+      end
       object MenuSplitItem1: TMenuItem
         Caption = '-'
       end
