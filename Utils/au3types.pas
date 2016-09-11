@@ -14,8 +14,8 @@ type
     PropName, PropVal, OldVal: string) of object;
 
   TChangeData = record
-    Comp: TObject;
-    Prop, OldVal, NewVal: String;
+    comp: TObject;
+    Prop, OldVal, NewVal: string;
   end;
 
   TPropChangeStack = specialize TStack<TChangeData>;
@@ -98,7 +98,7 @@ const
   SUpdateURL = 'http://kehrein.org/AS/Updates/';
 
 function OpendFileInfo(Name: string; Line: integer = 1;
-  Pos: integer = 1): TOpendFileInfo;
+  Pos: integer = 1; View: integer = 0): TOpendFileInfo;
 function FuncInfo(Name: string; Line: integer; Inf: string = '';
   FName: string = ''): TFuncInfo;
 function SelectedItem(Line, Pos: integer): TSelectedItem;
@@ -190,12 +190,13 @@ begin
   end;
 end;
 
-function OpendFileInfo(Name: string; Line: integer = 1;
-  Pos: integer = 1): TOpendFileInfo;
+function OpendFileInfo(Name: string; Line: integer = 1; Pos: integer = 1;
+  View: integer = 0): TOpendFileInfo;
 begin
   Result.Name := Name;
   Result.Line := Line;
   Result.Pos := Pos;
+  Result.View := View;
 end;
 
 function SelectedItem(Line, Pos: integer): TSelectedItem;

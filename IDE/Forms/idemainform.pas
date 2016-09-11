@@ -372,14 +372,19 @@ begin
     ProjectInspector1.Project := FCurrentProject;
     Openau3FileDialog.InitialDir := FCurrentProject.ProjectDir;
     Saveau3FileDialog.InitialDir := FCurrentProject.ProjectDir;
+      EditorManager.ViewOpened[1]:=vwTopRight in FCurrentProject.Views;
+      EditorManager.ViewOpened[2]:=vwBotLeft in FCurrentProject.Views;
+      EditorManager.ViewOpened[3]:=vwBotRight in FCurrentProject.Views;
     Self.Show;
+      EditorManager.WindowCount:=FCurrentProject.ViewWindows;
     for i := 0 to FCurrentProject.OpendFiles.Count - 1 do
       if FileExists(FCurrentProject.GetAbsPath(
         FCurrentProject.OpendFiles[i].Name)) then
         EditorManager.OpenEditor(FCurrentProject.GetAbsPath(
           FCurrentProject.OpendFiles[i].Name),
-          Point(FCurrentProject.OpendFiles[i].Pos, FCurrentProject.OpendFiles[i].Line));
-    EditorManager.EditorIndex := FCurrentProject.FocusedFile;
+          Point(FCurrentProject.OpendFiles[i].Pos, FCurrentProject.OpendFiles[i].Line), FCurrentProject.OpendFiles[i].View);
+    for i:=0 to 3+FCurrentProject.ViewWindows do
+      EditorManager.Focused[i]:=FCurrentProject.FocusedFile[i];
     ProjectInspector1.OpenEditor := @OpenFile;
     ProjectInspector1.CloseEditor := @KillEditor;
     EditorManager.OnEditorClose := @EditorClosing;
@@ -708,8 +713,14 @@ begin
   for i := 0 to EditorManager.Count - 1 do
     FCurrentProject.OpendFiles.Add(
       OpendFileInfo(FCurrentProject.GetRelPath(EditorManager.EditorFiles[i]),
-      EditorManager.EditorCaret[i].Y, EditorManager.EditorCaret[i].X));
-  FCurrentProject.FocusedFile := EditorManager.EditorIndex;
+      EditorManager.EditorCaret[i].Y, EditorManager.EditorCaret[i].X, EditorManager.EditorView[i]));
+  for i:=0 to 3+EditorManager.WindowCount do
+    FCurrentProject.FocusedFile[i]:=EditorManager.Focused[i];
+  FCurrentProject.Views:=[vwTopLeft];
+  if EditorManager.ViewOpened[1] then FCurrentProject.Views:=FCurrentProject.Views+[vwTopRight];
+  if EditorManager.ViewOpened[2] then FCurrentProject.Views:=FCurrentProject.Views+[vwBotLeft];
+  if EditorManager.ViewOpened[3] then FCurrentProject.Views:=FCurrentProject.Views+[vwBotRight];
+  FCurrentProject.ViewWindows:=EditorManager.WindowCount;
   FCurrentProject.Changed := True;
 end;
 

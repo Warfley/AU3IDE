@@ -5,24 +5,32 @@ unit Project;
 interface
 
 uses
-  Classes, SysUtils, DOM, XMLRead, XMLWrite, LazFileUtils, FileUtil, Dialogs, au3Types, ListRecords;
+  Classes, SysUtils, DOM, XMLRead, XMLWrite, LazFileUtils, FileUtil,
+  Dialogs, au3Types, ListRecords;
 
 type
   EWrongVersion = Exception;
 
-  TCompressionMode = (cmNone=0, cmLow=1, cmNormal=2, cmHigh=3, cmMax=4);
+  TCompressionMode = (cmNone = 0, cmLow = 1, cmNormal = 2, cmHigh = 3, cmMax = 4);
+
   TCompOptions = record
     Compression: TCompressionMode;
-    IconPath: String;
-    PackUPX: Boolean;
-    OutPath: String;
-  end;
-  TVersion = record
-    UseVersion, IncreaseBuilt: Boolean;
-    Version, Subversion, Revision, Built: Integer;
+    IconPath: string;
+    PackUPX: boolean;
+    OutPath: string;
   end;
 
-  TAppType = (atConsole=0, atNoConsole=1, atGUI=2);
+  TVersion = record
+    UseVersion, IncreaseBuilt: boolean;
+    Version, Subversion, Revision, Built: integer;
+  end;
+
+  TAppType = (atConsole = 0, atNoConsole = 1, atGUI = 2);
+
+  TView = (vwTopLeft, vwTopRight, vwBotLeft, vwBotRight);
+  TViews = set of TView;
+
+  { Tau3Project }
 
   Tau3Project = class
   private
@@ -36,15 +44,19 @@ type
     FAppType: TAppType;
     FMainForm: string;
     FRunParams: TStringList;
-    FFocusedFile: integer;
     FOpendFiles: TOpendFileList;
     FVersionData: TStringList;
     FVersion: TVersion;
     FOnChange: TNotifyEvent;
     FCheckInclude: TCheckIncludeEvent;
     FAddInclude: TAddIncludeEvent;
-    procedure SetPaths(s:TStringList);
-    procedure SetVersionData(s:TStringList);
+    FViews: TViews;
+    FViewWindows: Integer;
+    FFocusedFiles: Array of Integer;
+    function GetFocusedFile(View: Integer): integer;
+    procedure SetFocusedFile(View: Integer; AValue: integer);
+    procedure SetPaths(s: TStringList);
+    procedure SetVersionData(s: TStringList);
     procedure SetMainFile(f: string);
     procedure SetCompOptions(c: TCompOptions);
     function GetMainFile: string;
@@ -55,6 +67,7 @@ type
     procedure SetAbsoluteFileName(i: integer; f: string);
     procedure FilesChange(Sender: TObject);
     procedure SetRunParams(p: TStringList);
+    procedure SetViewWindows(AValue: Integer);
   public
     function GetAbsPath(Rel: string): string;
     function GetRelPath(Rel: string): string;
@@ -79,7 +92,7 @@ type
     property AppType: TAppType read FAppType write FAppType;
     property MainForm: string read FMainForm write SetMainForm;
     property OpendFiles: TOpendFileList read FOpendFiles write SetOpendFiles;
-    property FocusedFile: integer read FFocusedFile write FFocusedFile;
+    property FocusedFile[View: Integer]: integer read GetFocusedFile write SetFocusedFile;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
     property CheckInclude: TCheckIncludeEvent read FCheckInclude write FCheckInclude;
     property AddInclude: TAddIncludeEvent read FAddInclude write FAddInclude;
@@ -87,27 +100,37 @@ type
     property Paths: TStringList read FPaths write SetPaths;
     property Version: TVersion read FVersion write FVersion;
     property VersionData: TStringList read FVersionData write SetVersionData;
+    property Views: TViews read FViews write FViews;
+    property ViewWindows: Integer read FViewWindows write SetViewWindows;
   end;
 
-const ProjectVersion = '1';
+const
+  ProjectVersion = '2';
 
 implementation
 
-    procedure Tau3Project.SetRunParams(p: TStringList);
-    begin
+procedure Tau3Project.SetRunParams(p: TStringList);
+begin
   FChanged := True;
-      FRunParams.Assign(p);
+  FRunParams.Assign(p);
   if Assigned(FOnChange) then
     FOnChange(Self);
-    end;
+end;
 
-    procedure Tau3Project.SetCompOptions(c: TCompOptions);
-    begin
+procedure Tau3Project.SetViewWindows(AValue: Integer);
+begin
+  if FViewWindows=AValue then Exit;
+  FViewWindows:=AValue;
+  SetLength(FFocusedFiles, 4+AValue);
+end;
+
+procedure Tau3Project.SetCompOptions(c: TCompOptions);
+begin
   FChanged := True;
-      FCompOptions:=c;
+  FCompOptions := c;
   if Assigned(FOnChange) then
     FOnChange(Self);
-    end;
+end;
 
 procedure Tau3Project.SetProjectDir(p: string);
 var
@@ -134,18 +157,28 @@ begin
     FOnChange(Self);
 end;
 
-procedure Tau3Project.SetPaths(s:TStringList);
+procedure Tau3Project.SetPaths(s: TStringList);
 begin
   FPaths.Assign(s);
   if Assigned(FOnChange) then
-  FOnChange(Self);
+    FOnChange(Self);
 end;
 
-procedure Tau3Project.SetVersionData(s:TStringList);
+function Tau3Project.GetFocusedFile(View: Integer): integer;
+begin
+  Result:=FFocusedFiles[View];
+end;
+
+procedure Tau3Project.SetFocusedFile(View: Integer; AValue: integer);
+begin
+  FFocusedFiles[View]:=AValue;
+end;
+
+procedure Tau3Project.SetVersionData(s: TStringList);
 begin
   FVersionData.Assign(s);
   if Assigned(FOnChange) then
-  FOnChange(Self);
+    FOnChange(Self);
 end;
 
 procedure Tau3Project.SetMainForm(s: string);
@@ -162,7 +195,7 @@ procedure Tau3Project.SetOpendFiles(s: TOpendFileList);
 begin
   FOpendFiles.Assign(s);
   if Assigned(FOnChange) then
-  FOnChange(Self);
+    FOnChange(Self);
 end;
 
 procedure Tau3Project.SetMainFile(f: string);
@@ -259,13 +292,19 @@ begin
   FFiles := TStringList.Create;
   FFiles.OnChange := @FilesChange;
   FOpendFiles := TOpendFileList.Create;
-  FPaths:=TStringList.Create;
+  FPaths := TStringList.Create;
   FPaths.OnChange := @FilesChange;
-  FRunParams:=TStringList.Create;
-  FRunParams.OnChange :=@FilesChange;
-  FVersionData:=TStringList.Create;
-  FVersionData.OnChange:=@FilesChange;
+  FRunParams := TStringList.Create;
+  FRunParams.OnChange := @FilesChange;
+  FVersionData := TStringList.Create;
+  FVersionData.OnChange := @FilesChange;
   FillChar(FVersion, SizeOf(FVersion), #00);
+  FViews:=[vwTopLeft];
+  SetLength(FFocusedFiles, 4);
+  FFocusedFiles[0]:=-1;
+  FFocusedFiles[1]:=-1;
+  FFocusedFiles[2]:=-1;
+  FFocusedFiles[3]:=-1;
 end;
 
 destructor Tau3Project.Destroy;
@@ -293,27 +332,33 @@ var
   FilesNode: TDOMNode;
   i: integer;
   s1, s2: string;
-  p, l: integer;
+  p, l, v: integer;
+  ProjVersion: Integer;
 begin
   try
     FFiles.Clear;
     ReadXMLFile(ProjFile, IncludeTrailingPathDelimiter(FProjectDir) +
       FName + '.au3proj');
-    if not ProjFile.DocumentElement.hasAttribute('Version') or (ProjFile.DocumentElement.Attributes.Item[0].TextContent<>ProjectVersion) then
-      raise EWrongVersion.Create('Wrong Project Version');
+    if not ProjFile.DocumentElement.hasAttribute('Version') then
+      raise EWrongVersion.Create('No Version Information Found');
+    ProjVersion:=StrToInt(ProjFile.DocumentElement.Attributes.Item[0].TextContent);
     FMainFile := ProjFile.DocumentElement.FindNode('MainFile').TextContent;
     s1 := ProjFile.DocumentElement.FindNode('Apptype').TextContent;
     if s1 = 'GUI' then
-      FAppType:=atGUI
-    else if s1 = 'NoConsole' then FAppType:=atNoConsole else FAppType:=atConsole;
-    if FAppType=atGUI then
+      FAppType := atGUI
+    else if s1 = 'NoConsole' then
+      FAppType := atNoConsole
+    else
+      FAppType := atConsole;
+    if FAppType = atGUI then
       FMainForm := ProjFile.DocumentElement.FindNode('MainForm').TextContent;
     // Load Compiler Options
     FilesNode := ProjFile.DocumentElement.FindNode('CompilerOptions');
-    FCompOptions.Compression:=TCompressionMode(StrToInt(FilesNode.FindNode('Compression').TextContent));
-    FCompOptions.IconPath:=Trim(FilesNode.FindNode('Icon').TextContent);
-    FCompOptions.OutPath:=FilesNode.FindNode('OutPath').TextContent;
-    FCompOptions.PackUPX:=FilesNode.FindNode('UPX').TextContent='True';
+    FCompOptions.Compression :=
+      TCompressionMode(StrToInt(FilesNode.FindNode('Compression').TextContent));
+    FCompOptions.IconPath := Trim(FilesNode.FindNode('Icon').TextContent);
+    FCompOptions.OutPath := FilesNode.FindNode('OutPath').TextContent;
+    FCompOptions.PackUPX := FilesNode.FindNode('UPX').TextContent = 'True';
     // Load Params
     FilesNode := ProjFile.DocumentElement.FindNode('RunParams');
     FRunParams.BeginUpdate;
@@ -323,25 +368,26 @@ begin
         if FilesNode.ChildNodes.Item[i].NodeName = 'Param' then
           FRunParams.Add(FilesNode.ChildNodes.Item[i].TextContent);
     finally
-    FRunParams.EndUpdate;
+      FRunParams.EndUpdate;
     end;
     // Load Version
     FilesNode := ProjFile.DocumentElement.FindNode('Version');
-    FVersion.UseVersion:=FilesNode.FindNode('UseVersion').TextContent='True';
-    FVersion.IncreaseBuilt:=FilesNode.FindNode('IncreaseBuilt').TextContent='True';
-    FVersion.Version:=StrToInt(FilesNode.FindNode('Version').TextContent);
-    FVersion.Subversion:=StrToInt(FilesNode.FindNode('Subversion').TextContent);
-    FVersion.Revision:=StrToInt(FilesNode.FindNode('Revision').TextContent);
-    FVersion.Built:=StrToInt(FilesNode.FindNode('Built').TextContent);
+    FVersion.UseVersion := FilesNode.FindNode('UseVersion').TextContent = 'True';
+    FVersion.IncreaseBuilt := FilesNode.FindNode('IncreaseBuilt').TextContent = 'True';
+    FVersion.Version := StrToInt(FilesNode.FindNode('Version').TextContent);
+    FVersion.Subversion := StrToInt(FilesNode.FindNode('Subversion').TextContent);
+    FVersion.Revision := StrToInt(FilesNode.FindNode('Revision').TextContent);
+    FVersion.Built := StrToInt(FilesNode.FindNode('Built').TextContent);
     // Load Version Data
     FilesNode := ProjFile.DocumentElement.FindNode('VersionData');
     FVersionData.BeginUpdate;
     try
       FVersionData.Clear;
       for i := 0 to FilesNode.ChildNodes.Count - 1 do
-          FVersionData.Values[FilesNode.ChildNodes.Item[i].NodeName] := FilesNode.ChildNodes.Item[i].TextContent;
+        FVersionData.Values[FilesNode.ChildNodes.Item[i].NodeName] :=
+          FilesNode.ChildNodes.Item[i].TextContent;
     finally
-    FVersionData.EndUpdate;
+      FVersionData.EndUpdate;
     end;
     // Load Files
     FilesNode := ProjFile.DocumentElement.FindNode('Files');
@@ -365,19 +411,40 @@ begin
     finally
       FPaths.EndUpdate;
     end;
+    // Load Views
+      FViewWindows:=0;
+      FViews:=[vwTopLeft];
+    if ProjVersion>1 then
+    begin
+      FilesNode:=ProjFile.DocumentElement.FindNode('Views');
+      if TDOMElement(FilesNode).hasAttribute('TR') then FViews+=[vwTopRight];
+      if TDOMElement(FilesNode).hasAttribute('BL') then FViews+=[vwBotLeft];
+      if TDOMElement(FilesNode).hasAttribute('BR') then FViews+=[vwBotRight];
+      if TDOMElement(FilesNode).hasAttribute('Windows') then
+        FViewWindows:=StrToInt(TDOMElement(FilesNode).AttribStrings['Windows']);
+    end;
+    SetLength(FFocusedFiles, 4+FViewWindows);
+    FFocusedFiles[0]:=0;
+    FFocusedFiles[1]:=0;
+    FFocusedFiles[2]:=0;
+    FFocusedFiles[3]:=0;
+    // Load Files
     FilesNode := ProjFile.DocumentElement.FindNode('OpendFiles');
-    FFocusedFile := 0;
     for i := 0 to FilesNode.ChildNodes.Count - 1 do
       if FilesNode.ChildNodes.Item[i].NodeName = 'Opend' then
         with TDOMElement(FilesNode.ChildNodes.Item[i]) do
         begin
-          s1 := GetAttribute('Line');
-          s2 := GetAttribute('Pos');
+          s1 := AttribStrings['Line'];
+          s2 := AttribStrings['Pos'];
           GetInt(s1, s2, l, p);
-          if GetAttribute('Focused') = '1' then
-            FFocusedFile := FOpendFiles.Add(OpendFileInfo(TextContent, l, p))
+          if ProjVersion>1 then
+            v:=StrToInt(AttribStrings['View'])
           else
-            FOpendFiles.Add(OpendFileInfo(TextContent, l, p));
+            v:=0;
+          if GetAttribute('Focused') = '1' then
+            FFocusedFiles[v] := FOpendFiles.Add(OpendFileInfo(TextContent, l, p, v))
+          else
+            FOpendFiles.Add(OpendFileInfo(TextContent, l, p, v));
         end;
   finally
     ProjFile.Free;
@@ -408,14 +475,14 @@ begin
     tmp := ProjFile.CreateElement('Apptype');
     ProjFile.DocumentElement.AppendChild(tmp);
     case FAppType of
-    atGUI: s:='GUI';
-    atConsole: s:='Console';
-    atNoConsole: s:='NoConsole';
+      atGUI: s := 'GUI';
+      atConsole: s := 'Console';
+      atNoConsole: s := 'NoConsole';
     end;
     t := ProjFile.CreateTextNode(s);
     tmp.AppendChild(t);
     // Create MainForm Node
-    if FAppType=atGUI then
+    if FAppType = atGUI then
     begin
       tmp := ProjFile.CreateElement('MainForm');
       ProjFile.DocumentElement.AppendChild(tmp);
@@ -423,7 +490,7 @@ begin
       tmp.AppendChild(t);
     end;
     // Createing ParamNode
-    FilesNode:=ProjFile.CreateElement('RunParams');
+    FilesNode := ProjFile.CreateElement('RunParams');
     ProjFile.DocumentElement.AppendChild(FilesNode);
     if FRunParams.Count = 0 then
       FilesNode.AppendChild(ProjFile.CreateTextNode(' '));
@@ -435,57 +502,60 @@ begin
       tmp.AppendChild(t);
     end;
     // Create Compiler Options Node
-    FilesNode:=ProjFile.CreateElement('CompilerOptions');
+    FilesNode := ProjFile.CreateElement('CompilerOptions');
     ProjFile.DocumentElement.AppendChild(FilesNode);
-    tmp:=ProjFile.CreateElement('Compression');
+    tmp := ProjFile.CreateElement('Compression');
     FilesNode.AppendChild(tmp);
-    tmp.AppendChild(ProjFile.CreateTextNode(IntToStr(ord(FCompOptions.Compression))));
+    tmp.AppendChild(ProjFile.CreateTextNode(IntToStr(Ord(FCompOptions.Compression))));
 
-    tmp:=ProjFile.CreateElement('UPX');
+    tmp := ProjFile.CreateElement('UPX');
     FilesNode.AppendChild(tmp);
-    tmp.AppendChild(ProjFile.CreateTextNode(BoolToStr(FCompOptions.PackUPX, 'True', 'False')));
+    tmp.AppendChild(ProjFile.CreateTextNode(BoolToStr(FCompOptions.PackUPX,
+      'True', 'False')));
 
-    tmp:=ProjFile.CreateElement('OutPath');
+    tmp := ProjFile.CreateElement('OutPath');
     FilesNode.AppendChild(tmp);
     tmp.AppendChild(ProjFile.CreateTextNode(FCompOptions.OutPath));
 
-    tmp:=ProjFile.CreateElement('Icon');
+    tmp := ProjFile.CreateElement('Icon');
     FilesNode.AppendChild(tmp);
     tmp.AppendChild(ProjFile.CreateTextNode(FCompOptions.IconPath));
     // Creating Version Nodes
-    FilesNode:=ProjFile.CreateElement('Version');
+    FilesNode := ProjFile.CreateElement('Version');
     ProjFile.DocumentElement.AppendChild(FilesNode);
 
-    tmp:=ProjFile.CreateElement('UseVersion');
+    tmp := ProjFile.CreateElement('UseVersion');
     FilesNode.AppendChild(tmp);
-    tmp.AppendChild(ProjFile.CreateTextNode(BoolToStr(FVersion.UseVersion, 'True', 'False')));
+    tmp.AppendChild(ProjFile.CreateTextNode(BoolToStr(FVersion.UseVersion,
+      'True', 'False')));
 
-    tmp:=ProjFile.CreateElement('IncreaseBuilt');
+    tmp := ProjFile.CreateElement('IncreaseBuilt');
     FilesNode.AppendChild(tmp);
-    tmp.AppendChild(ProjFile.CreateTextNode(BoolToStr(FVersion.UseVersion, 'True', 'False')));
+    tmp.AppendChild(ProjFile.CreateTextNode(BoolToStr(FVersion.UseVersion,
+      'True', 'False')));
 
-    tmp:=ProjFile.CreateElement('Version');
+    tmp := ProjFile.CreateElement('Version');
     FilesNode.AppendChild(tmp);
     tmp.AppendChild(ProjFile.CreateTextNode(IntToStr(FVersion.Version)));
 
-    tmp:=ProjFile.CreateElement('Subversion');
+    tmp := ProjFile.CreateElement('Subversion');
     FilesNode.AppendChild(tmp);
     tmp.AppendChild(ProjFile.CreateTextNode(IntToStr(FVersion.Subversion)));
 
-    tmp:=ProjFile.CreateElement('Revision');
+    tmp := ProjFile.CreateElement('Revision');
     FilesNode.AppendChild(tmp);
     tmp.AppendChild(ProjFile.CreateTextNode(IntToStr(FVersion.Revision)));
 
-    tmp:=ProjFile.CreateElement('Built');
+    tmp := ProjFile.CreateElement('Built');
     FilesNode.AppendChild(tmp);
     tmp.AppendChild(ProjFile.CreateTextNode(IntToStr(FVersion.Built)));
 
     // Creating VersionData Nodes
-    FilesNode:=ProjFile.CreateElement('VersionData');
+    FilesNode := ProjFile.CreateElement('VersionData');
     ProjFile.DocumentElement.AppendChild(FilesNode);
-    for i:=0 to FVersionData.Count-1 do
+    for i := 0 to FVersionData.Count - 1 do
     begin
-      tmp:=ProjFile.CreateElement(FVersionData.Names[i]);
+      tmp := ProjFile.CreateElement(FVersionData.Names[i]);
       FilesNode.AppendChild(tmp);
       tmp.AppendChild(ProjFile.CreateTextNode(FVersionData.ValueFromIndex[i]));
     end;
@@ -514,6 +584,22 @@ begin
       t := ProjFile.CreateTextNode(FPaths[i]);
       tmp.AppendChild(t);
     end;
+    // View Nodes
+    FilesNode := ProjFile.CreateElement('Views');
+    ProjFile.DocumentElement.AppendChild(FilesNode);
+    with TDOMElement(FilesNode) do
+    begin
+    if vwTopLeft in FViews then
+      SetAttribute('TL', '1');
+    if vwTopRight in FViews then
+      SetAttribute('TR', '1');
+    if vwBotLeft in FViews then
+      SetAttribute('BL', '1');
+    if vwBotRight in FViews then
+      SetAttribute('BR', '1');
+    SetAttribute('Windows', IntToStr(FViewWindows));
+    end;
+
     // Createing OpendFile Nodes
     FilesNode := ProjFile.CreateElement('OpendFiles');
     ProjFile.DocumentElement.AppendChild(FilesNode);
@@ -522,10 +608,11 @@ begin
     for i := 0 to FOpendFiles.Count - 1 do
     begin
       tmp := ProjFile.CreateElement('Opend');
-      if i = FFocusedFile then
+      if i = FocusedFile[FOpendFiles[i].View] then
         TDOMElement(tmp).SetAttribute('Focused', '1');
       TDOMElement(tmp).SetAttribute('Line', IntToStr(FOpendFiles[i].Line));
       TDOMElement(tmp).SetAttribute('Pos', IntToStr(FOpendFiles[i].Pos));
+      TDOMElement(tmp).SetAttribute('View', IntToStr(FOpendFiles[i].View));
       FilesNode.AppendChild(tmp);
       t := ProjFile.CreateTextNode(FOpendFiles[i].Name);
       tmp.AppendChild(t);
@@ -537,7 +624,7 @@ begin
     ProjFile.Free;
   end;
   // Add support for Forms here
-  if Assigned(FCheckInclude) and Assigned(FAddInclude) and (AppType=atGUI) then
+  if Assigned(FCheckInclude) and Assigned(FAddInclude) and (AppType = atGUI) then
     if not FCheckInclude(MainFile, ChangeFileExt(MainForm, '.au3')) then
       FAddInclude(MainFile, ChangeFileExt(MainForm, '.au3'));
   FChanged := False;
@@ -554,7 +641,7 @@ procedure Tau3Project.WriteToFile(f: string);
 begin
   SetProjectDir(ExtractFilePath(f));
   FName := ExtractFileName(ExtractFileNameWithoutExt(f));
-  FCompOptions.OutPath:=Format('bin/%s.exe', [FName]);
+  FCompOptions.OutPath := Format('bin/%s.exe', [FName]);
   Save;
   if Assigned(FOnChange) then
     FOnChange(self);

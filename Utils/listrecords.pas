@@ -14,6 +14,7 @@ type
   TOpendFileInfo = record
     Name: String;
     Line, Pos: Integer;
+    View: Integer;
     class operator Equal (a, b: TOpendFileInfo) R: Boolean;
   end;
 
@@ -36,7 +37,7 @@ type
 implementation
     class operator TOpendFileInfo.Equal (a, b: TOpendFileInfo) R: Boolean;
     begin
-      R := (a.Name=b.Name) And (a.Line=b.Line) And (a.Pos=b.Pos);
+      R := (a.Name=b.Name) And (a.Line=b.Line) And (a.Pos=b.Pos) And (a.View=b.View);
     end;
     class operator TFuncInfo.Equal (a, b: TFuncInfo) R: Boolean;
     begin

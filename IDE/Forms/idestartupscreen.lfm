@@ -312,9 +312,9 @@ object StartupScreen: TStartupScreen
     OnPaint = LastOpendPanelPaint
     object Label1: TLabel
       Left = 8
-      Height = 25
+      Height = 15
       Top = 136
-      Width = 126
+      Width = 84
       Caption = 'Zuletzt geöffnet'
       ParentColor = False
     end
@@ -661,15 +661,15 @@ object StartupScreen: TStartupScreen
     end
     object Label2: TLabel
       Left = 6
-      Height = 25
+      Height = 15
       Top = 224
-      Width = 47
+      Width = 32
       Caption = 'Name'
       ParentColor = False
     end
     object NewProjectNameEdit: TEdit
       Left = 64
-      Height = 33
+      Height = 23
       Top = 220
       Width = 154
       OnChange = NewProjectNameEditChange
@@ -678,7 +678,7 @@ object StartupScreen: TStartupScreen
     end
     object NewProjectDirEdit: TDirectoryEdit
       Left = 64
-      Height = 33
+      Height = 23
       Top = 256
       Width = 318
       ShowHidden = False
@@ -689,9 +689,9 @@ object StartupScreen: TStartupScreen
     end
     object Label3: TLabel
       Left = 6
-      Height = 25
+      Height = 15
       Top = 260
-      Width = 56
+      Width = 37
       Caption = 'Ordner'
       ParentColor = False
     end

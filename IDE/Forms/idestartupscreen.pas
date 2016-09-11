@@ -193,7 +193,7 @@ begin
         if AnsiStartsStr('MainFile=', sl[i]) then
           mf := Trim(Copy(sl[i], pos('=', sl[i]) + 1, length(sl[i]) - pos('=', sl[i])))
         else if AnsiStartsStr('FocusedFile=', sl[i]) then
-          p.FocusedFile := StrToInt(Trim(Copy(sl[i], pos('=', sl[i]) + 1,
+          p.FocusedFile[0] := StrToInt(Trim(Copy(sl[i], pos('=', sl[i]) + 1,
             length(sl[i]) - pos('=', sl[i]))))
         else if AnsiStartsStr('OpendFile=', sl[i]) then
           p.OpendFiles.Add(OpendFileInfo(Trim(Copy(sl[i], pos('=', sl[i]) + 1,
@@ -229,8 +229,8 @@ begin
       IconPath:='';
     end;
     p.CompilerOptions:=co;
-    if p.OpendFiles[p.FocusedFile].Name = mf then
-      p.OpendFiles[p.FocusedFile] := OpendFileInfo(p.GetMainFileRel);
+    if p.OpendFiles[p.FocusedFile[0]].Name = mf then
+      p.OpendFiles[p.FocusedFile[0]] := OpendFileInfo(p.GetMainFileRel);
     FPath := path + p.Name + '.au3proj';
     for i:=0 to ProjectSettings.VersionData.RowCount-1 do
       p.VersionData.Add(ProjectSettings.VersionData.Keys[i]+'=');
