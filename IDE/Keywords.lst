@@ -48,3 +48,4 @@ While {Condition}
 Func {Name}()
 Func {Name}({Params})
 #include<{File}>
+Not

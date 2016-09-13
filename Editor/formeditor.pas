@@ -1555,7 +1555,7 @@ begin
             if (idx < 0) or (idx > FormControlView.Items.Count - 1) then
               Continue;
             a := TObject(FormControlView.Items[idx].Data) as Iau3Component;
-            a.Events[0] := FuncParams[1];
+            a.Events.ValueFromIndex[0] := FuncParams[1];
           end
           // Form Close Event
           else if isEnd(Lines[i], 'func') then
