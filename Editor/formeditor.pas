@@ -88,6 +88,8 @@ type
     FEnterFunc: TOpenFunctionEvent;
     FOnVarChanged: TNotifyEvent;
     FFuncList: TStringList;
+    FMaxUndoSize: integer;
+    FBorderHeight, FBorderWidth: Integer;
     { private declarations }
     procedure DeleteItem(n: TTreeNode);
     function FindControl(s: string): integer;
@@ -97,7 +99,11 @@ type
     function CreateEdit(P: TWinControl): Tau3Edit;
     procedure LoadControlData(c: TComponent);
     procedure PropChanged(Sender: TObject; PropName, PropVal, OldVal: string);
+    procedure SetBorderHeight(AValue: Integer);
+    procedure SetBorderWidth(AValue: Integer);
+    procedure SetMaxUndoSize(AValue: integer);
     procedure UpdateFormCaption(Sender: TObject);
+    procedure PushOnUndo(c: TChangeData);
   public
     procedure ReLoadConf;
     procedure DoUndo;
@@ -115,6 +121,9 @@ type
     property OpenEditor: TOpenEditorEvent read FOpenEditor write FOpenEditor;
     property EnterFunc: TOpenFunctionEvent read FEnterFunc write FEnterFunc;
     property OnVarChanged: TNotifyEvent read FOnVarChanged write FOnVarChanged;
+    property MaxUndoSize: integer read FMaxUndoSize write SetMaxUndoSize;
+    property BorderHeight: Integer read FBorderHeight write SetBorderHeight;
+    property BorderWidth: Integer read FBorderWidth write SetBorderWidth;
   end;
 
 function ChangeDataToString(c: TChangeData): string; inline;
@@ -134,6 +143,37 @@ begin
   FormCaptionLabel.Caption := FFormular.Caption;
 end;
 
+procedure TFormEditFrame.PushOnUndo(c: TChangeData);
+var
+  tmp: TPropChangeStack;
+  i: integer;
+begin
+  if UndoStack.Size() < MaxUndoSize then
+  begin
+    UndoStack.Push(c);
+    Exit;
+  end;
+  tmp := TPropChangeStack.Create;
+  try
+    i := 1;
+    tmp.Push(c);
+    while not UndoStack.IsEmpty() do
+    begin
+      if i < MaxUndoSize then
+        tmp.Push(UndoStack.Top());
+      Inc(i);
+      UndoStack.Pop();
+    end;
+    while not tmp.IsEmpty() do
+    begin
+      UndoStack.Push(tmp.Top());
+      tmp.Pop();
+    end;
+  finally
+    tmp.Free;
+  end;
+end;
+
 procedure TFormEditFrame.PropChanged(Sender: TObject; PropName, PropVal, OldVal: string);
 var
   i: integer;
@@ -148,7 +188,7 @@ begin
       undoItem.NewVal := PropVal;
       undoItem.OldVal := OldVal;
       if Length(PropName) > 0 then
-        UndoStack.Push(undoItem);
+        PushOnUndo(undoItem);
 
       PropName := LowerCase(PropName);
       if PropName = 'name' then
@@ -183,6 +223,48 @@ begin
     end;
     Parent.Caption := '*' + ExtractFileName(FFileName);
   end;
+end;
+
+procedure TFormEditFrame.SetBorderHeight(AValue: Integer);
+begin
+  if FBorderHeight=AValue then Exit;
+  FBorderHeight:=AValue;
+  FFormular.BorderHeight:=AValue;
+end;
+
+procedure TFormEditFrame.SetBorderWidth(AValue: Integer);
+begin
+  if FBorderWidth=AValue then Exit;
+  FBorderWidth:=AValue;
+  FFormular.BorderWidth:=AValue;
+end;
+
+procedure TFormEditFrame.SetMaxUndoSize(AValue: integer);
+var
+  tmp: TPropChangeStack;
+  i: integer;
+begin
+  if FMaxUndoSize = AValue then
+    Exit;
+  tmp := TPropChangeStack.Create;
+  try
+    i := 0;
+    while not UndoStack.IsEmpty do
+    begin
+      if (i < AValue) then
+        tmp.Push(UndoStack.Top());
+      Inc(i);
+      UndoStack.Pop();
+    end;
+    while not tmp.IsEmpty do
+    begin
+      UndoStack.Push(tmp.Top());
+      tmp.Pop();
+    end;
+  finally
+    tmp.Free;
+  end;
+  FMaxUndoSize := AValue;
 end;
 
 procedure TFormEditFrame.ReLoadConf;
@@ -251,7 +333,7 @@ begin
     finally
       FChangeProps := False;
     end;
-  FFormular.Invalidate;
+    FFormular.Invalidate;
   end;
 end;
 
@@ -271,7 +353,7 @@ begin
     finally
       FChangeProps := False;
     end;
-  FFormular.Invalidate;
+    FFormular.Invalidate;
   end;
 end;
 
@@ -478,6 +560,9 @@ begin
   UndoStack := TPropChangeStack.Create;
   RedoStack := TPropChangeStack.Create;
   FCopyLst := TObjectList.Create(False);
+  FMaxUndoSize:=1024;
+  BorderHeight:=32;
+  BorderWidth:=15;
   ReLoadConf;
 end;
 
@@ -1421,8 +1506,8 @@ begin
             FFormular.Text := FuncParams[0];
             FFormular.Left := StrToInt(FuncParams[3]);
             FFormular.Top := StrToInt(FuncParams[4]);
-            FFormular.Width := StrToInt(FuncParams[1]) - 16;
-            FFormular.Height := StrToInt(FuncParams[2]) - 32;
+            FFormular.Width := StrToInt(FuncParams[1]) - BorderWidth;
+            FFormular.Height := StrToInt(FuncParams[2]) - BorderHeight;
             FFormular.Style := TWindowStyles(StrToInt(FuncParams[5]) shr 16);
             FFormular.StyleEx := TWindowExStyles(StrToInt(FuncParams[6]));
             FormFound := True;
@@ -1781,12 +1866,12 @@ begin
       FuncParams.Free;
       Lines.Free;
     end;
+    FFileName := p;
     if Assigned(FOnVarChanged) then
       FOnVarChanged(Self);
     Self.Parent.Caption := ExtractFileName(p);
     FormControlView.Select(FormControlView.Items[0]);
     PositionPicker.Invalidate;
-    FFileName := p;
   finally
     FChangeProps := False;
   end;

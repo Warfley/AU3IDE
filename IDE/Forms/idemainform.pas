@@ -10,7 +10,7 @@ uses
   Menus, ComCtrls, Buttons, ExtCtrls, PairSplitter, Project, IDEStartupScreen,
   ProjectInspector, EditorManagerFrame, au3Types, FormEditor, Editor,
   au3FileInfo, strutils, CompilerOptions, au3Compiler, EditorOptions, FormEditorOptions,
-  SampeProjectView, fphttpclient, process, AboutWindow, Math, aboutautoit;
+  SampeProjectView, fphttpclient, process, AboutWindow, Math, aboutautoit, OtherOptionsForm;
 
 type
 
@@ -44,6 +44,7 @@ type
     ExtrasMenuItem: TMenuItem;
     CompileMenuItem: TMenuItem;
     AboutAutoitItem: TMenuItem;
+    OtherOptionsItem: TMenuItem;
     NewEditView: TMenuItem;
     NextTabItem: TMenuItem;
     CenterPanel: TPanel;
@@ -119,6 +120,7 @@ type
     procedure NewFormItemClick(Sender: TObject);
     procedure NewProjectItemClick(Sender: TObject);
     procedure NextTabItemClick(Sender: TObject);
+    procedure OtherOptionsItemClick(Sender: TObject);
     procedure PrevTabItemClick(Sender: TObject);
     procedure RedoMenuItemClick(Sender: TObject);
     procedure RunBtnClick(Sender: TObject);
@@ -145,6 +147,7 @@ type
     FFileData: Tau3FileManager;
     FCurrentState: TIDEState;
     IncludePath: string;
+    SearchForUpdates: Boolean;
     { private declarations }
     procedure OpenProject(P: string);
     function ShowFormConf: boolean;
@@ -164,6 +167,7 @@ type
     procedure ChangeMainForm(FileName: string; Silent: boolean = False);
     function ShowCompilerOptions: boolean;
     function ShowEditorConf: boolean;
+    procedure SaveIDESettings;
     procedure PrintText(Sender: TObject; FileName: string; Output: string);
     procedure FinishedComp(Sender: TObject);
     procedure FinishedRun(Sender: TObject);
@@ -178,6 +182,7 @@ type
 var
   MainForm: TMainForm;
 
+  const ConfVer = 1;
 implementation
 
 {$R *.lfm}
@@ -271,6 +276,20 @@ begin
   end;
 end;
 
+procedure TMainForm.SaveIDESettings;
+var fs: TFileStream;
+tmp: Integer;
+begin
+  tmp:=ConfVer;
+  fs:=TFileStream.Create(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'IDE.cnf', fmCreate);
+  try
+    fs.Write(tmp, SizeOf(tmp));
+    fs.Write(SearchForUpdates, SizeOf(SearchForUpdates));
+  finally
+    fs.Free;
+  end;
+end;
+
 procedure TMainForm.PrintText(Sender: TObject; FileName: string; Output: string);
 begin
   OutputBox.Items.Add(FCurrentProject.GetRelPath(FileName) + ': ' + Output);
@@ -343,8 +362,24 @@ procedure TMainForm.ShowStartupScreen(Data: IntPtr);
 
 var
   i: integer;
+  fs: TFileStream;
 begin
   Self.Hide;
+  if SearchForUpdates then
+  try
+  if CheckForUpdates then
+  begin
+    if MessageDlg('Neue Version gefunden',
+      'Eine neue Version steht zum Download bereit.'#10#13'Jetzt aktualisieren?',
+      mtInformation, mbYesNo, 'Update') = mrYes then
+      begin
+      PerformUpdate;
+      Exit;
+      end;
+  end;
+  except
+  end;
+
   if FileExists(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) +
     'compiler.cfg') then
     FCompiler.ReadConf(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) +
@@ -784,7 +819,7 @@ begin
   if CheckForUpdates then
   begin
     if MessageDlg('Neue Version gefunden',
-      'Eine neue Version Steht zum Download verfügbar.'#10#13'Jetzt aktualisieren?',
+      'Eine neue Version steht zum Download bereit.'#10#13'Jetzt aktualisieren?',
       mtInformation, mbYesNo, 'Update') = mrYes then
       PerformUpdate;
   end
@@ -798,7 +833,6 @@ procedure TMainForm.EditorParserFinished(Sender: TObject);
   var
     f, n: integer;
   begin
-    { Anpassen an PATH variablen }
     if not FilenameIsAbsolute(req) then
       req := GetFullPath(req, IncludePath, ExtractFilePath(
         (Sender as TEditorFrame).FileName) + PathDelim, FCurrentProject.Paths);
@@ -973,6 +1007,7 @@ procedure TMainForm.FormCreate(Sender: TObject);
 var
   i: integer;
   f: file of TIDEState;
+  fs: TFileStream;
 begin
   if FileExists(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) +
     'wnd.cnf') then
@@ -996,6 +1031,25 @@ begin
       Left := 200;
       PILeft := True;
     end;
+
+  // Load IDE Conf
+  if not FileExistsUTF8(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'IDE.cnf') then
+  begin
+    SearchForUpdates := MessageDlg('Nach Updates suchen',
+      'Soll die IDE bei jedem Start automatisch nach Updates suchen?',
+      mtConfirmation, mbYesNo, 'Update') = mrYes;
+    SaveIDESettings;
+  end
+  else
+  begin
+  fs:=TFileStream.Create(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'IDE.cnf', fmOpenRead);
+  try
+    fs.Read(i, SizeOf(i));
+    fs.Read(SearchForUpdates, SizeOf(SearchForUpdates));
+  finally
+    fs.Free;
+  end;
+  end;
   Width := FCurrentState.Width;
   Height := FCurrentState.Height;
   Left := FCurrentState.Left;
@@ -1004,6 +1058,7 @@ begin
   EditorManager.Parent := CenterPanel;
   EditorManager.Align := alClient;
   EditorManager.Visible := True;
+  EditorManager.ReadConfig(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'other.cnf');
   WindowState := FCurrentState.State;
   IDEOptionItem.Checked := FCurrentState.PILeft;
   IDEOptionItemClick(IDEOptionItem);
@@ -1166,6 +1221,32 @@ procedure TMainForm.NextTabItemClick(Sender: TObject);
 begin
   EditorManager.EditorIndex :=
     Min(EditorManager.EditorIndex + 1, EditorManager.Count - 1);
+end;
+
+procedure TMainForm.OtherOptionsItemClick(Sender: TObject);
+begin
+  with OtherOptions do
+  begin
+    UndoBox.Value:=EditorManager.UndoSteps;
+    SortBox.Value:=EditorManager.CompleteSortCount;
+    CompOpenBox.ItemIndex:=ord(EditorManager.AutoComplete);
+    IncVarBox.Checked:=EditorManager.ShowIncludeVars;
+    WinWidthEdit.Value:=EditorManager.BorderWidth;
+    WinHeightEdit.Value:=EditorManager.BorderHeight;
+    UpdateBox.Checked:=SearchForUpdates;
+  if ShowModal=mrOK then
+  begin
+    EditorManager.UndoSteps:=UndoBox.Value;
+    EditorManager.CompleteSortCount:=SortBox.Value;
+    EditorManager.AutoComplete:=TAutoOpen(CompOpenBox.ItemIndex);
+    EditorManager.ShowIncludeVars:=IncVarBox.Checked;
+    EditorManager.BorderWidth:=WinWidthEdit.Value;
+    EditorManager.BorderHeight:=WinHeightEdit.Value;
+    EditorManager.WriteConfig(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'other.cnf');
+    SearchForUpdates:=UpdateBox.Checked;
+    SaveIDESettings;
+  end;
+  end;
 end;
 
 procedure TMainForm.PrevTabItemClick(Sender: TObject);

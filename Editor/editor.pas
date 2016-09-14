@@ -9,11 +9,12 @@ uses
   au3Highlighter, Types, contnrs, LCLType, ExtCtrls, au3Types, UnitParser,
   Dialogs, Graphics, StdCtrls, Buttons, ComCtrls, strutils, CodeFormatter,
   ToolTip, ListRecords, SynEditTypes, Math, SynGutterBase, SynGutterChanges,
-  GraphUtil, Project, gvector;
+  GraphUtil, Project, gvector, fgl;
 
 type
 
   { TEditorFrame }
+  TAutoOpen = (aoNever, aoVar, aoAlways);
 
   TEditorFrame = class(TFrame)
     CodeExplorerPanel: TPanel;
@@ -86,12 +87,18 @@ type
     FKeyWords: TStringList;
     FDefRanges: TObjectList;
     Parser: TUnitParser;
+    FUseCount: TUseMap;
+    FShowIncludeVars: boolean;
+    FMaxCompletionCount: integer;
+    FCompletionList: TStringList;
+    FAutoOpen: TAutoOpen;
     function GetTemplatePos(UseCursor: boolean): TPoint;
     procedure LoadFuncList;
     procedure CompleteKeyDown(Sender: TObject; var Key: word; Shift: TShiftState);
     function GetCurrWord: string;
     function GetFont: TFont;
     procedure SetFont(f: TFont);
+    procedure SetMaxCompletionCount(AValue: integer);
     procedure SetRanges(l: TObjectList);
     procedure SetFunc(l: TFuncList);
     procedure SetVar(l: TVarList);
@@ -127,6 +134,11 @@ type
     property ToolTip: TEditorToolTip read FToolTip;
     property Project: Tau3Project read FProject write FProject;
     property IncludePath: string read FIncludePath write FIncludePath;
+    property UseCount: TUseMap read FUseCount;
+    property MaxCompletionCount: integer read FMaxCompletionCount
+      write SetMaxCompletionCount;
+    property ShowIncludeVars: boolean read FShowIncludeVars write FShowIncludeVars;
+    property AutoOpen: TAutoOpen read FAutoOpen write FAutoOpen;
     { public declarations }
   end;
 
@@ -361,6 +373,15 @@ begin
   CodeEditor.Font := f;
 end;
 
+procedure TEditorFrame.SetMaxCompletionCount(AValue: integer);
+begin
+  if FMaxCompletionCount = AValue then
+    Exit;
+  while FUseCount.Count > AValue do
+    FUseCount.Delete(FUseCount.Count - 1);
+  FMaxCompletionCount := AValue;
+end;
+
 procedure TEditorFrame.SetRanges(l: TObjectList);
 var
   i: integer;
@@ -415,7 +436,7 @@ begin
   moveright := True;
   Parser := TUnitParser.Create(True);
   Highlight := Tau3SynHighlight.Create(nil);
-  FToolTip.Highlighter:=Highlight;
+  FToolTip.Highlighter := Highlight;
   CodeEditor.Highlighter := Highlight;
   FFunctions := TFuncList.Create;
   FVars := TVarList.Create;
@@ -430,6 +451,11 @@ begin
   FIncludeFiles := TStringList.Create;
   FToolTip.OnClick := @TTClick;
   currWord := '';
+  FUseCount := TUseMap.Create;
+  FCompletionList := TStringList.Create;
+  FMaxCompletionCount := 32;
+  FAutoOpen := aoVar;
+  FShowIncludeVars := True;
 end;
 
 procedure TEditorFrame.SetFocus;
@@ -441,111 +467,90 @@ end;
 procedure TEditorFrame.ParserHasFinished(Sender: TObject);
 var
   i: integer;
-  FS, VS: integer;
-  p, ni, nv, nf, tmp: TTreeNode;
-  s: string;
+  ni, nv, nf, tmp: TTreeNode;
 begin
-  if not CodeExplorer.Visible then exit;
-  CodeExplorer.BeginUpdate;
-  try
-    for i := 0 to CodeExplorer.Items.Count - 1 do
-      if CodeExplorer.Items[i].ImageIndex > 0 then
-        CodeExplorer.Items[i].ImageIndex := -1;
-    ni := CodeExplorer.Items.FindNodeWithText('Includes');
-    nf := CodeExplorer.Items.FindNodeWithText('Funktionen');
-    nv := CodeExplorer.Items.FindNodeWithText('Variablen');
-
-    for i := 0 to FRequiredFiles.Count - 1 do
-      if FileExistsUTF8(GetFullPath(FRequiredFiles[i], FIncludePath,
-        ExtractFilePath(FFileName), FProject.Paths)) then
+  if CodeExplorer.Visible then
+  begin
+    CodeExplorer.BeginUpdate;
+    try
+      for i := 0 to CodeExplorer.Items.Count - 1 do
+        if CodeExplorer.Items[i].ImageIndex > 0 then
+          CodeExplorer.Items[i].ImageIndex := -1;
+      ni := CodeExplorer.Items.FindNodeWithText('Includes');
+      nf := CodeExplorer.Items.FindNodeWithText('Funktionen');
+      nv := CodeExplorer.Items.FindNodeWithText('Variablen');
+      i := 0;
+      for i := 0 to FRequiredFiles.Count - 1 do
+        if FileExistsUTF8(GetFullPath(FRequiredFiles[i], FIncludePath,
+          ExtractFilePath(FFileName), FProject.Paths)) then
+        begin
+          tmp := CodeExplorer.Items.FindNodeWithText(FRequiredFiles[i]);
+          if not Assigned(tmp) then
+            tmp := CodeExplorer.Items.AddChild(ni, FRequiredFiles[i]);
+          with tmp do
+          begin
+            ImageIndex := 1;
+            SelectedIndex := 1;
+            Data := Pointer(i);
+          end;
+        end;
+      for i := 0 to FFunctions.Count - 1 do
       begin
-        tmp := CodeExplorer.Items.FindNodeWithText(FRequiredFiles[i]);
+        tmp := CodeExplorer.Items.FindNodeWithText(FFunctions[i].Name);
         if not Assigned(tmp) then
-          tmp := CodeExplorer.Items.AddChild(ni, FRequiredFiles[i]);
+          tmp := CodeExplorer.Items.AddChild(nf, FFunctions[i].Name);
         with tmp do
         begin
-          ImageIndex := 1;
-          SelectedIndex := 1;
+          ImageIndex := 2;
+          SelectedIndex := 2;
           Data := Pointer(i);
         end;
       end;
-    for i := 0 to FFunctions.Count - 1 do
-    begin
-      tmp := CodeExplorer.Items.FindNodeWithText(FFunctions[i].Name);
-      if not Assigned(tmp) then
-        tmp := CodeExplorer.Items.AddChild(nf, FFunctions[i].Name);
-      with tmp do
+      for i := 0 to FVars.Count - 1 do
       begin
-        ImageIndex := 2;
-        SelectedIndex := 2;
-        Data := Pointer(i);
-      end;
-    end;
-    for i := 0 to FVars.Count - 1 do
-    begin
-      tmp := CodeExplorer.Items.FindNodeWithText(FVars[i].Name);
-      if not Assigned(tmp) then
-        tmp := CodeExplorer.Items.AddChild(nv, FVars[i].Name);
-      with tmp do
-      begin
-        ImageIndex := 3;
-        SelectedIndex := 3;
-        Data := Pointer(i);
-      end;
-    end;
-    FS := FFunctions.Count;
-    VS := FVars.Count;
-    if Assigned(FOnParserFinished) then
-      FOnParserFinished(Self);
-    {for i := FS to FFunctions.Count - 1 do
-    begin
-      s := GetRelInclude(FFunctions[i].FileName, IncludePath,
-        ExtractFilePath(FFileName), FProject.Paths);
-      p := CodeExplorer.Items.FindNodeWithText(s);
-      if not Assigned(p) then
-        p := CodeExplorer.Items.AddChild(ni, s);
-        with p do
+        tmp := CodeExplorer.Items.FindNodeWithText(FVars[i].Name);
+        if not Assigned(tmp) then
+          tmp := CodeExplorer.Items.AddChild(nv, FVars[i].Name);
+        with tmp do
         begin
-          ImageIndex := 1;
-          SelectedIndex := 1;
-          Data := Pointer(-1);
+          ImageIndex := 3;
+          SelectedIndex := 3;
+          Data := Pointer(i);
         end;
-      tmp := p.FindNode(FFunctions[i].Name);
-      if not Assigned(tmp) then
-        tmp := CodeExplorer.Items.AddChild(p, FFunctions[i].Name);
-      with tmp do
-      begin
-        ImageIndex := 2;
-        SelectedIndex := 2;
-        Data := Pointer(i);
       end;
+      i := 0;
+      while i < CodeExplorer.Items.Count do
+        if CodeExplorer.Items[i].ImageIndex = -1 then
+          CodeExplorer.Items[i].Free
+        else
+          Inc(i);
+    finally
+      CodeExplorer.EndUpdate;
     end;
-    for i := VS to FVars.Count - 1 do
-    begin
-      s := GetRelInclude(FVars[i].FileName, IncludePath,
-        ExtractFilePath(FFileName), FProject.Paths);
-      p := CodeExplorer.Items.FindNodeWithText(s);
-      if not Assigned(p) then
-        p := CodeExplorer.Items.AddChild(ni, s);
-        with p do
-        begin
-          ImageIndex := 1;
-          SelectedIndex := 1;
-          Data := Pointer(-1);
-        end;
-    end;  }
-    i := 0;
-    while i < CodeExplorer.Items.Count do
-      if CodeExplorer.Items[i].ImageIndex = -1 then
-        CodeExplorer.Items[i].Free
-      else
-        Inc(i);
-  finally
-    CodeExplorer.EndUpdate;
   end;
+  if FShowIncludeVars and Assigned(FOnParserFinished) then
+    FOnParserFinished(Self);
 end;
 
 procedure TEditorFrame.CompletionExecute(Sender: TObject);
+
+  procedure InsertSorted(l: TStringList; v: string);
+  var
+    i, x, p: integer;
+  begin
+    if not FUseCount.Find(LowerCase(v), p) then
+      l.Add(v)
+    else
+    begin
+      for i := 0 to l.Count - 1 do
+        if not (FUseCount.Find(LowerCase(l[i]), x) and (x >= p)) then
+        begin
+          l.Insert(i, v);
+          Exit;
+        end;
+      l.Add(v);
+    end;
+  end;
 
   function StringsContain(s: TStrings; str: string): boolean;
   var
@@ -600,56 +605,58 @@ begin
         Completion.ItemList.Add(FIncludeFiles[i]);
     Exit;
   end;
+  // Fill Completion List
+  FCompletionList.Clear;
+  FCompletionList.Duplicates := dupIgnore;
+
+  // Keywords
+  for i := 0 to FKeyWords.Count - 1 do
+    InsertSorted(FCompletionList, FKeyWords[i]);
+
+  // Macros
+  for i := 0 to FMacros.Count - 1 do
+    InsertSorted(FCompletionList, FMacros[i]);
+
+  // STD Func
+  for i := 0 to FStdFunc.Count - 1 do
+    InsertSorted(FCompletionList, FStdFunc[i].Name);
+
+  // Func
+  for i := 0 to FFunctions.Count - 1 do
+    InsertSorted(FCompletionList, FFunctions[i].Name);
+
+  // Compiler Vars
+  for i := 0 to FCompVars.Count - 1 do
+    InsertSorted(FCompletionList, FCompVars[i]);
+
+  // Global Vars
+  for i := 0 to FVars.Count - 1 do
+    if (FVars[i].Line <= CodeEditor.LogicalCaretXY.y - 1) or
+      (FVars[i].FileName <> '') then
+      InsertSorted(FCompletionList, FVars[i].Name);
+
+  // Local Vars
+  for x := 0 to FDefRanges.Count - 1 do
+    if (CodeEditor.LogicalCaretXY.y - 1 >= (FDefRanges[x] as TDefRange).StartLine) and
+      (CodeEditor.LogicalCaretXY.y - 1 < (FDefRanges[x] as TDefRange).EndLine) then
+      for i := 0 to (FDefRanges[x] as TDefRange).Vars.Count - 1 do
+        if ((FDefRanges[x] as TDefRange).Vars[i].Line <=
+          CodeEditor.LogicalCaretXY.y - 1) then
+          InsertSorted(FCompletionList, (FDefRanges[x] as TDefRange).Vars[i].Name);
+  // Filter
   Completion.ItemList.Clear;
   if Length(Completion.CurrentString) = 0 then
-  begin
-    Completion.ItemList.AddStrings(FKeyWords);
-    for i := 0 to FStdFunc.Count - 1 do
-      Completion.ItemList.Add(FStdFunc[i].Name);
-    for i := 0 to FFunctions.Count - 1 do
-      Completion.ItemList.Add(FFunctions[i].Name);
-  end
-  else if Completion.CurrentString[1] = '$' then
-  begin
-    for i := 0 to FVars.Count - 1 do
-      if ((FVars[i].Line <= CodeEditor.LogicalCaretXY.y - 1) or
-        (FVars[i].FileName <> '')) and
-        (Pos(LowerCase(Completion.CurrentString), LowerCase(FVars[i].Name)) = 1) then
-        Completion.ItemList.Add(FVars[i].Name);
-    for x := 0 to FDefRanges.Count - 1 do
-      if (CodeEditor.LogicalCaretXY.y - 1 >= (FDefRanges[x] as TDefRange).StartLine) and
-        (CodeEditor.LogicalCaretXY.y - 1 < (FDefRanges[x] as TDefRange).EndLine) then
-        for i := 0 to (FDefRanges[x] as TDefRange).Vars.Count - 1 do
-          if ((FDefRanges[x] as TDefRange).Vars[i].Line <=
-            CodeEditor.LogicalCaretXY.y - 1) and
-            (Pos(LowerCase(Completion.CurrentString), LowerCase(
-            (FDefRanges[x] as TDefRange).Vars[i].Name)) = 1) then
-            Completion.ItemList.Add((FDefRanges[x] as TDefRange).Vars[i].Name);
-    for i := 0 to FCompVars.Count - 1 do
-      if (Pos(LowerCase(Completion.CurrentString), LowerCase(FCompVars[i])) = 1) then
-        Completion.ItemList.Add(FCompVars[i]);
-    if not StringsContain(Completion.ItemList, Completion.CurrentString) then
-      Completion.ItemList.Add(Completion.CurrentString);
-  end
-  else if Completion.CurrentString[1] = '@' then
-  begin
-    for i := 0 to FMacros.Count - 1 do
-      if (Pos(LowerCase(Completion.CurrentString), LowerCase(FMacros[i])) = 1) then
-        Completion.ItemList.Add(FMacros[i]);
-  end
+    Completion.ItemList.AddStrings(FCompletionList)
   else
-  begin
-    for i := 0 to FKeyWords.Count - 1 do
-      if Pos(LowerCase(Completion.CurrentString), LowerCase(FKeyWords[i])) = 1 then
-        Completion.ItemList.Add(FKeyWords[i]);
-    for i := 0 to FStdFunc.Count - 1 do
-      if Pos(LowerCase(Completion.CurrentString), LowerCase(FStdFunc[i].Name)) = 1 then
-        Completion.ItemList.Add(FStdFunc[i].Name);
-    for i := 0 to FFunctions.Count - 1 do
-      if Pos(LowerCase(Completion.CurrentString), LowerCase(FFunctions[i].Name)) = 1 then
-        Completion.ItemList.Add(FFunctions[i].Name);
+    for i := 0 to FCompletionList.Count - 1 do
+      if Pos(LowerCase(Completion.CurrentString), LowerCase(FCompletionList[i])) = 1 then
+        if Length(Completion.CurrentString) = Length(FCompletionList[i]) then
+          Completion.ItemList.Insert(0, FCompletionList[i])
+        else
+          Completion.ItemList.Add(FCompletionList[i]);
+
+  if Completion.ItemList.Count = 0 then
     Completion.ItemList.Add(Completion.CurrentString);
-  end;
   Completion.ItemList.Add('');
   Completion.Position := 0;
 end;
@@ -692,7 +699,8 @@ begin
             break;
         if curr in [tkString, tkTemp] then
           Inc(l)
-        else if (curr = tkUnknown) and (s + l <= Length(AKey)) and (AKey[s + l] = '(') then
+        else if (curr = tkUnknown) and (s + l <= Length(AKey)) and
+          (AKey[s + l] = '(') then
           curr := tkFunction;
         tok := Copy(AKey, s, l);
         Font.Bold := False;
@@ -753,13 +761,19 @@ end;
 procedure TEditorFrame.CompleteKeyDown(Sender: TObject; var Key: word;
   Shift: TShiftState);
 begin
-  if (Key = 8) and (Length(Completion.CurrentString) > 0) and
-    (Completion.CurrentString[1] in ['$', '@']) then
+  if (Key = 8) and (Length(Completion.CurrentString) = 0) or
+    ((Length(Completion.CurrentString) > 0) and
+    (Completion.CurrentString[1] in ['$', '@'])) then
     Completion.Deactivate
-  else
-  {if (key in [17, 18]) then
+  else if Key in [17, 18] then
     Completion.Deactivate
-  else }if key = 9 then
+  else if Key = 32 then
+  begin
+    Key := 0;
+    CodeEditor.InsertTextAtCaret(' ');
+    Completion.Deactivate;
+  end
+  else if key = 9 then
     key := 13;
 
 end;
@@ -792,55 +806,21 @@ begin
       Completion.ItemList.Add(Copy(Completion.CurrentString,
         pos('<', Completion.CurrentString) + 1, Length(Completion.CurrentString)));
   end
-  else if Length(Completion.CurrentString) = 0 then
-  begin
-    Completion.ItemList.AddStrings(FKeyWords);
-    for i := 0 to FStdFunc.Count - 1 do
-      Completion.ItemList.Add(FStdFunc[i].Name);
-    for i := 0 to FFunctions.Count - 1 do
-      Completion.ItemList.Add(FFunctions[i].Name);
-  end
-  else if Completion.CurrentString[1] = '$' then
-  begin
-    for i := 0 to FVars.Count - 1 do
-      if ((FVars[i].Line <= CodeEditor.LogicalCaretXY.y - 1) or
-        (FVars[i].FileName <> '')) and
-        (Pos(LowerCase(Completion.CurrentString), LowerCase(FVars[i].Name)) = 1) then
-        Completion.ItemList.Add(FVars[i].Name);
-    for x := 0 to FDefRanges.Count - 1 do
-      if (CodeEditor.LogicalCaretXY.y - 1 >= (FDefRanges[x] as TDefRange).StartLine) and
-        (CodeEditor.LogicalCaretXY.y - 1 < (FDefRanges[x] as TDefRange).EndLine) then
-        for i := 0 to (FDefRanges[x] as TDefRange).Vars.Count - 1 do
-          if ((FDefRanges[x] as TDefRange).Vars[i].Line <=
-            CodeEditor.LogicalCaretXY.y - 1) and
-            (Pos(LowerCase(Completion.CurrentString), LowerCase(
-            (FDefRanges[x] as TDefRange).Vars[i].Name)) = 1) then
-            Completion.ItemList.Add((FDefRanges[x] as TDefRange).Vars[i].Name);
-    for i := 0 to FCompVars.Count - 1 do
-      if (Pos(LowerCase(Completion.CurrentString), LowerCase(FCompVars[i])) = 1) then
-        Completion.ItemList.Add(FCompVars[i]);
-    if not StringsContain(Completion.ItemList, Completion.CurrentString) then
-      Completion.ItemList.Add(Completion.CurrentString);
-  end
-  else if Completion.CurrentString[1] = '@' then
-  begin
-    for i := 0 to FMacros.Count - 1 do
-      if (Pos(LowerCase(Completion.CurrentString), LowerCase(FMacros[i])) = 1) then
-        Completion.ItemList.Add(FMacros[i]);
-  end
   else
   begin
-    for i := 0 to FKeyWords.Count - 1 do
-      if Pos(LowerCase(Completion.CurrentString), LowerCase(FKeyWords[i])) = 1 then
-        Completion.ItemList.Add(FKeyWords[i]);
-    for i := 0 to FStdFunc.Count - 1 do
-      if Pos(LowerCase(Completion.CurrentString), LowerCase(FStdFunc[i].Name)) = 1 then
-        Completion.ItemList.Add(FStdFunc[i].Name);
-    for i := 0 to FFunctions.Count - 1 do
-      if Pos(LowerCase(Completion.CurrentString), LowerCase(FFunctions[i].Name)) = 1 then
-        Completion.ItemList.Add(FFunctions[i].Name);
-    Completion.ItemList.Add(Completion.CurrentString);
+    Completion.ItemList.Clear;
+    if Length(Completion.CurrentString) = 0 then
+      Completion.ItemList.AddStrings(FCompletionList)
+    else
+      for i := 0 to FCompletionList.Count - 1 do
+        if Pos(LowerCase(Completion.CurrentString),
+          LowerCase(FCompletionList[i])) = 1 then
+          if Length(Completion.CurrentString) = Length(FCompletionList[i]) then
+            Completion.ItemList.Insert(0, FCompletionList[i])
+          else
+            Completion.ItemList.Add(FCompletionList[i]);
   end;
+
   if Completion.ItemList.Count = 0 then
     Completion.ItemList.Add(Completion.CurrentString);
   Completion.ItemList.Add('');
@@ -920,6 +900,7 @@ begin
     Parser.Vars := FVars;
     Parser.RequiredFiles := FRequiredFiles;
     Parser.Ranges := FDefRanges;
+    Parser.UseCount := UseCount;
     Parser.Start;
   end;
 end;
@@ -928,9 +909,30 @@ procedure TEditorFrame.CompletionCodeCompletion(var Value: string;
   SourceValue: string; var SourceStart, SourceEnd: TPoint; KeyChar: TUTF8Char;
   Shift: TShiftState);
 var
-  p: integer;
+  p, x: integer;
   ln: string;
 begin
+  if FUseCount.Find(LowerCase(Value), p) then
+  begin
+    x := FUseCount.Data[p];
+    FUseCount.Delete(p);
+    FUseCount.InsertKeyData(0, LowerCase(Value), x + 1);
+  end
+  else if FUseCount.Count < MaxCompletionCount then
+    FUseCount.Add(LowerCase(Value), 1)
+  else
+  begin
+    // Delete Least important
+    for x := MaxCompletionCount - 1 downto MaxCompletionCount div 2 do
+      if FUseCount.Data[x + 1] < FUseCount.Data[x] * 2 then
+      begin
+        FUseCount.Delete(x + 1);
+        Break;
+      end;
+    if FUseCount.Count = MaxCompletionCount then
+      FUseCount.Delete(MaxCompletionCount div 2);
+    FUseCount.Add(LowerCase(Value), 1);
+  end;
   ln := CodeEditor.Lines[SourceStart.y - 1];
   moveright := False;
   if Length(Value) = 0 then
@@ -1019,7 +1021,7 @@ procedure TEditorFrame.CodeEditorKeyUp(Sender: TObject; var Key: word;
 
 var
   ln, pref, tmp: string;
-  i, x, l, s, e: integer;
+  i, x, l: integer;
   b: boolean;
   p: TPoint;
 begin
@@ -1085,8 +1087,8 @@ begin
           #13 + pref + 'EndSwitch';
       end;
       CodeEditor.TextBetweenPoints[Point(0, i + 2), Point(0, i + 2)] :=
-        pref + '  Case ';
-      Application.QueueAsyncCall(@MoveHorz, 7);
+        pref + '  Case {Value}';
+    Application.QueueAsyncCall(@SelectTemp, 0);
     end
     else if isEnd(ln, 'select') then
     begin
@@ -1134,13 +1136,18 @@ begin
   else if (Key = Ord('F')) and (ssCtrl in Shift) then
     ShowSearch;
   moveright := True;
-  if key in [Ord('A')..Ord('Z'), Ord('0')..Ord('9')] then
+  if (key in [Ord('A')..Ord('Z'), Ord('0')..Ord('9')]) or ((key =8) and (AutoOpen=aoAlways)) then
   begin
     tmp := GetCurrWord;
     p := Point(CodeEditor.CaretXPix, CodeEditor.CaretYPix + CodeEditor.LineHeight);
     p := CodeEditor.ClientToScreen(p);
-    if (Length(tmp) > 1) and ((tmp[1] in ['$', '#', '@'])) and not
-      (ssCtrl in Shift) and not (ssAlt in Shift) then
+    if (Length(tmp) >= 1) and not (ssCtrl in Shift) and not
+      (ssAlt in Shift) and ((AutoOpen = aoAlways) or
+      ((AutoOpen = aoVar) and (tmp[1] in ['$', '#', '@']) and not
+      (CodeEditor.LogicalCaretXY.x >=
+      Length(CodeEditor.Lines[CodeEditor.LogicalCaretXY.Y])) and not
+      (CodeEditor.Lines[CodeEditor.LogicalCaretXY.y - 1]
+      [CodeEditor.LogicalCaretXY.x] in ['$', '#', '@']))) then
       Completion.Execute(GetCurrWord, p);
   end
   else if Key in [VK_LEFT..VK_DOWN] then
@@ -1476,6 +1483,8 @@ begin
     if p.x > 0 then
       Key := 0;
   end
+  else if Key=13 then
+    CodeEditor.TextBetweenPoints[Point(0, CodeEditor.LogicalCaretXY.Y),Point(Length(CodeEditor.Lines[CodeEditor.LogicalCaretXY.y-1])+1, CodeEditor.LogicalCaretXY.Y)] := Trim(CodeEditor.Lines[CodeEditor.LogicalCaretXY.y-1])
   else if Key = VK_BACK then
     p := GetTemplatePos(True);
   if p.x > 0 then
@@ -1543,10 +1552,10 @@ procedure TEditorFrame.CheckSelTimerTimer(Sender: TObject);
         if ln[i] = '"' then
           instr := not instr
         else if not instr then
-        if ln[i] = ')' then
-          Inc(d)
-        else if ln[i] = '(' then
-          Dec(d);
+          if ln[i] = ')' then
+            Inc(d)
+          else if ln[i] = '(' then
+            Dec(d);
         if (d = 1) and (ln[i] = ',') and not instr then
           Inc(n);
         Dec(i);
@@ -1675,19 +1684,19 @@ end;
 
 procedure TEditorFrame.CloseCodeExplorerButtonClick(Sender: TObject);
 begin
-  if CloseCodeExplorerButton.Caption='x' then
+  if CloseCodeExplorerButton.Caption = 'x' then
   begin
     CodeExplorer.Hide;
-    CodeExplorerPanel.Width:=32;
-    CloseCodeExplorerButton.Caption:='<';
-    CodeExplorerHead.Caption:='';
+    CodeExplorerPanel.Width := 32;
+    CloseCodeExplorerButton.Caption := '<';
+    CodeExplorerHead.Caption := '';
   end
   else
   begin
     CodeExplorer.Show;
-    CodeExplorerPanel.Width:=235;
-    CloseCodeExplorerButton.Caption:='x';
-    CodeExplorerHead.Caption:='Code Explorer';
+    CodeExplorerPanel.Width := 235;
+    CloseCodeExplorerButton.Caption := 'x';
+    CodeExplorerHead.Caption := 'Code Explorer';
     UpdateTimerTimer(nil);
   end;
 end;
@@ -1777,6 +1786,8 @@ begin
   FIncludeFiles.Free;
   FCompVars.Free;
   FMacros.Free;
+  FUseCount.Free;
+  FCompletionList.Free;
   inherited;
 end;
 

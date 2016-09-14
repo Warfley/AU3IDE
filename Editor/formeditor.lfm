@@ -60,8 +60,8 @@ object FormEditFrame: TFormEditFrame
       TabOrder = 0
       object ControlProps: TTabSheet
         Caption = 'Eigenschaften'
-        ClientHeight = 456
-        ClientWidth = 526
+        ClientHeight = 228
+        ClientWidth = 263
         object PropEditor: TTIPropertyGrid
           Left = 0
           Height = 228
@@ -106,7 +106,7 @@ object FormEditFrame: TFormEditFrame
           OnGetPickList = EventEditorGetPickList
           ColWidths = (
             64
-            198
+            181
           )
         end
       end
@@ -117,7 +117,7 @@ object FormEditFrame: TFormEditFrame
       Top = 23
       Width = 271
       Align = alClient
-      DefaultItemHeight = 26
+      DefaultItemHeight = 24
       Images = ImageList1
       MultiSelect = True
       MultiSelectStyle = [msControlSelect, msShiftSelect]
@@ -194,8 +194,8 @@ object FormEditFrame: TFormEditFrame
     Anchors = [akRight, akBottom]
     BevelOuter = bvNone
     BorderStyle = bsSingle
-    ClientHeight = 45
-    ClientWidth = 80
+    ClientHeight = 41
+    ClientWidth = 76
     TabOrder = 3
     object PositionPicker: TPaintBox
       Left = 0

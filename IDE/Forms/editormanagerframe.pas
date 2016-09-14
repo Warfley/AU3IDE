@@ -80,13 +80,22 @@ type
     FOnParserFinished: TNotifyEvent;
     FTabs: TEditorList;
     FViewWindows: TViewWindowList;
+    FUndoSteps, FCompleteSort, FBorderW, FBorderH: Integer;
+    FShowIncVar: Boolean;
+    FAutoComp: TAutoOpen;
     { Functions & Procedures }
     function GetFocused(View: integer): integer;
     function GetPageControl(View: integer): TPageControl;
     function GetView(i: integer): integer;
     function GetViewOpened(View: integer): boolean;
     function GetWindowCount: integer;
+    procedure SetAutoComplete(AValue: TAutoOpen);
+    procedure SetBorderHeight(AValue: Integer);
+    procedure SetBorderWidth(AValue: Integer);
+    procedure SetCompleteSortCount(AValue: Integer);
     procedure SetFocused(View: integer; AValue: integer);
+    procedure SetShowIncludeVars(AValue: Boolean);
+    procedure SetUndoSteps(AValue: Integer);
     procedure SetView(EIndex: integer; AValue: integer);
     procedure ProjectItemClick(Sender: TObject);
     procedure CurrentItemClick(Sender: TObject);
@@ -114,6 +123,8 @@ type
     procedure SetWindowCount(AValue: integer);
     procedure ViewWindowClose(Sender: TObject; var act: TCloseAction);
   public
+    procedure ReadConfig(P: String);
+    procedure WriteConfig(P: String);
     function CreateViewWindow: TEditorViewForm;
     function OpenEditor(FileName: string; Pos: TPoint; View: integer = -1): TFrame;
     procedure CloseEditor(i: integer);
@@ -139,6 +150,12 @@ type
     property ViewOpened[View: integer]: boolean read GetViewOpened write SetViewOpened;
     property WindowCount: integer read GetWindowCount write SetWindowCount;
     property Focused[View: integer]: integer read GetFocused write SetFocused;
+    property AutoComplete: TAutoOpen read FAutoComp write SetAutoComplete;
+    property UndoSteps: Integer read FUndoSteps write SetUndoSteps;
+    property CompleteSortCount: Integer read FCompleteSort write SetCompleteSortCount;
+    property BorderWidth: Integer read FBorderW write SetBorderWidth;
+    property BorderHeight: Integer read FBorderH write SetBorderHeight;
+    property ShowIncludeVars: Boolean read FShowIncVar write SetShowIncludeVars;
     { Events }
     property OnEditorClose: TCloseEditorEvent read FOnEditorClose write FOnEditorClose;
     property OnEditorCreated: TEditorNotifyEvent
@@ -149,6 +166,8 @@ type
     property OnParserFinished: TNotifyEvent read FOnParserFinished
       write FOnParserFinished;
   end;
+
+  Const ConfVersion = 1;
 
 implementation
 
@@ -339,6 +358,50 @@ begin
   Result := FViewWindows.Count;
 end;
 
+procedure TEditorManager.SetAutoComplete(AValue: TAutoOpen);
+var
+  i: Integer;
+begin
+  if FAutoComp=AValue then Exit;
+  for i:=0 to Count-1 do
+    if Editors[i] is TEditorFrame then
+      (Editors[i] as TEditorFrame).AutoOpen:=AValue;
+  FAutoComp:=AValue;
+end;
+
+procedure TEditorManager.SetBorderHeight(AValue: Integer);
+var
+  i: Integer;
+begin
+  if FBorderH=AValue then Exit;
+  for i:=0 to Count-1 do
+    if Editors[i] is TFormEditFrame then
+      (Editors[i] as TFormEditFrame).BorderHeight:=AValue;
+  FBorderH:=AValue;
+end;
+
+procedure TEditorManager.SetBorderWidth(AValue: Integer);
+var
+  i: Integer;
+begin
+  if FBorderW=AValue then Exit;
+  for i:=0 to Count-1 do
+    if Editors[i] is TFormEditFrame then
+      (Editors[i] as TFormEditFrame).BorderWidth:=AValue;
+  FBorderW:=AValue;
+end;
+
+procedure TEditorManager.SetCompleteSortCount(AValue: Integer);
+var
+  i: Integer;
+begin
+  if FCompleteSort=AValue then Exit;
+  for i:=0 to Count-1 do
+    if Editors[i] is TEditorFrame then
+      (Editors[i] as TEditorFrame).MaxCompletionCount:=AValue;
+  FCompleteSort:=AValue;
+end;
+
 procedure TEditorManager.SetFocused(View: integer; AValue: integer);
 var
   i: integer;
@@ -354,6 +417,30 @@ begin
     for i := 0 to p.PageCount - 1 do
       if p.Page[i] = FTabs[AValue] then
         p.PageIndex := i;
+end;
+
+procedure TEditorManager.SetShowIncludeVars(AValue: Boolean);
+var
+  i: Integer;
+begin
+  if FShowIncVar=AValue then Exit;
+  for i:=0 to Count-1 do
+    if Editors[i] is TEditorFrame then
+      (Editors[i] as TEditorFrame).ShowIncludeVars:=AValue;
+  FShowIncVar:=AValue;
+end;
+
+procedure TEditorManager.SetUndoSteps(AValue: Integer);
+var
+  i: Integer;
+begin
+  if FUndoSteps=AValue then Exit;
+  for i:=0 to Count-1 do
+    if Editors[i] is TEditorFrame then
+      (Editors[i] as TEditorFrame).CodeEditor.MaxUndo:=AValue
+      else if Editors[i] is TFormEditFrame then
+      (Editors[i] as TFormEditFrame).MaxUndoSize:=AValue;
+  FUndoSteps:=AValue;
 end;
 
 procedure TEditorManager.SetView(EIndex: integer; AValue: integer);
@@ -529,6 +616,7 @@ procedure TEditorManager.EditorChanged(Sender: TObject);
 begin
   if not Assigned((Sender as TControl).Parent) then
     exit;
+  FFocused:=FindIndex((Sender as TControl).Parent as TTabSheet);
   if not ((Sender as TFrame).Parent.Caption[1] = '*') then
     (Sender as TFrame).Parent.Caption := '*' + (Sender as TFrame).Parent.Caption;
   if Assigned(FOnEditorChanged) then
@@ -633,6 +721,7 @@ begin
   Result.EditorControl.OnMouseUp := @EditorControlMouseUp;
   Result.OnClose := @ViewWindowClose;
   Result.OpenEditorButton2.OnClick := @OpenEditorButton1Click;
+  Result.ShowInTaskBar:=stAlways;
   Result.Show;
 end;
 
@@ -660,6 +749,62 @@ begin
   end;
 end;
 
+procedure TEditorManager.ReadConfig(P: String);
+var FS: TFileStream;
+  ver: Integer;
+  tmpInt: Integer;
+  tmpAO: TAutoOpen;
+  tmpBool: Boolean;
+begin
+  if not FileExists(P) then
+  begin
+    FUndoSteps:=1024;
+    FCompleteSort:=32;
+    FBorderW:=15;
+    FBorderH:= 32;
+    FAutoComp:=aoVar;
+    FShowIncVar:=True;
+    exit;
+  end;
+  FS:=TFileStream.Create(p, fmOpenRead);
+  try
+    FS.Read(ver, SizeOf(ver));
+    FS.Read(tmpInt, SizeOf(tmpInt));
+    SetUndoSteps(tmpInt);
+    FS.Read(tmpInt, SizeOf(tmpInt));
+    SetCompleteSortCount(tmpInt);
+    FS.Read(tmpInt, SizeOf(tmpInt));
+    SetBorderWidth(tmpInt);
+    FS.Read(tmpInt, SizeOf(tmpInt));
+    SetBorderHeight(tmpInt);
+    FS.Read(tmpAO, SizeOf(tmpAO));
+    SetAutoComplete(tmpAO);
+    FS.Read(tmpBool, SizeOf(tmpBool));
+    SetShowIncludeVars(tmpBool);
+  finally
+    FS.Free;
+  end;
+end;
+
+procedure TEditorManager.WriteConfig(P: String);
+var fs: TFileStream;
+  ver: Integer;
+begin
+  fs:=TFileStream.Create(P, fmCreate);
+  try
+    ver:=ConfVersion;
+    fs.Write(ver, SizeOf(Integer));
+    fs.Write(FUndoSteps, SizeOf(Integer));
+    fs.Write(FCompleteSort, SizeOf(Integer));
+    fs.Write(FBorderW, SizeOf(Integer));
+    fs.Write(FBorderH, SizeOf(Integer));
+    fs.Write(FAutoComp, SizeOf(TAutoOpen));
+    fs.Write(FShowIncVar, SizeOf(Boolean));
+  finally
+    fs.Free;
+  end;
+end;
+
 procedure TEditorManager.CreateEditor(FName: string; Line, Pos: integer;
   View: TPageControl);
 var
@@ -669,6 +814,7 @@ begin
   tmp := View.AddTabSheet;
   tmp.Caption := ExtractFileName(FName);
   tmp.Visible := True;
+  tmp.OnEnter:=@EditorEnter;
   FFocused := FTabs.Add(tmp);
   View.ActivePage := tmp;
   ext := ExtractFileExt(FName);
@@ -678,6 +824,9 @@ begin
       Align := alClient;
       Parent := tmp;
       Visible := True;
+      MaxUndoSize:=FUndoSteps;
+      BorderWidth:=FBorderW;
+      BorderHeight:=FBorderH;
       Name := Format('FormEditor%d', [FFocused]);
       OnChange := @EditorChanged;
       OnVarChanged := FOnParserFinished;
@@ -697,6 +846,10 @@ begin
       Align := alClient;
       Parent := tmp;
       Visible := True;
+      ShowIncludeVars:=FShowIncVar;
+      AutoOpen:=FAutoComp;
+      MaxCompletionCount:=FCompleteSort;
+      CodeEditor.MaxUndo:=FUndoSteps;
       Name := Format('CodeEditor%d', [FFocused]);
       CodeEditor.SetFocus;
       IncludePath := FIncludePath;

@@ -49,3 +49,5 @@ Func {Name}()
 Func {Name}({Params})
 #include<{File}>
 Not
+Switch {Expression}
+Case {Value}

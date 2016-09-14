@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AU3Projekt1 Version="2">
+  <MainFile>AU3Projekt1.apr</MainFile>
+  <Apptype>GUI</Apptype>
+  <MainForm>MainForm.afm</MainForm>
+  <RunParams> </RunParams>
+  <CompilerOptions>
+    <Compression>2</Compression>
+    <UPX>False</UPX>
+    <OutPath>bin/Calc.exe</OutPath>
+    <Icon></Icon>
+  </CompilerOptions>
+  <Version>
+    <UseVersion>False</UseVersion>
+    <IncreaseBuilt>False</IncreaseBuilt>
+    <Version>0</Version>
+    <Subversion>0</Subversion>
+    <Revision>0</Revision>
+    <Built>0</Built>
+  </Version>
+  <VersionData>
+    <Comments></Comments>
+    <CompanyName></CompanyName>
+    <FileDescription></FileDescription>
+    <InternalName></InternalName>
+    <LegalCopyright></LegalCopyright>
+    <LegalTrademarks></LegalTrademarks>
+    <OriginalFileName></OriginalFileName>
+    <ProductName></ProductName>
+    <FileVersion></FileVersion>
+    <ProductVersion></ProductVersion>
+  </VersionData>
+  <Files>
+    <File>MainForm.au3</File>
+    <File>MainForm.afm</File>
+  </Files>
+  <Paths> </Paths>
+  <Views TL="1" Windows="0"/>
+  <OpendFiles>
+    <Opend Pos="0" Line="0" View="0">MainForm.afm</Opend>
+    <Opend Pos="53" Line="7" View="0" Focused="1">MainForm.au3</Opend>
+  </OpendFiles>
+</AU3Projekt1>

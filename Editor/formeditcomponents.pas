@@ -183,6 +183,7 @@ type
     FIconID: integer;
     FMyCursor: TAU3Cursor;
     FOnChangeCaption: TNotifyEvent;
+    FBorderHeight, FBorderWidth: Integer;
     FResize: cardinal;
     function GetEditorTop: integer;
     function GetEditorLeft: integer;
@@ -238,6 +239,8 @@ type
     property ComponentProp[prop: string]: string read GetProp write SetProp;
     property isProperty[prop: string]: boolean read CheckProperty;
     property isMainForm: boolean read FIsMainForm write SetIsMainForm;
+    property BorderHeight: Integer read FBorderHeight write FBorderHeight;
+    property BorderWidth: Integer read FBorderWidth write FBorderWidth;
   published
     property EditorTop: integer read GetEditorTop;
     property EditorLeft: integer read GetEditorLeft;
@@ -1443,7 +1446,7 @@ begin
     sl.Add('Opt("GUIOnEventMode", 1)');
     sl.Add(Format('Opt("GUIResizeMode", %d)', [FResize]));
     sl.Add(Format('$%s = GUICreate("%s", %d, %d, %d, %d, %d, %d)',
-      [Name, FCaption, Width + 16, Height + 32, FLeft, FTop, FStyle, FStyleEx]));
+      [Name, FCaption, Width + FBorderWidth, Height + FBorderHeight, FLeft, FTop, FStyle, FStyleEx]));
     if FileExists(FIcon) then
       sl.Add(Format('GUISetIcon("%s", %d, $%s)', [FIcon, FIconID, Name]));
     sl.Add(Format('GUISetCursor(%d, 0, $%s)', [Ord(FMyCursor), Name]));

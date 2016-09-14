@@ -73,6 +73,7 @@ type
     Line, Pos: integer;
   end;
 
+  TUseMap = specialize TFPGMap<String, Integer>;
   TOpendFileList = specialize TFPGList<TOpendFileInfo>;
   TFuncList = specialize TFPGList<TFuncInfo>;
   TVarList = specialize TFPGList<TVarInfo>;
@@ -94,7 +95,7 @@ type
   end;
 
 const
-  Version = '0.0.6';
+  Version = '0.0.7';
   SUpdateURL = 'http://kehrein.org/AS/Updates/';
 
 function OpendFileInfo(Name: string; Line: integer = 1;

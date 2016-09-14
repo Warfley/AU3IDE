@@ -20,11 +20,11 @@
     <VersionInfo>
       <UseVersionInfo Value="True"/>
       <AutoIncrementBuild Value="True"/>
-      <RevisionNr Value="6"/>
-      <BuildNr Value="28"/>
+      <RevisionNr Value="7"/>
+      <BuildNr Value="33"/>
       <Language Value="0407"/>
       <Attributes pvaPreRelease="True"/>
-      <StringTable Comments="Automate Studio Alpha 0.0.5" FileDescription="IDE for AutoIt language" LegalCopyright="Copyright (c) F. Kehrein 2016" ProductName="Automate Studio" ProductVersion="0.0.5 Alpha"/>
+      <StringTable Comments="Automate Studio early Alpha" FileDescription="IDE for AutoIt language" LegalCopyright="Copyright (c) F. Kehrein 2016" ProductName="Automate Studio" ProductVersion="0.0.x Alpha"/>
     </VersionInfo>
     <BuildModes Count="3">
       <Item1 Name="Default" Default="True"/>
@@ -115,7 +115,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="25">
+    <Units Count="26">
       <Unit0>
         <Filename Value="AU3IDE.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -280,6 +280,14 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="EditorWindow"/>
       </Unit24>
+      <Unit25>
+        <Filename Value="Forms\otheroptionsform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="OtherOptions"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="OtherOptionsForm"/>
+      </Unit25>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

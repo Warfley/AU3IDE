@@ -8,6 +8,9 @@ uses
   Classes, SysUtils, contnrs, au3Types, strutils, Forms, Dialogs;
 
 type
+
+  { TUnitParser }
+
   TUnitParser = class(TThread)
   private
     FOnVarFound, FOnFuncFound, FOnFinished: TNotifyEvent;
@@ -22,6 +25,8 @@ type
     FMYVars: TVarList;
     FCurr: TStringList;
     FWait: boolean;
+    FUseCount: TUseMap;
+    procedure SetUseCount(AValue: TUseMap);
     procedure UpdateTheShit(Data: IntPtr);
     procedure SetText(s: string);
     procedure ParseLine(ln: string; vars: TVarList; line: integer);
@@ -34,6 +39,7 @@ type
     property Funcs: TFuncList read FFunc write FFunc;
     property Ranges: TObjectList read FRanges write FRanges;
     property Vars: TVarList read FVars write FVars;
+    property UseCount: TUseMap read FUseCount write SetUseCount;
     constructor Create(CreateSuspended: boolean);
     destructor Destroy; override;
     property OnVarFound: TNotifyEvent read FOnVarFound write FOnFuncFound;
@@ -68,6 +74,7 @@ begin
   FMYVars := TVarList.Create;
   FCurr := TStringList.Create;
   FText := TStringList.Create;
+  FUseCount:=TUseMap.Create;
   FMyRequiredFiles := TStringList.Create;
   FreeOnTerminate := False;
   inherited Create(CreateSuspended);
@@ -81,6 +88,7 @@ begin
   FMyRequiredFiles.Free;
   FCurr.Free;
   FText.Free;
+  FUseCount.Free;
   inherited Destroy;
 end;
 
@@ -136,6 +144,25 @@ begin
 end;
 
 procedure TUnitParser.ParseLine(ln: string; vars: TVarList; line: integer);
+
+procedure InsertSorted(lst: TVarList; v: String; s: Integer);
+var
+  i, x, p: Integer;
+begin
+  if not FUseCount.Find(LowerCase(v), p) then
+    lst.Add(VarInfo(v, line, s))
+  else
+  begin
+  for i:=0 to lst.Count-1 do
+    if not (FUseCount.Find(LowerCase(lst[i].Name), x) and (x>=p)) then
+    begin
+      lst.Insert(i, VarInfo(v,line, s));
+      Exit;
+    end;
+    lst.Add(VarInfo(v,line,s));
+  end;
+end;
+
 function InOtherFile(v: String): Boolean;
 var
   i: Integer;
@@ -173,9 +200,9 @@ begin
         if not StringsContain(FCurr, str) and not InOtherFile(str) then
         begin
           if isEnd(ln, 'global') then
-            FMYVars.Add(VarInfo(str, line, s))
+            InsertSorted(FMYVars, str, s)
           else
-            vars.Add(VarInfo(str, line, s));
+            InsertSorted(vars, str, s);
           FCurr.Add(str);
           if Assigned(FOnVarFound) then
             Application.QueueAsyncCall(TDataEvent(FOnVarFound), PtrInt(Self));
@@ -315,6 +342,15 @@ begin
   FWait := False;
   if Assigned(FOnFinished) then
     Application.QueueAsyncCall(TDataEvent(FOnFinished), PtrInt(self));
+end;
+
+procedure TUnitParser.SetUseCount(AValue: TUseMap);
+var
+  i: Integer;
+begin
+  FUseCount.Clear;
+  for i:=0 to AValue.Count-1 do
+    FUseCount.Add(AValue.Keys[i], AValue.Data[i]);
 end;
 
 end.

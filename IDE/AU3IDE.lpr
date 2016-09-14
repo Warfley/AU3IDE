@@ -11,7 +11,7 @@ uses
   IDEStartupScreen, ProjectInspector, au3Types, Editor, FormEditor,
   EditorManagerFrame, au3FileInfo, FormEditComponents, au3Compiler,
   CompilerOptions, EditorOptions, FormEditorOptions, SampeProjectView,
-  AboutWindow, ProjectConfForm, aboutautoit, EditorWindow
+  AboutWindow, ProjectConfForm, aboutautoit, EditorWindow, OtherOptionsForm
   { you can add units after this };
 
 {$R *.res}
@@ -29,6 +29,7 @@ begin
   Application.CreateForm(TAboutForm, AboutForm);
   Application.CreateForm(TProjectSettings, ProjectSettings);
   Application.CreateForm(TAboutAutoitForm, AboutAutoitForm);
+  Application.CreateForm(TOtherOptions, OtherOptions);
   Application.Run;
 end.
 

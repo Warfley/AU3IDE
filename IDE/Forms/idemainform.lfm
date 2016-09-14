@@ -1997,6 +1997,10 @@ object MainForm: TMainForm
         Caption = 'Formular Editor Optionen'
         OnClick = FormOptionsItemClick
       end
+      object OtherOptionsItem: TMenuItem
+        Caption = 'Weitere'
+        OnClick = OtherOptionsItemClick
+      end
     end
   end
   object SaveAU3FileDialog: TSaveDialog
