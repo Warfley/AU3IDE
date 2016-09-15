@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, fgl, ListRecords, Graphics, LazFileUtils, strutils, Dialogs,
-  gstack;
+  gstack{$IfDef WINDOWS}, windows{$EndIf}, math;
 
 type
 
@@ -95,7 +95,7 @@ type
   end;
 
 const
-  Version = '0.0.7';
+  Version = '0.0.8';
   SUpdateURL = 'http://kehrein.org/AS/Updates/';
 
 function OpendFileInfo(Name: string; Line: integer = 1;
@@ -110,9 +110,50 @@ function GetFullPath(Filename, IncludePath, FPath: string; Paths: TStringList): 
 function GetRelInclude(FullPath, IncludePath, FPath: string;
   Paths: TStringList): string;
 function ExtractBetween(const Value, A, B: string): string;
+{$IfDef WINDOWS}
+function GetCharFromVKey(vkey: Word): string;
+{$EndIf}
+function FindNewName(n: String): String;
 
 implementation
 
+function FindNewName(n: String): String;
+var i,x, k: Integer;
+begin
+  x:=0;
+  k:=0;
+  for i:=Length(n) downto 1 do
+    if n[i] in ['0'..'9'] then
+    begin
+      x+=(ord(n[i])-ord('0'))*(10**k);
+      inc(k);
+    end
+    else
+      break;
+  Result:=Copy(n, 1, Length(n)-k)+IntToStr(x+1);
+end;
+
+{$IfDef WINDOWS}
+function GetCharFromVKey(vkey: Word): string;
+var
+   keystate: TKeyboardState;
+   retcode: Integer;
+begin
+   Win32Check(GetKeyboardState(keystate));
+   SetLength(Result, 2);
+   retcode := ToAscii(vkey,
+     MapVirtualKey(vkey, 0),
+     keystate, @Result[1],
+     0);
+   case retcode of
+     0: Result := ''; // no character
+     1: SetLength(Result, 1);
+     2:;
+     else
+       Result := ''; // retcode < 0 indicates a dead key
+   end;
+end;
+{$EndIf}
 
 function ExtractBetween(const Value, A, B: string): string;
 var

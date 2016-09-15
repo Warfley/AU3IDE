@@ -407,7 +407,7 @@ var
   i: integer;
   p: TPageControl;
 begin
-  if not ViewOpened[View] or (AValue < 0) or (AValue < FTabs.Count) or
+  if not ViewOpened[View] or (AValue < 0) or (AValue > FTabs.Count) or
     (FTabs.Count = 0) then
     exit;
   p := GetPageControl(View);

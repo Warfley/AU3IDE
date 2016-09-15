@@ -761,12 +761,27 @@ end;
 procedure TEditorFrame.CompleteKeyDown(Sender: TObject; var Key: word;
   Shift: TShiftState);
 begin
-  if (Key = 8) and (Length(Completion.CurrentString) = 0) or
+  if (Key = 8) and ((Length(Completion.CurrentString) = 0) or
     ((Length(Completion.CurrentString) > 0) and
-    (Completion.CurrentString[1] in ['$', '@'])) then
+    (Completion.CurrentString[1] in ['$', '@']))) then
     Completion.Deactivate
-  else if Key in [17, 18] then
+    {$IfDef Windows}
+   else if (Key>32) and (Length(GetCharFromVKey(Key))>0) and not (GetCharFromVKey(Key)[1] in ['A'..'Z', 'a'..'z', '0'..'9']) then
+   begin
+    CodeEditor.InsertTextAtCaret(GetCharFromVKey(Key));
+    Key := 0;
+    Completion.Deactivate;
+   end
+    {$Else}
+  else if (Key=188) and (Shift=[]) then
+  begin
+    Key := 0;
+    CodeEditor.InsertTextAtCaret(',');
+    Completion.Deactivate;
+  end
+  else if Key in [17, 18, 188] then
     Completion.Deactivate
+  {$EndIf}
   else if Key = 32 then
   begin
     Key := 0;
@@ -775,7 +790,6 @@ begin
   end
   else if key = 9 then
     key := 13;
-
 end;
 
 procedure TEditorFrame.CompletionSearchPosition(var APosition: integer);
@@ -794,7 +808,7 @@ procedure TEditorFrame.CompletionSearchPosition(var APosition: integer);
   end;
 
 var
-  i, x: integer;
+  i: integer;
 begin
   Completion.ItemList.Clear;
   if isEnd(CodeEditor.Lines[CodeEditor.LogicalCaretXY.y - 1], '#include') then
@@ -950,7 +964,7 @@ begin
       Value := Value + ' = '
     else if (SourceEnd.x = SourceStart.x + Length(Completion.CurrentString)) and
       not isEnd(ln, 'global') then
-      Value := Value + ' ';
+      Value := Value;
   end
   else
   begin
@@ -969,13 +983,7 @@ begin
     begin
       Value := Value + '()';
       Application.QueueAsyncCall(@MoveHorz, -1);
-    end
-    else if (pos(Completion.CurrentString, ln) > 0) and
-      (not ((pos(Completion.CurrentString, ln) + Length(Completion.CurrentString) <=
-      length(ln)) and (ln[pos(Completion.CurrentString, ln) +
-      Length(Completion.CurrentString)] in [#0..#32]))) and not
-      isEnd(ln, '#include') then
-      Value := Value + ' ';
+    end;
   end;
   if (Length(Value) > 0) and not (Value[1] in ['_', 'A'..'Z', 'a'..'z', '0'..'9']) then
     Value := Copy(Value, 2, Length(Value) - 1);
@@ -1021,7 +1029,7 @@ procedure TEditorFrame.CodeEditorKeyUp(Sender: TObject; var Key: word;
 
 var
   ln, pref, tmp: string;
-  i, x, l: integer;
+  i, x, l, cx, cy: integer;
   b: boolean;
   p: TPoint;
 begin
@@ -1088,7 +1096,7 @@ begin
       end;
       CodeEditor.TextBetweenPoints[Point(0, i + 2), Point(0, i + 2)] :=
         pref + '  Case {Value}';
-    Application.QueueAsyncCall(@SelectTemp, 0);
+      Application.QueueAsyncCall(@SelectTemp, 0);
     end
     else if isEnd(ln, 'select') then
     begin
@@ -1136,18 +1144,18 @@ begin
   else if (Key = Ord('F')) and (ssCtrl in Shift) then
     ShowSearch;
   moveright := True;
-  if (key in [Ord('A')..Ord('Z'), Ord('0')..Ord('9')]) or ((key =8) and (AutoOpen=aoAlways)) then
+  if (key in [Ord('A')..Ord('Z'), Ord('0')..Ord('9')]) or
+    ((key = 8) and (AutoOpen = aoAlways)) then
   begin
     tmp := GetCurrWord;
     p := Point(CodeEditor.CaretXPix, CodeEditor.CaretYPix + CodeEditor.LineHeight);
     p := CodeEditor.ClientToScreen(p);
+    cx := CodeEditor.LogicalCaretXY.x;
+    cy := CodeEditor.LogicalCaretXY.y;
     if (Length(tmp) >= 1) and not (ssCtrl in Shift) and not
       (ssAlt in Shift) and ((AutoOpen = aoAlways) or
       ((AutoOpen = aoVar) and (tmp[1] in ['$', '#', '@']) and not
-      (CodeEditor.LogicalCaretXY.x >=
-      Length(CodeEditor.Lines[CodeEditor.LogicalCaretXY.Y])) and not
-      (CodeEditor.Lines[CodeEditor.LogicalCaretXY.y - 1]
-      [CodeEditor.LogicalCaretXY.x] in ['$', '#', '@']))) then
+      ((cx>Length(CodeEditor.Lines[cy-1])) and (CodeEditor.Lines[Cy - 1][Cx] in ['$', '#', '@'])))) then
       Completion.Execute(GetCurrWord, p);
   end
   else if Key in [VK_LEFT..VK_DOWN] then
@@ -1483,8 +1491,10 @@ begin
     if p.x > 0 then
       Key := 0;
   end
-  else if Key=13 then
-    CodeEditor.TextBetweenPoints[Point(0, CodeEditor.LogicalCaretXY.Y),Point(Length(CodeEditor.Lines[CodeEditor.LogicalCaretXY.y-1])+1, CodeEditor.LogicalCaretXY.Y)] := Trim(CodeEditor.Lines[CodeEditor.LogicalCaretXY.y-1])
+  else if Key = 13 then
+    CodeEditor.TextBetweenPoints[Point(0, CodeEditor.LogicalCaretXY.Y),
+      Point(Length(CodeEditor.Lines[CodeEditor.LogicalCaretXY.y - 1]) + 1,
+      CodeEditor.LogicalCaretXY.Y)] := TrimRight(CodeEditor.Lines[CodeEditor.LogicalCaretXY.y - 1])
   else if Key = VK_BACK then
     p := GetTemplatePos(True);
   if p.x > 0 then

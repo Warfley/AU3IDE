@@ -91,6 +91,7 @@ type
     FMaxUndoSize: integer;
     FBorderHeight, FBorderWidth: Integer;
     { private declarations }
+    function CopyControl(c: TObject): TObject;
     procedure DeleteItem(n: TTreeNode);
     function FindControl(s: string): integer;
     function CreateButton(P: TWinControl): Tau3Button;
@@ -458,6 +459,24 @@ begin
   end;
   FLastClickTime := c;
   FLastClickRow := EventEditor.Row;
+end;
+
+function TFormEditFrame.CopyControl(c: TObject): TObject;
+var n: String;
+begin
+  if c is Tau3Button then
+    Result:=CreateButton((c as TControl).Parent)
+  else if c is Tau3Label then
+    Result:=CreateLabel((c as TControl).Parent)
+  else if c is Tau3Edit then
+    Result:=CreateEdit((c as TControl).Parent)
+  else if c is Tau3Checkbox then
+    Result:=CreateCheckBox((c as TControl).Parent);
+  n:=(c as TControl).Name;
+  while FindControl(n)>0 do
+    n:=FindNewName(n);
+  (Result as TControl).Name:=n;
+  (c as Iau3Component).CopyTo(Result as TControl);
 end;
 
 function TFormEditFrame.CreateLabel(P: TWinControl): Tau3Label;
@@ -1272,31 +1291,22 @@ begin
       if FormControlView.Items[i].Selected then
         FCopyLst.Add(TObject(FormControlView.Items[i].Data));
   end
+  else if Key=13 then
+  begin
+    if PropertyPages.PageIndex=0 then
+      PropEditor.SetItemIndexAndFocus(PropEditor.ItemIndex)
+    else
+      EventEditor.SetFocus;
+  end
   else if (Key = Ord('V')) and (ssCtrl in Shift) then
   begin
     tmplst := TObjectList.Create(False);
     try
       for i := 0 to FCopyLst.Count - 1 do
-        if FCopyLst[i] is Tau3Button then
-        begin
-          tmp := tmplst.Add(CreateButton((FCopyLst[i] as TControl).Parent));
-          (FCopyLst[i] as Tau3Button).CopyTo(tmplst[tmp] as TControl);
-        end
-        else if FCopyLst[i] is Tau3Label then
-        begin
-          tmp := tmplst.Add(CreateLabel((FCopyLst[i] as TControl).Parent));
-          (FCopyLst[i] as Tau3Label).CopyTo(tmplst[tmp] as TControl);
-        end
-        else if FCopyLst[i] is Tau3Edit then
-        begin
-          tmp := tmplst.Add(CreateEdit((FCopyLst[i] as TControl).Parent));
-          (FCopyLst[i] as Tau3Edit).CopyTo(tmplst[tmp] as TControl);
-        end
-        else if FCopyLst[i] is Tau3Checkbox then
-        begin
-          tmp := tmplst.Add(CreateCheckBox((FCopyLst[i] as TControl).Parent));
-          (FCopyLst[i] as Tau3Checkbox).CopyTo(tmplst[tmp] as TControl);
-        end;
+      begin
+        tmp:=tmplst.Add(CopyControl(FCopyLst[i]));
+        FCopyLst[i]:=tmplst[tmp];
+      end;
       for i := 0 to tmplst.Count - 1 do
       begin
         for n := 0 to FormControlView.Items.Count - 1 do

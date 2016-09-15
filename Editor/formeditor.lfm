@@ -80,11 +80,11 @@ object FormEditFrame: TFormEditFrame
       end
       object ControlEvents: TTabSheet
         Caption = 'Ereignisse'
-        ClientHeight = 1744
-        ClientWidth = 2104
+        ClientHeight = 228
+        ClientWidth = 263
         object EventEditor: TValueListEditor
           Left = 0
-          Height = 218
+          Height = 228
           Top = 0
           Width = 263
           Align = alClient
@@ -106,7 +106,7 @@ object FormEditFrame: TFormEditFrame
           OnGetPickList = EventEditorGetPickList
           ColWidths = (
             64
-            181
+            198
           )
         end
       end
