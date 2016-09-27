@@ -88,6 +88,7 @@ begin
       end;
     sl.Insert(1, IntToStr(sl.Count));
     sl.SaveToFile(CreateAbsolutePath('Update.txt', DirectoryEdit2.Directory));
+    CheckListBox1.Items.SaveToFile(CreateAbsolutePath('Install.txt', DirectoryEdit2.Directory));
   finally
     sl.Free;
   end;

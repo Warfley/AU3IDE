@@ -27,7 +27,7 @@ type
   end;
 
 const
-  SDownloadURL = 'http://kehrein.org/AS/Install/';
+  SDownloadURL = 'http://kehrein.org/AS/Updates/';
 
   procedure TPrintObject.PrintOutput(Sender: TObject;
   const ContentLength, CurrentPos: int64);
@@ -82,7 +82,7 @@ var
 
 begin
   TextColor(White);
-  WriteLn(UTF8Decode('Bitte das Zielverzeichnis wählen'));
+  WriteLn(UTF8Decode('Select installation directory'));
   fd := TSelectDirectoryDialog.Create(nil);
   try
     fd.InitialDir := GetEnvironmentVariable('PROGRAMFILES(x86)') + PathDelim + 'AutomateStudio';
@@ -107,32 +107,32 @@ begin
   try
     f.OnDataReceived := @po.PrintOutput;
     TextColor(LightCyan);
-    po.DownloadName := 'Installationsinformationen werden geladen: ';
-    Write('Installationsinformationen werden geladen: ');
+    po.DownloadName := 'Loading file information: ';
+    Write('Loading file information: ');
     TextColor(White);
     sl.Text := f.Get(SDownloadURL + 'Install.txt');
     TextColor(LightGreen);
-    WriteLn('Fertig');
+    WriteLn('Done');
     TextColor(White);
-    WriteLn('Daten werden heruntergeladen und installiert.');
+    WriteLn('Downloading and installing files.');
     i := 0;
     for i := 0 to sl.Count - 1 do
       if sl[i] <> '' then
       begin
         f.RequestHeaders.Clear;
         TextColor(LightCyan);
-        po.DownloadName := Format('Datei %s wird geladen: ', [sl[i]]);
-        Write(Format('Datei %s wird geladen: ', [sl[i]]));
+        po.DownloadName := Format('Downloading file %s: ', [sl[i]]);
+        Write(Format('Downloading file %s: ', [sl[i]]));
         TextColor(White);
         ForceDirectories(ExtractFileDir(selDir + sl[i]));
         f.Get(SDownloadURL + StringReplace(ExtractFilePath(sl[i]), '\',
           '/', [rfReplaceAll]) + EncodeURLElement(ExtractFileName(sl[i])),
           selDir + sl[i]);
         TextColor(LightGreen);
-        WriteLn('Fertig');
+        WriteLn('Done');
       end;
     TextColor(White);
-    Write(UTF8Decode('.au3proj Dateien verknüpfen? (y/n)'));
+    Write(UTF8Decode('Create .au3proj file link? (y/n)'));
     ReadLn(inp);
     if LowerCase(inp) = 'y' then
     begin
@@ -148,7 +148,7 @@ begin
         a.Free;
       end;
     end;
-    Write(UTF8Decode('Startmenü Verknüpfung erstellen? (y/n)'));
+    Write(UTF8Decode('Create Startmenu shortcut? (y/n)'));
     ReadLn(inp);
     if LowerCase(inp) = 'y' then
     begin
@@ -157,8 +157,8 @@ begin
         PathDelim + 'AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Automate.lnk', 'Automate Studio');
     end;
     TextColor(Yellow);
-    WriteLn('Installation abgeschlossen');
-    Write(UTF8Decode('Automate Studio öffnen? (y/n)'));
+    WriteLn('Installation completed');
+    Write(UTF8Decode('Open Automate Studio? (y/n)'));
     ReadLn(inp);
     if LowerCase(inp) = 'y' then
     begin

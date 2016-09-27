@@ -8,12 +8,13 @@ object Form1: TForm1
   ClientHeight = 419
   ClientWidth = 647
   Position = poScreenCenter
+  LCLVersion = '1.6.0.4'
   Visible = False
   object CheckListBox1: TCheckListBox
     Left = 0
-    Height = 575
-    Top = 33
-    Width = 757
+    Height = 361
+    Top = 23
+    Width = 647
     Align = alClient
     ItemHeight = 0
     OnKeyUp = CheckListBox1KeyUp
@@ -21,9 +22,9 @@ object Form1: TForm1
   end
   object DirectoryEdit1: TDirectoryEdit
     Left = 0
-    Height = 33
+    Height = 23
     Top = 0
-    Width = 757
+    Width = 647
     ShowHidden = False
     ButtonWidth = 23
     NumGlyphs = 1
@@ -35,15 +36,15 @@ object Form1: TForm1
   object Panel1: TPanel
     Left = 0
     Height = 35
-    Top = 608
-    Width = 757
+    Top = 384
+    Width = 647
     Align = alBottom
     BevelOuter = bvNone
     ClientHeight = 35
-    ClientWidth = 757
+    ClientWidth = 647
     TabOrder = 2
     object Button1: TButton
-      Left = 582
+      Left = 472
       Height = 35
       Top = 0
       Width = 175
@@ -56,7 +57,7 @@ object Form1: TForm1
       Left = 136
       Height = 35
       Top = 0
-      Width = 446
+      Width = 336
       ShowHidden = False
       ButtonWidth = 23
       NumGlyphs = 1

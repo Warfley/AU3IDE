@@ -12,6 +12,7 @@
       <XPManifest>
         <DpiAware Value="True"/>
       </XPManifest>
+      <Icon Value="0"/>
     </General>
     <i18n>
       <EnableI18N Value="True"/>
@@ -21,7 +22,7 @@
       <UseVersionInfo Value="True"/>
       <AutoIncrementBuild Value="True"/>
       <RevisionNr Value="7"/>
-      <BuildNr Value="36"/>
+      <BuildNr Value="39"/>
       <Language Value="0407"/>
       <Attributes pvaPreRelease="True"/>
       <StringTable Comments="Automate Studio early Alpha" FileDescription="IDE for AutoIt language" LegalCopyright="Copyright (c) F. Kehrein 2016" ProductName="Automate Studio" ProductVersion="0.0.x Alpha"/>
