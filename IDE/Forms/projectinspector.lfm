@@ -9,8 +9,8 @@ object ProjectInspector: TProjectInspector
   TabOrder = 0
   object ProjectFileTreeView: TTreeView
     Left = 0
-    Height = 239
-    Top = 57
+    Height = 249
+    Top = 47
     Width = 347
     Align = alClient
     Anchors = [akTop, akLeft, akRight]
@@ -36,7 +36,7 @@ object ProjectInspector: TProjectInspector
     TabOrder = 1
     object PathEdit: TLabeledEdit
       Left = 8
-      Height = 33
+      Height = 23
       Top = 24
       Width = 331
       Anchors = [akTop, akLeft, akRight]
@@ -45,10 +45,10 @@ object ProjectInspector: TProjectInspector
       EditLabel.AnchorSideRight.Side = asrBottom
       EditLabel.AnchorSideBottom.Control = PathEdit
       EditLabel.Left = 8
-      EditLabel.Height = 25
-      EditLabel.Top = -4
+      EditLabel.Height = 15
+      EditLabel.Top = 6
       EditLabel.Width = 331
-      EditLabel.Caption = 'Pfad'
+      EditLabel.Caption = 'Path'
       EditLabel.ParentColor = False
       ReadOnly = True
       TabOrder = 0
@@ -60,7 +60,7 @@ object ProjectInspector: TProjectInspector
       Top = 139
       Width = 104
       Anchors = [akRight, akBottom]
-      Caption = 'Hinzufügen'
+      Caption = 'Add'
       OnClick = AddButtonClick
       TabOrder = 1
     end
@@ -70,7 +70,7 @@ object ProjectInspector: TProjectInspector
       Top = 139
       Width = 75
       Anchors = [akRight, akBottom]
-      Caption = 'Löschen'
+      Caption = 'Delete'
       Enabled = False
       OnClick = DeleteButtonClick
       TabOrder = 2
@@ -81,7 +81,7 @@ object ProjectInspector: TProjectInspector
       Top = 72
       Width = 144
       Anchors = [akTop, akRight]
-      Caption = 'Hauptformular'
+      Caption = 'Mainform'
       OnClick = SetMainFormButtonClick
       TabOrder = 3
       Visible = False
@@ -92,7 +92,7 @@ object ProjectInspector: TProjectInspector
       Top = 139
       Width = 128
       Anchors = [akLeft, akBottom]
-      Caption = 'Einstellungen'
+      Caption = 'Settings'
       OnClick = SettingsButtonClick
       TabOrder = 4
     end
@@ -104,13 +104,13 @@ object ProjectInspector: TProjectInspector
     Width = 347
     Align = alTop
     AutoSize = False
-    Caption = '  Projekt Dateien'
+    Caption = '  Project files'
     Layout = tlCenter
     ParentColor = False
   end
   object TreeFilterEdit1: TTreeFilterEdit
     Left = 0
-    Height = 33
+    Height = 23
     Top = 24
     Width = 347
     ButtonWidth = 23

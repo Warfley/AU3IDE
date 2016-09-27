@@ -6,10 +6,12 @@ interface
 
 uses
   Classes, SysUtils, LazFileUtils, FileUtil, Forms, Controls, Graphics,
-  Dialogs, StdCtrls, Menus, ComCtrls, Buttons, ExtCtrls, PairSplitter, Project, IDEStartupScreen,
+  Dialogs, StdCtrls, Menus, ComCtrls, Buttons, ExtCtrls, PairSplitter,
+  Project, IDEStartupScreen,
   ProjectInspector, EditorManagerFrame, au3Types, FormEditor, Editor,
   au3FileInfo, strutils, CompilerOptions, au3Compiler, EditorOptions, FormEditorOptions,
-  SampeProjectView, fphttpclient, process, AboutWindow, Math, aboutautoit, OtherOptionsForm, TLStrings, Types;
+  SampeProjectView, fphttpclient, process, AboutWindow, Math,
+  aboutautoit, OtherOptionsForm, TLStrings, Types, LCLTranslator, DefaultTranslator;
 
 type
 
@@ -120,7 +122,7 @@ type
     procedure NextTabItemClick(Sender: TObject);
     procedure OtherOptionsItemClick(Sender: TObject);
     procedure OutputBoxClick(Sender: TObject);
-    procedure OutputBoxDrawItem(Control: TWinControl; Index: Integer;
+    procedure OutputBoxDrawItem(Control: TWinControl; Index: integer;
       ARect: TRect; State: TOwnerDrawState);
     procedure PrevTabItemClick(Sender: TObject);
     procedure RedoMenuItemClick(Sender: TObject);
@@ -150,7 +152,8 @@ type
     FFileData: Tau3FileManager;
     FCurrentState: TIDEState;
     IncludePath: string;
-    SearchForUpdates: Boolean;
+    SearchForUpdates: boolean;
+    FCurrentLang: String;
     { private declarations }
     procedure OpenProject(P: string);
     function ShowFormConf: boolean;
@@ -185,7 +188,9 @@ type
 var
   MainForm: TMainForm;
 
-  const ConfVer = 1;
+const
+  ConfVer = 1;
+
 implementation
 
 {$R *.lfm}
@@ -280,11 +285,13 @@ begin
 end;
 
 procedure TMainForm.SaveIDESettings;
-var fs: TFileStream;
-tmp: Integer;
+var
+  fs: TFileStream;
+  tmp: integer;
 begin
-  tmp:=ConfVer;
-  fs:=TFileStream.Create(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'IDE.cnf', fmCreate);
+  tmp := ConfVer;
+  fs := TFileStream.Create(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) +
+    'IDE.cnf', fmCreate);
   try
     fs.Write(tmp, SizeOf(tmp));
     fs.Write(SearchForUpdates, SizeOf(SearchForUpdates));
@@ -373,19 +380,18 @@ var
 begin
   Self.Hide;
   if SearchForUpdates then
-  try
-  if CheckForUpdates then
-  begin
-    if MessageDlg(SNewUpdateTitle,
-      SNewUpdateText,
-      mtInformation, mbYesNo, SNewUpdateKeyword) = mrYes then
+    try
+      if CheckForUpdates then
       begin
-      PerformUpdate;
-      Exit;
+        if MessageDlg(SNewUpdateTitle, SNewUpdateText, mtInformation,
+          mbYesNo, SNewUpdateKeyword) = mrYes then
+        begin
+          PerformUpdate;
+          Exit;
+        end;
       end;
-  end;
-  except
-  end;
+    except
+    end;
 
   if FileExists(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) +
     'compiler.cfg') then
@@ -416,19 +422,20 @@ begin
     ProjectInspector.Project := FCurrentProject;
     Openau3FileDialog.InitialDir := FCurrentProject.ProjectDir;
     Saveau3FileDialog.InitialDir := FCurrentProject.ProjectDir;
-      EditorManager.ViewOpened[1]:=vwTopRight in FCurrentProject.Views;
-      EditorManager.ViewOpened[2]:=vwBotLeft in FCurrentProject.Views;
-      EditorManager.ViewOpened[3]:=vwBotRight in FCurrentProject.Views;
+    EditorManager.ViewOpened[1] := vwTopRight in FCurrentProject.Views;
+    EditorManager.ViewOpened[2] := vwBotLeft in FCurrentProject.Views;
+    EditorManager.ViewOpened[3] := vwBotRight in FCurrentProject.Views;
     Self.Show;
-      EditorManager.WindowCount:=FCurrentProject.ViewWindows;
+    EditorManager.WindowCount := FCurrentProject.ViewWindows;
     for i := 0 to FCurrentProject.OpendFiles.Count - 1 do
       if FileExists(FCurrentProject.GetAbsPath(
         FCurrentProject.OpendFiles[i].Name)) then
         EditorManager.OpenEditor(FCurrentProject.GetAbsPath(
           FCurrentProject.OpendFiles[i].Name),
-          Point(FCurrentProject.OpendFiles[i].Pos, FCurrentProject.OpendFiles[i].Line), FCurrentProject.OpendFiles[i].View);
-    for i:=0 to 3+FCurrentProject.ViewWindows do
-      EditorManager.Focused[i]:=FCurrentProject.FocusedFile[i];
+          Point(FCurrentProject.OpendFiles[i].Pos, FCurrentProject.OpendFiles[i].Line),
+          FCurrentProject.OpendFiles[i].View);
+    for i := 0 to 3 + FCurrentProject.ViewWindows do
+      EditorManager.Focused[i] := FCurrentProject.FocusedFile[i];
     ProjectInspector.OpenEditor := @OpenFile;
     ProjectInspector.CloseEditor := @KillEditor;
     EditorManager.OnEditorClose := @EditorClosing;
@@ -448,8 +455,7 @@ var
 begin
   FSaveOnClosing := False;
   if FCompiler.Active then
-    if MessageDlg(SStillRunningTitle,
-      SStillRunningText,
+    if MessageDlg(SStillRunningTitle, SStillRunningText,
       mtConfirmation, [mbYes, mbCancel], SStillRunningKeyword) = mrYes then
       FCompiler.Stop
     else
@@ -469,7 +475,8 @@ begin
   else
   if FCurrentProject.Changed then
   begin
-    mr := MessageDlg(SSaveProjectTitle,SSaveProjectText,mtConfirmation, mbYesNoCancel, SSaveProjectKeyword);
+    mr := MessageDlg(SSaveProjectTitle, SSaveProjectText, mtConfirmation,
+      mbYesNoCancel, SSaveProjectKeyword);
     case mr of
       mrYes: FCurrentProject.Save;
       mrAbort: CloseAction := caNone;
@@ -719,8 +726,8 @@ begin
   begin
     EditorManager.EditorIndex := Editor;
     EditorManager.Invalidate;
-    res := MessageDlg(SSaveFileTitle, SSaveFileText,
-      mtConfirmation, mbYesNoCancel, SSaveFileKeyword);
+    res := MessageDlg(SSaveFileTitle, SSaveFileText, mtConfirmation,
+      mbYesNoCancel, SSaveFileKeyword);
     case res of
       mrYes: if FFormIsClosing then
         begin
@@ -755,14 +762,18 @@ begin
   for i := 0 to EditorManager.Count - 1 do
     FCurrentProject.OpendFiles.Add(
       OpendFileInfo(FCurrentProject.GetRelPath(EditorManager.EditorFiles[i]),
-      EditorManager.EditorCaret[i].Y, EditorManager.EditorCaret[i].X, EditorManager.EditorView[i]));
-  if EditorManager.ViewOpened[1] then FCurrentProject.Views:=FCurrentProject.Views+[vwTopRight];
-  if EditorManager.ViewOpened[2] then FCurrentProject.Views:=FCurrentProject.Views+[vwBotLeft];
-  if EditorManager.ViewOpened[3] then FCurrentProject.Views:=FCurrentProject.Views+[vwBotRight];
-  FCurrentProject.ViewWindows:=EditorManager.WindowCount;
-  for i:=0 to 3+EditorManager.WindowCount do
-    FCurrentProject.FocusedFile[i]:=EditorManager.Focused[i];
-  FCurrentProject.Views:=[vwTopLeft];
+      EditorManager.EditorCaret[i].Y, EditorManager.EditorCaret[i].X,
+      EditorManager.EditorView[i]));
+  if EditorManager.ViewOpened[1] then
+    FCurrentProject.Views := FCurrentProject.Views + [vwTopRight];
+  if EditorManager.ViewOpened[2] then
+    FCurrentProject.Views := FCurrentProject.Views + [vwBotLeft];
+  if EditorManager.ViewOpened[3] then
+    FCurrentProject.Views := FCurrentProject.Views + [vwBotRight];
+  FCurrentProject.ViewWindows := EditorManager.WindowCount;
+  for i := 0 to 3 + EditorManager.WindowCount do
+    FCurrentProject.FocusedFile[i] := EditorManager.Focused[i];
+  FCurrentProject.Views := [vwTopLeft];
   FCurrentProject.Changed := True;
 end;
 
@@ -823,9 +834,8 @@ procedure TMainForm.UpdateMenuItemClick(Sender: TObject);
 begin
   if CheckForUpdates then
   begin
-    if MessageDlg(SNewUpdateTitle,
-      SNewUpdateText,
-      mtInformation, mbYesNo, SNewUpdateKeyword) = mrYes then
+    if MessageDlg(SNewUpdateTitle, SNewUpdateText, mtInformation,
+      mbYesNo, SNewUpdateKeyword) = mrYes then
       PerformUpdate;
   end
   else
@@ -1013,10 +1023,25 @@ var
   i: integer;
   f: file of TIDEState;
   fs: TFileStream;
+  s: String;
 begin
-  ProjectInspector:=TProjectInspector.Create(Self);
-  ProjectInspector.Parent:=Self;
-  ProjectInspector.Align:=alLeft;
+  if FileExistsUTF8(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) +
+    'lang') then
+  begin
+    fs:=TFileStream.Create(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) +
+    'lang', fmOpenRead);
+    try
+      SetLength(s, fs.Size);
+      fs.Read(s[1], fs.Size);
+      SetDefaultLang(s);
+      FCurrentLang:=s;
+    finally
+      fs.Free;
+    end;
+  end;
+  ProjectInspector := TProjectInspector.Create(Self);
+  ProjectInspector.Parent := Self;
+  ProjectInspector.Align := alLeft;
   if FileExists(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) +
     'wnd.cnf') then
   begin
@@ -1041,22 +1066,24 @@ begin
     end;
 
   // Load IDE Conf
-  if not FileExistsUTF8(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'IDE.cnf') then
+  if not FileExistsUTF8(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) +
+    'IDE.cnf') then
   begin
     SearchForUpdates := MessageDlg(SSearchForUpdatesTitle,
-      SSearchForUpdatesText,
-      mtConfirmation, mbYesNo, SSearchForUpdatesKeyword) = mrYes;
+      SSearchForUpdatesText, mtConfirmation, mbYesNo,
+      SSearchForUpdatesKeyword) = mrYes;
     SaveIDESettings;
   end
   else
   begin
-  fs:=TFileStream.Create(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'IDE.cnf', fmOpenRead);
-  try
-    fs.Read(i, SizeOf(i));
-    fs.Read(SearchForUpdates, SizeOf(SearchForUpdates));
-  finally
-    fs.Free;
-  end;
+    fs := TFileStream.Create(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) +
+      'IDE.cnf', fmOpenRead);
+    try
+      fs.Read(i, SizeOf(i));
+      fs.Read(SearchForUpdates, SizeOf(SearchForUpdates));
+    finally
+      fs.Free;
+    end;
   end;
   Width := FCurrentState.Width;
   Height := FCurrentState.Height;
@@ -1066,7 +1093,8 @@ begin
   EditorManager.Parent := CenterPanel;
   EditorManager.Align := alClient;
   EditorManager.Visible := True;
-  EditorManager.ReadConfig(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'other.cnf');
+  EditorManager.ReadConfig(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) +
+    'other.cnf');
   WindowState := FCurrentState.State;
   IDEOptionItem.Checked := FCurrentState.PILeft;
   IDEOptionItemClick(IDEOptionItem);
@@ -1084,7 +1112,7 @@ begin
   EditorManager.OnParserFinished := @EditorParserFinished;
   EditorManager.IDEOpenFile := @OpenFile;
   ProjectInspector.ChangeMainForm := @ChangeMainForm;
-  FDrawState:=TList.Create;
+  FDrawState := TList.Create;
   FLastOpend := TStringList.Create;
   FLastOpend.LoadFromFile(ExtractFilePath(ParamStr(0)) + 'LastOpend.txt');
   i := 0;
@@ -1234,28 +1262,63 @@ begin
 end;
 
 procedure TMainForm.OtherOptionsItemClick(Sender: TObject);
+var sl: TStringList;
+  i: Integer;
+  fs: TFileStream;
 begin
   with OtherOptions do
   begin
-    UndoBox.Value:=EditorManager.UndoSteps;
-    SortBox.Value:=EditorManager.CompleteSortCount;
-    CompOpenBox.ItemIndex:=ord(EditorManager.AutoComplete);
-    IncVarBox.Checked:=EditorManager.ShowIncludeVars;
-    WinWidthEdit.Value:=EditorManager.BorderWidth;
-    WinHeightEdit.Value:=EditorManager.BorderHeight;
-    UpdateBox.Checked:=SearchForUpdates;
-  if ShowModal=mrOK then
-  begin
-    EditorManager.UndoSteps:=UndoBox.Value;
-    EditorManager.CompleteSortCount:=SortBox.Value;
-    EditorManager.AutoComplete:=TAutoOpen(CompOpenBox.ItemIndex);
-    EditorManager.ShowIncludeVars:=IncVarBox.Checked;
-    EditorManager.BorderWidth:=WinWidthEdit.Value;
-    EditorManager.BorderHeight:=WinHeightEdit.Value;
-    EditorManager.WriteConfig(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'other.cnf');
-    SearchForUpdates:=UpdateBox.Checked;
-    SaveIDESettings;
-  end;
+    UndoBox.Value := EditorManager.UndoSteps;
+    SortBox.Value := EditorManager.CompleteSortCount;
+    CompOpenBox.ItemIndex := Ord(EditorManager.AutoComplete);
+    IncVarBox.Checked := EditorManager.ShowIncludeVars;
+    WinWidthEdit.Value := EditorManager.BorderWidth;
+    WinHeightEdit.Value := EditorManager.BorderHeight;
+    UpdateBox.Checked := SearchForUpdates;
+    LangBox.Clear;
+    LangBox.Items.Add(SDefault);
+    sl:=TStringList.Create;
+    try
+      FindAllFiles(sl, IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) +
+    'Languages', '*.po');
+      for i:=0 to sl.Count-1 do
+      begin
+        sl[i]:=ExtractFileName(ExtractFileNameWithoutExt(sl[i]));
+        if Pos('.', sl[i])>0 then
+          LangBox.Items.Add(Copy(ExtractFileExt(sl[i]), 2, 2));
+      end;
+    finally
+      sl.Free;
+    end;
+    if FCurrentLang='' then
+      LangBox.ItemIndex:=0
+    else
+      LangBox.ItemIndex:=LangBox.Items.IndexOf(FCurrentLang);
+    if ShowModal = mrOk then
+    begin
+      EditorManager.UndoSteps := UndoBox.Value;
+      EditorManager.CompleteSortCount := SortBox.Value;
+      EditorManager.AutoComplete := TAutoOpen(CompOpenBox.ItemIndex);
+      EditorManager.ShowIncludeVars := IncVarBox.Checked;
+      EditorManager.BorderWidth := WinWidthEdit.Value;
+      EditorManager.BorderHeight := WinHeightEdit.Value;
+      EditorManager.WriteConfig(IncludeTrailingPathDelimiter(
+        ExtractFilePath(ParamStr(0))) + 'other.cnf');
+      if LangBox.ItemIndex>0 then
+        FCurrentLang:=LangBox.Items[LangBox.ItemIndex]
+      else
+        FCurrentLang:='';
+      fs:=TFileStream.Create(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) +
+    'lang', fmCreate);
+      try
+        fs.Write(PChar(FCurrentLang)^, Length(FCurrentLang));
+      finally
+        fs.Free;
+      end;
+      SetDefaultLang(FCurrentLang);
+      SearchForUpdates := UpdateBox.Checked;
+      SaveIDESettings;
+    end;
   end;
 end;
 
@@ -1264,22 +1327,22 @@ begin
   OutputBox.Invalidate;
 end;
 
-procedure TMainForm.OutputBoxDrawItem(Control: TWinControl; Index: Integer;
+procedure TMainForm.OutputBoxDrawItem(Control: TWinControl; Index: integer;
   ARect: TRect; State: TOwnerDrawState);
 begin
   with OutputBox.Canvas do
   begin
-  Brush.Color:=TColor(FDrawState[Index]);
-  Brush.Style:=bsSolid;
-    pen.Style:=psSolid  ;
-  if OutputBox.ItemIndex=Index then
-  pen.Color:=clBlack
-  else
-  pen.Color:=clWhite             ;
-  Rectangle(ARect);
-  Brush.Style:=bsClear;
-  Font.Color:=OutputBox.Font.Color;
-  TextOut(ARect.Left,ARect.Top, OutputBox.Items[Index]);
+    Brush.Color := TColor(FDrawState[Index]);
+    Brush.Style := bsSolid;
+    pen.Style := psSolid;
+    if OutputBox.ItemIndex = Index then
+      pen.Color := clBlack
+    else
+      pen.Color := clWhite;
+    Rectangle(ARect);
+    Brush.Style := bsClear;
+    Font.Color := OutputBox.Font.Color;
+    TextOut(ARect.Left, ARect.Top, OutputBox.Items[Index]);
   end;
 end;
 
@@ -1341,7 +1404,7 @@ begin
   else if ext = '.au3' then
     Saveau3FileDialog.Filter := Format('%s %s|*.au3', [SAutoIt, SUnit])
   else if ext = '.apr' then
-    Saveau3FileDialog.Filter := Format('%s %s|*.apr', [SAutoIt, SProgrammFile])  ;
+    Saveau3FileDialog.Filter := Format('%s %s|*.apr', [SAutoIt, SProgrammFile]);
   Saveau3FileDialog.FileName := ExtractFileName(oldFile);
   if Saveau3FileDialog.Execute then
   begin

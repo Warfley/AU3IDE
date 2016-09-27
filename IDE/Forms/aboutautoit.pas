@@ -5,7 +5,7 @@ unit aboutautoit;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, Forms, Controls, windows, Graphics, Dialogs, ExtCtrls;
+  Classes, SysUtils, FileUtil, Forms, Controls, windows, Graphics, Dialogs, ExtCtrls,LCLTranslator;
 
 type
 

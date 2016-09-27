@@ -5,7 +5,7 @@ object StartupScreen: TStartupScreen
   Width = 605
   ActiveControl = LastOpendBox
   BorderStyle = bsToolWindow
-  Caption = 'Projekt Auswahl'
+  Caption = 'Select project'
   ClientHeight = 325
   ClientWidth = 605
   Color = clWhite
@@ -22,7 +22,7 @@ object StartupScreen: TStartupScreen
     Height = 72
     Top = 8
     Width = 208
-    Caption = 'Neues Projekt'
+    Caption = 'New project'
     Flat = True
     Glyph.Data = {
       36100000424D3610000000000000360000002800000020000000200000000100
@@ -163,7 +163,7 @@ object StartupScreen: TStartupScreen
     Height = 72
     Top = 96
     Width = 208
-    Caption = 'Projekt Öffnen'
+    Caption = 'Open project'
     Flat = True
     Glyph.Data = {
       36100000424D3610000000000000360000002800000020000000200000000100
@@ -314,8 +314,8 @@ object StartupScreen: TStartupScreen
       Left = 8
       Height = 15
       Top = 136
-      Width = 84
-      Caption = 'Zuletzt geöffnet'
+      Width = 58
+      Caption = 'Last opend'
       ParentColor = False
     end
     object LastOpendBox: TListBox
@@ -631,7 +631,7 @@ object StartupScreen: TStartupScreen
     Height = 25
     Top = 297
     Width = 88
-    Caption = 'Schließen'
+    Caption = 'Close'
     ModalResult = 3
     TabOrder = 1
   end
@@ -674,7 +674,7 @@ object StartupScreen: TStartupScreen
       Width = 154
       OnChange = NewProjectNameEditChange
       TabOrder = 1
-      Text = 'AU3Projekt1'
+      Text = 'AU3Project1'
     end
     object NewProjectDirEdit: TDirectoryEdit
       Left = 64
@@ -691,8 +691,8 @@ object StartupScreen: TStartupScreen
       Left = 6
       Height = 15
       Top = 260
-      Width = 37
-      Caption = 'Ordner'
+      Width = 48
+      Caption = 'Directory'
       ParentColor = False
     end
     object CreateBTN: TButton
@@ -700,7 +700,7 @@ object StartupScreen: TStartupScreen
       Height = 25
       Top = 287
       Width = 75
-      Caption = 'Erstellen'
+      Caption = 'Create'
       OnClick = CreateBTNClick
       TabOrder = 3
     end
@@ -709,13 +709,14 @@ object StartupScreen: TStartupScreen
       Height = 25
       Top = 287
       Width = 83
-      Caption = 'Schließen'
+      Caption = 'Close'
       OnClick = ClosePanelButtonClick
       TabOrder = 4
     end
   end
   object OpenProjDialog: TOpenDialog
-    Filter = 'AET-Projekt|*.AU3proj'
+    Title = 'Open Project'
+    Filter = 'Automate Studio Project |*.au3proj'
     left = 475
     top = 195
   end

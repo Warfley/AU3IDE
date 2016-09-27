@@ -82,6 +82,12 @@ resourcestring
   SNew = 'New';
   SNone = 'None';
 
+  SInclude='Include';
+  SVariables = 'Variables';
+  SFunctions = 'Functions';
+
+  SDefault = 'Default';
+
 implementation
 
 end.

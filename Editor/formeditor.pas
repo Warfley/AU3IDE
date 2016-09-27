@@ -10,7 +10,7 @@ interface
 uses
   Classes, SysUtils, FileUtil, TreeFilterEdit, RTTIGrids, Forms, Controls,
   Graphics, ExtCtrls, StdCtrls, ValEdit, ComCtrls, Grids, contnrs, au3Types,
-  Dialogs, FormEditComponents, LCLIntf, Math, GraphUtil, PropEdits, ObjectInspector, TLStrings;
+  Dialogs, FormEditComponents, LCLIntf, Math, GraphUtil, PropEdits, ObjectInspector, TLStrings, LCLTranslator;
 
 type
 

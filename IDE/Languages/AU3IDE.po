@@ -1,0 +1,1547 @@
+msgid ""
+msgstr "Content-Type: text/plain; charset=UTF-8"
+
+#: taboutform.button2.caption
+msgctxt "taboutform.button2.caption"
+msgid "Close"
+msgstr ""
+
+#: taboutform.hilfe.caption
+msgid "Help"
+msgstr ""
+
+#: taboutform.label1.caption
+msgid "Copyright © F. Kehrein 2015-2016"
+msgstr ""
+
+#: tcompileroptionsform.button1.caption
+msgctxt "tcompileroptionsform.button1.caption"
+msgid "Ok"
+msgstr ""
+
+#: tcompileroptionsform.button2.caption
+msgctxt "tcompileroptionsform.button2.caption"
+msgid "Cancel"
+msgstr ""
+
+#: tcompileroptionsform.label1.caption
+msgid "AutoIt Path"
+msgstr ""
+
+#: tcompileroptionsform.saveintbox.caption
+msgid "Save debug output"
+msgstr ""
+
+#: teditorconf.addfuncbutton.caption
+msgctxt "TEDITORCONF.ADDFUNCBUTTON.CAPTION"
+msgid "Add"
+msgstr ""
+
+#: teditorconf.addkeywordbutton.caption
+msgctxt "teditorconf.addkeywordbutton.caption"
+msgid "Add"
+msgstr ""
+
+#: teditorconf.bgcolorbtn.caption
+msgctxt "teditorconf.bgcolorbtn.caption"
+msgid "..."
+msgstr ""
+
+#: teditorconf.button1.caption
+msgctxt "TEDITORCONF.BUTTON1.CAPTION"
+msgid "Cancel"
+msgstr ""
+
+#: teditorconf.button2.caption
+msgctxt "TEDITORCONF.BUTTON2.CAPTION"
+msgid "Ok"
+msgstr ""
+
+#: teditorconf.caretalwaysvisiblebox.caption
+msgid "Cursor always visible"
+msgstr ""
+
+#: teditorconf.cesidebox.caption
+msgctxt "teditorconf.cesidebox.caption"
+msgid "Right"
+msgstr ""
+
+#: teditorconf.colordialog1.title
+msgctxt "teditorconf.colordialog1.title"
+msgid "Select Color"
+msgstr ""
+
+#: teditorconf.commentb.caption
+msgctxt "teditorconf.commentb.caption"
+msgid "B"
+msgstr ""
+
+#: teditorconf.commentbg.caption
+msgctxt "teditorconf.commentbg.caption"
+msgid "Background"
+msgstr ""
+
+#: teditorconf.commentfb.caption
+msgctxt "teditorconf.commentfb.caption"
+msgid "Border"
+msgstr ""
+
+#: teditorconf.commenti.caption
+msgctxt "teditorconf.commenti.caption"
+msgid "I"
+msgstr ""
+
+#: teditorconf.commentu.caption
+msgctxt "teditorconf.commentu.caption"
+msgid "U"
+msgstr ""
+
+#: teditorconf.deletefuncbutton.caption
+msgctxt "TEDITORCONF.DELETEFUNCBUTTON.CAPTION"
+msgid "Delete"
+msgstr ""
+
+#: teditorconf.deletekeywordbutton.caption
+msgctxt "teditorconf.deletekeywordbutton.caption"
+msgid "Delete"
+msgstr ""
+
+#: teditorconf.docb.caption
+msgctxt "TEDITORCONF.DOCB.CAPTION"
+msgid "B"
+msgstr ""
+
+#: teditorconf.docbg.caption
+msgctxt "TEDITORCONF.DOCBG.CAPTION"
+msgid "Background"
+msgstr ""
+
+#: teditorconf.docfb.caption
+msgctxt "TEDITORCONF.DOCFB.CAPTION"
+msgid "Border"
+msgstr ""
+
+#: teditorconf.doci.caption
+msgctxt "TEDITORCONF.DOCI.CAPTION"
+msgid "I"
+msgstr ""
+
+#: teditorconf.docu.caption
+msgctxt "TEDITORCONF.DOCU.CAPTION"
+msgid "U"
+msgstr ""
+
+#: teditorconf.editedcolorbutton.caption
+msgctxt "TEDITORCONF.EDITEDCOLORBUTTON.CAPTION"
+msgid "..."
+msgstr ""
+
+#: teditorconf.editorcolorbutton.caption
+msgctxt "TEDITORCONF.EDITORCOLORBUTTON.CAPTION"
+msgid "..."
+msgstr ""
+
+#: teditorconf.editorfontbutton.caption
+msgid "Courier New"
+msgstr ""
+
+#: teditorconf.fontdialog1.title
+msgid "Select Font"
+msgstr ""
+
+#: teditorconf.functionb.caption
+msgctxt "TEDITORCONF.FUNCTIONB.CAPTION"
+msgid "B"
+msgstr ""
+
+#: teditorconf.functionbg.caption
+msgctxt "TEDITORCONF.FUNCTIONBG.CAPTION"
+msgid "Background"
+msgstr ""
+
+#: teditorconf.functionfb.caption
+msgctxt "TEDITORCONF.FUNCTIONFB.CAPTION"
+msgid "Border"
+msgstr ""
+
+#: teditorconf.functioni.caption
+msgctxt "TEDITORCONF.FUNCTIONI.CAPTION"
+msgid "I"
+msgstr ""
+
+#: teditorconf.functionoptiontab.caption
+msgid "Default functions"
+msgstr ""
+
+#: teditorconf.functionu.caption
+msgctxt "TEDITORCONF.FUNCTIONU.CAPTION"
+msgid "U"
+msgstr ""
+
+#: teditorconf.generaloptionstab.caption
+msgctxt "teditorconf.generaloptionstab.caption"
+msgid "General"
+msgstr ""
+
+#: teditorconf.guttercolorbutton.caption
+msgctxt "TEDITORCONF.GUTTERCOLORBUTTON.CAPTION"
+msgid "..."
+msgstr ""
+
+#: teditorconf.gutterforecolorbutton.caption
+msgctxt "TEDITORCONF.GUTTERFORECOLORBUTTON.CAPTION"
+msgid "..."
+msgstr ""
+
+#: teditorconf.highlightoptionstab.caption
+msgid "Highlighter"
+msgstr ""
+
+#: teditorconf.identifierb.caption
+msgctxt "TEDITORCONF.IDENTIFIERB.CAPTION"
+msgid "B"
+msgstr ""
+
+#: teditorconf.identifierbg.caption
+msgctxt "TEDITORCONF.IDENTIFIERBG.CAPTION"
+msgid "Background"
+msgstr ""
+
+#: teditorconf.identifierfb.caption
+msgctxt "TEDITORCONF.IDENTIFIERFB.CAPTION"
+msgid "Border"
+msgstr ""
+
+#: teditorconf.identifieri.caption
+msgctxt "TEDITORCONF.IDENTIFIERI.CAPTION"
+msgid "I"
+msgstr ""
+
+#: teditorconf.identifieru.caption
+msgctxt "TEDITORCONF.IDENTIFIERU.CAPTION"
+msgid "U"
+msgstr ""
+
+#: teditorconf.keyedit.editlabel.caption
+msgctxt "teditorconf.keyedit.editlabel.caption"
+msgid "Keyword"
+msgstr ""
+
+#: teditorconf.keytypebox.text
+msgctxt "TEDITORCONF.KEYTYPEBOX.TEXT"
+msgid "Keyword"
+msgstr ""
+
+#: teditorconf.keywordoptionstab.caption
+msgctxt "TEDITORCONF.KEYWORDOPTIONSTAB.CAPTION"
+msgid "Keywords"
+msgstr ""
+
+#: teditorconf.keywordview.columns[0].caption
+msgid "Key"
+msgstr ""
+
+#: teditorconf.keywordview.columns[1].caption
+msgid "Type"
+msgstr ""
+
+#: teditorconf.label1.caption
+msgid "Explorer align:"
+msgstr ""
+
+#: teditorconf.label10.caption
+msgid "Tab width:"
+msgstr ""
+
+#: teditorconf.label11.caption
+msgid "Comments"
+msgstr ""
+
+#: teditorconf.label12.caption
+msgctxt "teditorconf.label12.caption"
+msgid "Keywords"
+msgstr ""
+
+#: teditorconf.label13.caption
+msgctxt "teditorconf.label13.caption"
+msgid "Functions"
+msgstr ""
+
+#: teditorconf.label14.caption
+msgid "Symbols"
+msgstr ""
+
+#: teditorconf.label15.caption
+msgid "Numbers"
+msgstr ""
+
+#: teditorconf.label16.caption
+msgid "Space"
+msgstr ""
+
+#: teditorconf.label17.caption
+msgid "Strings"
+msgstr ""
+
+#: teditorconf.label18.caption
+msgctxt "teditorconf.label18.caption"
+msgid "Variables"
+msgstr ""
+
+#: teditorconf.label19.caption
+msgctxt "teditorconf.label19.caption"
+msgid "Other"
+msgstr ""
+
+#: teditorconf.label2.caption
+msgctxt "teditorconf.label2.caption"
+msgid "Background:"
+msgstr ""
+
+#: teditorconf.label20.caption
+msgid "Doc comments"
+msgstr ""
+
+#: teditorconf.label21.caption
+msgid "Color"
+msgstr ""
+
+#: teditorconf.label22.caption
+msgid "Font"
+msgstr ""
+
+#: teditorconf.label23.caption
+msgctxt "TEDITORCONF.LABEL23.CAPTION"
+msgid "Border"
+msgstr ""
+
+#: teditorconf.label24.caption
+msgctxt "TEDITORCONF.LABEL24.CAPTION"
+msgid "Background"
+msgstr ""
+
+#: teditorconf.label25.caption
+msgid "Tooltip color:"
+msgstr ""
+
+#: teditorconf.label26.caption
+msgid "Tooltip font color"
+msgstr ""
+
+#: teditorconf.label27.caption
+msgid "Editor font:"
+msgstr ""
+
+#: teditorconf.label28.caption
+msgid "Type (Highlighter):"
+msgstr ""
+
+#: teditorconf.label29.caption
+msgid "Function"
+msgstr ""
+
+#: teditorconf.label3.caption
+msgid "Editor background"
+msgstr ""
+
+#: teditorconf.label30.caption
+msgid "Description"
+msgstr ""
+
+#: teditorconf.label31.caption
+msgid "Font color:"
+msgstr ""
+
+#: teditorconf.label4.caption
+msgid "Sidebar Background:"
+msgstr ""
+
+#: teditorconf.label5.caption
+msgid "Sidebar font:"
+msgstr ""
+
+#: teditorconf.label6.caption
+msgid "Row changed:"
+msgstr ""
+
+#: teditorconf.label7.caption
+msgid "Row saved:"
+msgstr ""
+
+#: teditorconf.label8.caption
+msgid "Selection color:"
+msgstr ""
+
+#: teditorconf.label9.caption
+msgid "Selected text color:"
+msgstr ""
+
+#: teditorconf.numberb.caption
+msgctxt "TEDITORCONF.NUMBERB.CAPTION"
+msgid "B"
+msgstr ""
+
+#: teditorconf.numberbg.caption
+msgctxt "TEDITORCONF.NUMBERBG.CAPTION"
+msgid "Background"
+msgstr ""
+
+#: teditorconf.numberfb.caption
+msgctxt "TEDITORCONF.NUMBERFB.CAPTION"
+msgid "Border"
+msgstr ""
+
+#: teditorconf.numberi.caption
+msgctxt "TEDITORCONF.NUMBERI.CAPTION"
+msgid "I"
+msgstr ""
+
+#: teditorconf.numberu.caption
+msgctxt "TEDITORCONF.NUMBERU.CAPTION"
+msgid "U"
+msgstr ""
+
+#: teditorconf.otherb.caption
+msgctxt "TEDITORCONF.OTHERB.CAPTION"
+msgid "B"
+msgstr ""
+
+#: teditorconf.otherbg.caption
+msgctxt "TEDITORCONF.OTHERBG.CAPTION"
+msgid "Background"
+msgstr ""
+
+#: teditorconf.otherfb.caption
+msgctxt "TEDITORCONF.OTHERFB.CAPTION"
+msgid "Border"
+msgstr ""
+
+#: teditorconf.otheri.caption
+msgctxt "TEDITORCONF.OTHERI.CAPTION"
+msgid "I"
+msgstr ""
+
+#: teditorconf.otheru.caption
+msgctxt "TEDITORCONF.OTHERU.CAPTION"
+msgid "U"
+msgstr ""
+
+#: teditorconf.savedcolorbutton.caption
+msgctxt "TEDITORCONF.SAVEDCOLORBUTTON.CAPTION"
+msgid "..."
+msgstr ""
+
+#: teditorconf.scrollpasteolbox.caption
+msgid "Scroll past end of line"
+msgstr ""
+
+#: teditorconf.selectedcolorbutton.caption
+msgctxt "TEDITORCONF.SELECTEDCOLORBUTTON.CAPTION"
+msgid "..."
+msgstr ""
+
+#: teditorconf.selectedforecolorbutton.caption
+msgctxt "TEDITORCONF.SELECTEDFORECOLORBUTTON.CAPTION"
+msgid "..."
+msgstr ""
+
+#: teditorconf.spaceb.caption
+msgctxt "TEDITORCONF.SPACEB.CAPTION"
+msgid "B"
+msgstr ""
+
+#: teditorconf.spacebg.caption
+msgctxt "TEDITORCONF.SPACEBG.CAPTION"
+msgid "Background"
+msgstr ""
+
+#: teditorconf.spacefb.caption
+msgctxt "TEDITORCONF.SPACEFB.CAPTION"
+msgid "Border"
+msgstr ""
+
+#: teditorconf.spacei.caption
+msgctxt "TEDITORCONF.SPACEI.CAPTION"
+msgid "I"
+msgstr ""
+
+#: teditorconf.spaceu.caption
+msgctxt "TEDITORCONF.SPACEU.CAPTION"
+msgid "U"
+msgstr ""
+
+#: teditorconf.stringb.caption
+msgctxt "TEDITORCONF.STRINGB.CAPTION"
+msgid "B"
+msgstr ""
+
+#: teditorconf.stringbg.caption
+msgctxt "TEDITORCONF.STRINGBG.CAPTION"
+msgid "Background"
+msgstr ""
+
+#: teditorconf.stringfb.caption
+msgctxt "TEDITORCONF.STRINGFB.CAPTION"
+msgid "Border"
+msgstr ""
+
+#: teditorconf.stringi.caption
+msgctxt "TEDITORCONF.STRINGI.CAPTION"
+msgid "I"
+msgstr ""
+
+#: teditorconf.stringu.caption
+msgctxt "TEDITORCONF.STRINGU.CAPTION"
+msgid "U"
+msgstr ""
+
+#: teditorconf.symbolb.caption
+msgctxt "TEDITORCONF.SYMBOLB.CAPTION"
+msgid "B"
+msgstr ""
+
+#: teditorconf.symbolbg.caption
+msgctxt "TEDITORCONF.SYMBOLBG.CAPTION"
+msgid "Background"
+msgstr ""
+
+#: teditorconf.symbolfb.caption
+msgctxt "TEDITORCONF.SYMBOLFB.CAPTION"
+msgid "Border"
+msgstr ""
+
+#: teditorconf.symboli.caption
+msgctxt "TEDITORCONF.SYMBOLI.CAPTION"
+msgid "I"
+msgstr ""
+
+#: teditorconf.symbolu.caption
+msgctxt "TEDITORCONF.SYMBOLU.CAPTION"
+msgid "U"
+msgstr ""
+
+#: teditorconf.tablenedit.text
+msgid "2"
+msgstr ""
+
+#: teditorconf.textcolorbutton.caption
+msgctxt "TEDITORCONF.TEXTCOLORBUTTON.CAPTION"
+msgid "..."
+msgstr ""
+
+#: teditorconf.tooltipcolorbutton.caption
+msgctxt "TEDITORCONF.TOOLTIPCOLORBUTTON.CAPTION"
+msgid "..."
+msgstr ""
+
+#: teditorconf.tooltipforecolorbutton.caption
+msgctxt "TEDITORCONF.TOOLTIPFORECOLORBUTTON.CAPTION"
+msgid "..."
+msgstr ""
+
+#: teditorconf.variableb.caption
+msgctxt "TEDITORCONF.VARIABLEB.CAPTION"
+msgid "B"
+msgstr ""
+
+#: teditorconf.variablebg.caption
+msgctxt "TEDITORCONF.VARIABLEBG.CAPTION"
+msgid "Background"
+msgstr ""
+
+#: teditorconf.variablefb.caption
+msgctxt "TEDITORCONF.VARIABLEFB.CAPTION"
+msgid "Border"
+msgstr ""
+
+#: teditorconf.variablei.caption
+msgctxt "TEDITORCONF.VARIABLEI.CAPTION"
+msgid "I"
+msgstr ""
+
+#: teditorconf.variableu.caption
+msgctxt "TEDITORCONF.VARIABLEU.CAPTION"
+msgid "U"
+msgstr ""
+
+#: teditorframe.closecodeexplorerbutton.caption
+msgctxt "TEDITORFRAME.CLOSECODEEXPLORERBUTTON.CAPTION"
+msgid "x"
+msgstr ""
+
+#: teditorframe.closesearchbutton.caption
+msgctxt "teditorframe.closesearchbutton.caption"
+msgid "x"
+msgstr ""
+
+#: teditorframe.codeexplorerhead.caption
+msgid "Code Explorer"
+msgstr ""
+
+#: teditorframe.label1.caption
+msgctxt "teditorframe.label1.caption"
+msgid "Search"
+msgstr ""
+
+#: teditorframe.replaceallbutton.caption
+msgid "Replace all"
+msgstr ""
+
+#: teditorframe.replacebutton.caption
+msgid "Replace"
+msgstr ""
+
+#: teditorframe.searchbutton.caption
+msgid "Find"
+msgstr ""
+
+#: teditormanager.blmovemenu.caption
+msgid "Bottom Left"
+msgstr ""
+
+#: teditormanager.brmovemenu.caption
+msgid "Bottom Right"
+msgstr ""
+
+#: teditormanager.menuitem1.caption
+msgctxt "teditormanager.menuitem1.caption"
+msgid "-"
+msgstr ""
+
+#: teditormanager.menuitem2.caption
+msgid "New Item1"
+msgstr ""
+
+#: teditormanager.movetobutton1.hint
+msgctxt "TEDITORMANAGER.MOVETOBUTTON1.HINT"
+msgid "Move Editor"
+msgstr ""
+
+#: teditormanager.movetobutton2.hint
+msgctxt "teditormanager.movetobutton2.hint"
+msgid "Move Editor"
+msgstr ""
+
+#: teditormanager.movetobutton3.hint
+msgctxt "TEDITORMANAGER.MOVETOBUTTON3.HINT"
+msgid "Move Editor"
+msgstr ""
+
+#: teditormanager.movetobutton4.hint
+msgctxt "TEDITORMANAGER.MOVETOBUTTON4.HINT"
+msgid "Move Editor"
+msgstr ""
+
+#: teditormanager.newwindowmovemenu.caption
+msgid "New Window"
+msgstr ""
+
+#: teditormanager.openau3filedialog.title
+msgctxt "teditormanager.openau3filedialog.title"
+msgid "Open File"
+msgstr ""
+
+#: teditormanager.openeditorbutton1.hint
+msgctxt "TEDITORMANAGER.OPENEDITORBUTTON1.HINT"
+msgid "Open Editor"
+msgstr ""
+
+#: teditormanager.openeditorbutton2.hint
+msgctxt "teditormanager.openeditorbutton2.hint"
+msgid "Open Editor"
+msgstr ""
+
+#: teditormanager.openeditorbutton3.hint
+msgctxt "TEDITORMANAGER.OPENEDITORBUTTON3.HINT"
+msgid "Open Editor"
+msgstr ""
+
+#: teditormanager.openeditorbutton4.hint
+msgctxt "TEDITORMANAGER.OPENEDITORBUTTON4.HINT"
+msgid "Open Editor"
+msgstr ""
+
+#: teditormanager.tlmovemenu.caption
+msgid "Top Left"
+msgstr ""
+
+#: teditormanager.toolbar1.caption
+msgid "ToolBar1"
+msgstr ""
+
+#: teditormanager.toolbar2.caption
+msgid "ToolBar2"
+msgstr ""
+
+#: teditormanager.toolbar3.caption
+msgid "ToolBar3"
+msgstr ""
+
+#: teditormanager.toolbar4.caption
+msgid "ToolBar4"
+msgstr ""
+
+#: teditormanager.trmovemenu.caption
+msgid "Top Right"
+msgstr ""
+
+#: teditormanager.viewbar.caption
+msgid "ViewBar"
+msgstr ""
+
+#: teditorviewform.openeditorbutton2.hint
+msgctxt "teditorviewform.openeditorbutton2.hint"
+msgid "Open Editor"
+msgstr ""
+
+#: tformeditframe.controlevents.caption
+msgid "Events"
+msgstr ""
+
+#: tformeditframe.controlprops.caption
+msgid "Properties"
+msgstr ""
+
+#: tformeditframe.formcaptionlabel.caption
+msgid "Form1"
+msgstr ""
+
+#: tformeditframe.toolboxheaderpanel.caption
+msgid "Toolbox"
+msgstr ""
+
+#: tformeditoroptionsform.bgcolorbtn.caption
+msgctxt "TFORMEDITOROPTIONSFORM.BGCOLORBTN.CAPTION"
+msgid "..."
+msgstr ""
+
+#: tformeditoroptionsform.button1.caption
+msgctxt "TFORMEDITOROPTIONSFORM.BUTTON1.CAPTION"
+msgid "Cancel"
+msgstr ""
+
+#: tformeditoroptionsform.button2.caption
+msgctxt "TFORMEDITOROPTIONSFORM.BUTTON2.CAPTION"
+msgid "Ok"
+msgstr ""
+
+#: tformeditoroptionsform.colordialog1.title
+msgctxt "TFORMEDITOROPTIONSFORM.COLORDIALOG1.TITLE"
+msgid "Select Color"
+msgstr ""
+
+#: tformeditoroptionsform.dbbox.caption
+msgid "Double buffer"
+msgstr ""
+
+#: tformeditoroptionsform.dbbox.hint
+msgid "Not recommended on a slow computer"
+msgstr ""
+
+#: tformeditoroptionsform.forecolorbutton.caption
+msgctxt "TFORMEDITOROPTIONSFORM.FORECOLORBUTTON.CAPTION"
+msgid "..."
+msgstr ""
+
+#: tformeditoroptionsform.helplinebox.caption
+msgid "Helper lines"
+msgstr ""
+
+#: tformeditoroptionsform.helplinebox.hint
+msgid "Lines to help position controls based on ther controls position."
+msgstr ""
+
+#: tformeditoroptionsform.label1.caption
+msgid "Object inspektor:"
+msgstr ""
+
+#: tformeditoroptionsform.label2.caption
+msgctxt "TFORMEDITOROPTIONSFORM.LABEL2.CAPTION"
+msgid "Background:"
+msgstr ""
+
+#: tformeditoroptionsform.label3.caption
+msgid "Foreground:"
+msgstr ""
+
+#: tformeditoroptionsform.label4.caption
+msgid "Toolbox Button:"
+msgstr ""
+
+#: tformeditoroptionsform.label5.caption
+msgid "Grid:"
+msgstr ""
+
+#: tformeditoroptionsform.label5.hint
+msgctxt "tformeditoroptionsform.label5.hint"
+msgid "Shows the grid on the formular. Not recommended on a slow computer"
+msgstr ""
+
+#: tformeditoroptionsform.label6.caption
+msgid "Size:"
+msgstr ""
+
+#: tformeditoroptionsform.oisidebox.caption
+msgctxt "TFORMEDITOROPTIONSFORM.OISIDEBOX.CAPTION"
+msgid "Right"
+msgstr ""
+
+#: tformeditoroptionsform.rasterbox.hint
+msgctxt "TFORMEDITOROPTIONSFORM.RASTERBOX.HINT"
+msgid "Shows the grid on the formular. Not recommended on a slow computer"
+msgstr ""
+
+#: tformeditoroptionsform.rastersizeedit.text
+msgid "8"
+msgstr ""
+
+#: tformeditoroptionsform.tbcolorbutton.caption
+msgctxt "TFORMEDITOROPTIONSFORM.TBCOLORBUTTON.CAPTION"
+msgid "..."
+msgstr ""
+
+#: tlstrings.sallowedsymbols
+msgid "Names must only consist of alphanumerical chars and _"
+msgstr ""
+
+#: tlstrings.sautoit
+msgid "AutoIt"
+msgstr ""
+
+#: tlstrings.scodeexplorer
+msgid "Code explorer"
+msgstr ""
+
+#: tlstrings.scodeformatterkeyword
+msgid "Format"
+msgstr ""
+
+#: tlstrings.scodeformattertext
+msgid ""
+"Start code formatting?\n"
+"(This could fuck up your code)\n"
+msgstr ""
+
+#: tlstrings.scodeformattertitle
+msgid "Format code?"
+msgstr ""
+
+#: tlstrings.scomp0
+msgctxt "tlstrings.scomp0"
+msgid "None"
+msgstr ""
+
+#: tlstrings.scomp1
+msgid "Weak"
+msgstr ""
+
+#: tlstrings.scomp2
+msgid "Normal"
+msgstr ""
+
+#: tlstrings.scomp3
+msgid "Strong"
+msgstr ""
+
+#: tlstrings.scomp4
+msgid "Max"
+msgstr ""
+
+#: tlstrings.sdefault
+msgid "Default"
+msgstr ""
+
+#: tlstrings.sdeletefilekeyword
+msgid "Continue"
+msgstr ""
+
+#: tlstrings.sdeletefiletext
+msgid "Delete the selected file?"
+msgstr ""
+
+#: tlstrings.sdeletefiletitle
+msgid "Delete file?"
+msgstr ""
+
+#: tlstrings.sdirnotemptykeyword
+msgid "Overwrite files"
+msgstr ""
+
+#: tlstrings.sdirnotemptytext
+msgid ""
+"The chosen directory is not empty, the files might be overwritten.\n"
+"Continue?\n"
+msgstr ""
+
+#: tlstrings.sdirnotemptytitle
+msgid "Directory not empty"
+msgstr ""
+
+#: tlstrings.sdonecompileing
+msgid "%s compiled"
+msgstr ""
+
+#: tlstrings.sdoneexec
+msgid "Excecution finished"
+msgstr ""
+
+#: tlstrings.seofreachedkeyword
+msgid "EOF reached"
+msgstr ""
+
+#: tlstrings.seofreachedtext
+msgid "End of file reached, continue at the first line?"
+msgstr ""
+
+#: tlstrings.seofreachedtitle
+msgid "End of file reached"
+msgstr ""
+
+#: tlstrings.serrorcompiling
+msgid "Error compiling %s"
+msgstr ""
+
+#: tlstrings.serrorcreateprojectdir
+msgid "An error occured creating project directories"
+msgstr ""
+
+#: tlstrings.sfile
+msgctxt "tlstrings.sfile"
+msgid "File"
+msgstr ""
+
+#: tlstrings.sfilenotprojdirkeyword
+msgid "Copy to Project"
+msgstr ""
+
+#: tlstrings.sfilenotprojdirtext
+msgid ""
+"The selected file is not located in the project directory.\n"
+"Do you want to create a copy in the project directory?\n"
+msgstr ""
+
+#: tlstrings.sfilenotprojdirtitle
+msgid "File located outside the project directory"
+msgstr ""
+
+#: tlstrings.sform
+msgid "form"
+msgstr ""
+
+#: tlstrings.sfunctions
+msgctxt "tlstrings.sfunctions"
+msgid "Functions"
+msgstr ""
+
+#: tlstrings.sinclude
+msgid "Include"
+msgstr ""
+
+#: tlstrings.sleft
+msgid "left"
+msgstr ""
+
+#: tlstrings.snew
+msgctxt "tlstrings.snew"
+msgid "New"
+msgstr ""
+
+#: tlstrings.snewupdatekeyword
+msgid "Update"
+msgstr ""
+
+#: tlstrings.snewupdatetext
+msgid ""
+"A new version is available.\n"
+"Update now?\n"
+msgstr ""
+
+#: tlstrings.snewupdatetitle
+msgid "New version available"
+msgstr ""
+
+#: tlstrings.snomatchfound
+msgid "No match found"
+msgstr ""
+
+#: tlstrings.snone
+msgctxt "tlstrings.snone"
+msgid "None"
+msgstr ""
+
+#: tlstrings.snonewupdate
+msgid "No new version available."
+msgstr ""
+
+#: tlstrings.sopend
+msgid "Opend"
+msgstr ""
+
+#: tlstrings.sprogrammfile
+msgid "main source"
+msgstr ""
+
+#: tlstrings.sproject
+msgctxt "tlstrings.sproject"
+msgid "Project"
+msgstr ""
+
+#: tlstrings.sprojectinspector
+msgid "Project inspector"
+msgstr ""
+
+#: tlstrings.sright
+msgid "right"
+msgstr ""
+
+#: tlstrings.srunbtnhint
+msgid "Run %s (%s)"
+msgstr ""
+
+#: tlstrings.ssavefilekeyword
+msgctxt "tlstrings.ssavefilekeyword"
+msgid "Save"
+msgstr ""
+
+#: tlstrings.ssavefiletext
+msgid ""
+"The file got changed.\n"
+"Save changes?\n"
+msgstr ""
+
+#: tlstrings.ssavefiletitle
+msgid "Save file?"
+msgstr ""
+
+#: tlstrings.ssaveprojectkeyword
+msgctxt "tlstrings.ssaveprojectkeyword"
+msgid "Save"
+msgstr ""
+
+#: tlstrings.ssaveprojecttext
+msgid ""
+"The project got changed.\n"
+"Save changes?\n"
+msgstr ""
+
+#: tlstrings.ssaveprojecttitle
+msgid "Save project?"
+msgstr ""
+
+#: tlstrings.ssearchforupdateskeyword
+msgid "Updates"
+msgstr ""
+
+#: tlstrings.ssearchforupdatestext
+msgid "Search for updates on startup?"
+msgstr ""
+
+#: tlstrings.ssearchforupdatestitle
+msgid "Search for updates?"
+msgstr ""
+
+#: tlstrings.sselectprojecttemplate
+msgid "Select a project template"
+msgstr ""
+
+#: tlstrings.sstillrunningkeyword
+msgid "Terminate"
+msgstr ""
+
+#: tlstrings.sstillrunningtext
+msgid "Excecution of the compiler/project has not finished. Terminate it now?"
+msgstr ""
+
+#: tlstrings.sstillrunningtitle
+msgid "Excecution has not finished"
+msgstr ""
+
+#: tlstrings.sunit
+msgid "source file"
+msgstr ""
+
+#: tlstrings.svariables
+msgctxt "tlstrings.svariables"
+msgid "Variables"
+msgstr ""
+
+#: tmainform.aboutautoititem.caption
+msgid "About AutoIt"
+msgstr ""
+
+#: tmainform.addformbtn.hint
+msgid "New AutoIt form"
+msgstr ""
+
+#: tmainform.addunitbtn.hint
+msgid "New AutoIt source file"
+msgstr ""
+
+#: tmainform.centerpanel.caption
+msgid "CenterPanel"
+msgstr ""
+
+#: tmainform.closeallbtn.hint
+msgctxt "tmainform.closeallbtn.hint"
+msgid "Close all"
+msgstr ""
+
+#: tmainform.closeallitem.caption
+msgctxt "TMAINFORM.CLOSEALLITEM.CAPTION"
+msgid "Close all"
+msgstr ""
+
+#: tmainform.closeeditorbtn.hint
+msgctxt "tmainform.closeeditorbtn.hint"
+msgid "Close editor"
+msgstr ""
+
+#: tmainform.closefileitem.caption
+msgctxt "TMAINFORM.CLOSEFILEITEM.CAPTION"
+msgid "Close editor"
+msgstr ""
+
+#: tmainform.compilemenuitem.caption
+msgctxt "tmainform.compilemenuitem.caption"
+msgid "Build"
+msgstr ""
+
+#: tmainform.compoptionmenuitem.caption
+msgid "Compiler options"
+msgstr ""
+
+#: tmainform.configmenuitem.caption
+msgid "Options"
+msgstr ""
+
+#: tmainform.editmenuitem.caption
+msgid "Edit"
+msgstr ""
+
+#: tmainform.extrasmenuitem.caption
+msgid "Tools"
+msgstr ""
+
+#: tmainform.filemenuitem.caption
+msgctxt "tmainform.filemenuitem.caption"
+msgid "File"
+msgstr ""
+
+#: tmainform.formatmenuitem.caption
+msgid "Format code"
+msgstr ""
+
+#: tmainform.formoptionsitem.caption
+msgid "Formeditor options"
+msgstr ""
+
+#: tmainform.ideoptionitem.caption
+msgid "Project inspector left"
+msgstr ""
+
+#: tmainform.infomenuitem.caption
+msgid "About..."
+msgstr ""
+
+#: tmainform.maintoolbar.caption
+msgid "MainToolbar"
+msgstr ""
+
+#: tmainform.menusplititem1.caption
+msgctxt "TMAINFORM.MENUSPLITITEM1.CAPTION"
+msgid "-"
+msgstr ""
+
+#: tmainform.menusplititem2.caption
+msgctxt "TMAINFORM.MENUSPLITITEM2.CAPTION"
+msgid "-"
+msgstr ""
+
+#: tmainform.menusplititem3.caption
+msgctxt "TMAINFORM.MENUSPLITITEM3.CAPTION"
+msgid "-"
+msgstr ""
+
+#: tmainform.menusplititem4.caption
+msgctxt "TMAINFORM.MENUSPLITITEM4.CAPTION"
+msgid "-"
+msgstr ""
+
+#: tmainform.menusplititem5.caption
+msgctxt "TMAINFORM.MENUSPLITITEM5.CAPTION"
+msgid "-"
+msgstr ""
+
+#: tmainform.menusplititem6.caption
+msgctxt "TMAINFORM.MENUSPLITITEM6.CAPTION"
+msgid "-"
+msgstr ""
+
+#: tmainform.neweditview.caption
+msgid "New editor window"
+msgstr ""
+
+#: tmainform.newfileitem.caption
+msgid "AutoIt source"
+msgstr ""
+
+#: tmainform.newformitem.caption
+msgid "AutoIt form"
+msgstr ""
+
+#: tmainform.newmenuitem.caption
+msgctxt "tmainform.newmenuitem.caption"
+msgid "New"
+msgstr ""
+
+#: tmainform.newprojbtn.hint
+msgctxt "tmainform.newprojbtn.hint"
+msgid "New project"
+msgstr ""
+
+#: tmainform.newprojectitem.caption
+msgctxt "tmainform.newprojectitem.caption"
+msgid "Project"
+msgstr ""
+
+#: tmainform.nexttabitem.caption
+msgid "Next editor"
+msgstr ""
+
+#: tmainform.openau3filedialog.title
+msgctxt "TMAINFORM.OPENAU3FILEDIALOG.TITLE"
+msgid "Open File"
+msgstr ""
+
+#: tmainform.otheroptionsitem.caption
+msgctxt "TMAINFORM.OTHEROPTIONSITEM.CAPTION"
+msgid "Other"
+msgstr ""
+
+#: tmainform.prevtabitem.caption
+msgid "Previous editor"
+msgstr ""
+
+#: tmainform.quitmenuitem.caption
+msgid "Quit"
+msgstr ""
+
+#: tmainform.redomenuitem.caption
+msgid "Redo"
+msgstr ""
+
+#: tmainform.runbtn.hint
+msgid "Run (F5)"
+msgstr ""
+
+#: tmainform.runmenu.caption
+msgctxt "tmainform.runmenu.caption"
+msgid "Run"
+msgstr ""
+
+#: tmainform.runmenuitem.caption
+msgctxt "TMAINFORM.RUNMENUITEM.CAPTION"
+msgid "Run"
+msgstr ""
+
+#: tmainform.sampebutton.caption
+msgid "Examples"
+msgstr ""
+
+#: tmainform.saveallbtn.hint
+msgctxt "tmainform.saveallbtn.hint"
+msgid "Save all"
+msgstr ""
+
+#: tmainform.saveallitem.caption
+msgctxt "TMAINFORM.SAVEALLITEM.CAPTION"
+msgid "Save all"
+msgstr ""
+
+#: tmainform.saveasbtn.hint
+msgctxt "tmainform.saveasbtn.hint"
+msgid "Save as..."
+msgstr ""
+
+#: tmainform.saveasitem.caption
+msgctxt "TMAINFORM.SAVEASITEM.CAPTION"
+msgid "Save as..."
+msgstr ""
+
+#: tmainform.saveau3filedialog.title
+msgid "Save file as"
+msgstr ""
+
+#: tmainform.savebtn.hint
+msgctxt "tmainform.savebtn.hint"
+msgid "Save"
+msgstr ""
+
+#: tmainform.savefileitem.caption
+msgctxt "TMAINFORM.SAVEFILEITEM.CAPTION"
+msgid "Save"
+msgstr ""
+
+#: tmainform.searchmenuitem.caption
+msgctxt "TMAINFORM.SEARCHMENUITEM.CAPTION"
+msgid "Search"
+msgstr ""
+
+#: tmainform.selectmodebox.hint
+msgid "Mode"
+msgstr ""
+
+#: tmainform.selectmodebox.text
+msgid "x86"
+msgstr ""
+
+#: tmainform.stopbtn.hint
+msgid "Halt"
+msgstr ""
+
+#: tmainform.texteditoroptionsitem.caption
+msgid "Scripteditor options"
+msgstr ""
+
+#: tmainform.undomenuitem.caption
+msgid "Undo"
+msgstr ""
+
+#: tmainform.updatemenuitem.caption
+msgid "Search for updates"
+msgstr ""
+
+#: totheroptions.compopenbox.text
+msgid "Variables, Macros and Compiler switches"
+msgstr ""
+
+#: totheroptions.incvarbox.caption
+msgid "Show variables and functions from included files"
+msgstr ""
+
+#: totheroptions.label1.caption
+msgid "Undo Steps"
+msgstr ""
+
+#: totheroptions.label2.caption
+msgid "Elements considered sorting the completion"
+msgstr ""
+
+#: totheroptions.label3.caption
+msgid "Automaticly open completion"
+msgstr ""
+
+#: totheroptions.label4.caption
+msgid "Window Border Size"
+msgstr ""
+
+#: totheroptions.label5.caption
+msgid "X"
+msgstr ""
+
+#: totheroptions.label6.caption
+msgid "Language:"
+msgstr ""
+
+#: totheroptions.okbutton.caption
+msgctxt "TOTHEROPTIONS.OKBUTTON.CAPTION"
+msgid "Ok"
+msgstr ""
+
+#: totheroptions.okbutton1.caption
+msgctxt "TOTHEROPTIONS.OKBUTTON1.CAPTION"
+msgid "Cancel"
+msgstr ""
+
+#: totheroptions.updatebox.caption
+msgid "Search for updates on startup"
+msgstr ""
+
+#: tprojectinspector.addbutton.caption
+msgctxt "TPROJECTINSPECTOR.ADDBUTTON.CAPTION"
+msgid "Add"
+msgstr ""
+
+#: tprojectinspector.deletebutton.caption
+msgctxt "TPROJECTINSPECTOR.DELETEBUTTON.CAPTION"
+msgid "Delete"
+msgstr ""
+
+#: tprojectinspector.label1.caption
+msgid "  Project files"
+msgstr ""
+
+#: tprojectinspector.pathedit.editlabel.caption
+msgid "Path"
+msgstr ""
+
+#: tprojectinspector.setmainformbutton.caption
+msgid "Mainform"
+msgstr ""
+
+#: tprojectinspector.settingsbutton.caption
+msgid "Settings"
+msgstr ""
+
+#: tprojectsettings.addparambtn.caption
+msgid "+"
+msgstr ""
+
+#: tprojectsettings.allgemein.caption
+msgctxt "TPROJECTSETTINGS.ALLGEMEIN.CAPTION"
+msgid "General"
+msgstr ""
+
+#: tprojectsettings.apptypebox.text
+msgid "Console"
+msgstr ""
+
+#: tprojectsettings.builtedit.text
+msgctxt "TPROJECTSETTINGS.BUILTEDIT.TEXT"
+msgid "0"
+msgstr ""
+
+#: tprojectsettings.cancelbutton.caption
+msgctxt "TPROJECTSETTINGS.CANCELBUTTON.CAPTION"
+msgid "Cancel"
+msgstr ""
+
+#: tprojectsettings.compiler.caption
+msgid "Compiler"
+msgstr ""
+
+#: tprojectsettings.deleteparambtn.caption
+msgctxt "TPROJECTSETTINGS.DELETEPARAMBTN.CAPTION"
+msgid "-"
+msgstr ""
+
+#: tprojectsettings.incbuildbox.caption
+msgid "Increase on build"
+msgstr ""
+
+#: tprojectsettings.label1.caption
+msgctxt "TPROJECTSETTINGS.LABEL1.CAPTION"
+msgid "Name"
+msgstr ""
+
+#: tprojectsettings.label10.caption
+msgid "Apptype"
+msgstr ""
+
+#: tprojectsettings.label2.caption
+msgctxt "TPROJECTSETTINGS.LABEL2.CAPTION"
+msgid "Directory"
+msgstr ""
+
+#: tprojectsettings.label3.caption
+msgid "Compiler Output:"
+msgstr ""
+
+#: tprojectsettings.label4.caption
+msgid "Icon:"
+msgstr ""
+
+#: tprojectsettings.label5.caption
+msgid "Compression:"
+msgstr ""
+
+#: tprojectsettings.label6.caption
+msgctxt "TPROJECTSETTINGS.LABEL6.CAPTION"
+msgid "Version"
+msgstr ""
+
+#: tprojectsettings.label7.caption
+msgid "Subversion"
+msgstr ""
+
+#: tprojectsettings.label8.caption
+msgid "Revision"
+msgstr ""
+
+#: tprojectsettings.label9.caption
+msgctxt "TPROJECTSETTINGS.LABEL9.CAPTION"
+msgid "Build"
+msgstr ""
+
+#: tprojectsettings.revisionedit.text
+msgctxt "TPROJECTSETTINGS.REVISIONEDIT.TEXT"
+msgid "0"
+msgstr ""
+
+#: tprojectsettings.runparameter.caption
+msgid "Run parameter"
+msgstr ""
+
+#: tprojectsettings.savebutton.caption
+msgctxt "TPROJECTSETTINGS.SAVEBUTTON.CAPTION"
+msgid "Save"
+msgstr ""
+
+#: tprojectsettings.subversionedit.text
+msgctxt "TPROJECTSETTINGS.SUBVERSIONEDIT.TEXT"
+msgid "0"
+msgstr ""
+
+#: tprojectsettings.tabsheet2.caption
+msgctxt "tprojectsettings.tabsheet2.caption"
+msgid "Version"
+msgstr ""
+
+#: tprojectsettings.upxbox.caption
+msgid "UPX Compression"
+msgstr ""
+
+#: tprojectsettings.useversion.caption
+msgid "Use version information"
+msgstr ""
+
+#: tprojectsettings.versionedit.text
+msgctxt "tprojectsettings.versionedit.text"
+msgid "0"
+msgstr ""
+
+#: tstartupscreen.button1.caption
+msgctxt "TSTARTUPSCREEN.BUTTON1.CAPTION"
+msgid "Close"
+msgstr ""
+
+#: tstartupscreen.closepanelbutton.caption
+msgctxt "TSTARTUPSCREEN.CLOSEPANELBUTTON.CAPTION"
+msgid "Close"
+msgstr ""
+
+#: tstartupscreen.createbtn.caption
+msgid "Create"
+msgstr ""
+
+#: tstartupscreen.label1.caption
+msgid "Last opend"
+msgstr ""
+
+#: tstartupscreen.label2.caption
+msgctxt "tstartupscreen.label2.caption"
+msgid "Name"
+msgstr ""
+
+#: tstartupscreen.label3.caption
+msgctxt "tstartupscreen.label3.caption"
+msgid "Directory"
+msgstr ""
+
+#: tstartupscreen.newbutton.caption
+msgctxt "TSTARTUPSCREEN.NEWBUTTON.CAPTION"
+msgid "New project"
+msgstr ""
+
+#: tstartupscreen.newprojectnameedit.text
+msgid "AU3Project1"
+msgstr ""
+
+#: tstartupscreen.openbutton.caption
+msgid "Open project"
+msgstr ""
+
+#: tstartupscreen.openprojdialog.title
+msgid "Open Project"
+msgstr ""
+

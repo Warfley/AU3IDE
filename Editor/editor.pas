@@ -9,7 +9,7 @@ uses
   au3Highlighter, Types, contnrs, LCLType, ExtCtrls, au3Types, UnitParser,
   Dialogs, Graphics, StdCtrls, Buttons, ComCtrls, strutils, CodeFormatter,
   ToolTip, ListRecords, SynEditTypes, Math, SynGutterBase, SynGutterChanges,
-  GraphUtil, Project, gvector, fgl, TLStrings;
+  GraphUtil, Project, gvector, fgl, TLStrings, LCLTranslator;
 
 type
 
@@ -476,9 +476,9 @@ begin
       for i := 0 to CodeExplorer.Items.Count - 1 do
         if CodeExplorer.Items[i].ImageIndex > 0 then
           CodeExplorer.Items[i].ImageIndex := -1;
-      ni := CodeExplorer.Items.FindNodeWithText('Includes');
-      nf := CodeExplorer.Items.FindNodeWithText('Funktionen');
-      nv := CodeExplorer.Items.FindNodeWithText('Variablen');
+      ni := CodeExplorer.Items.FindNodeWithText(SInclude);
+      nf := CodeExplorer.Items.FindNodeWithText(SFunctions);
+      nv := CodeExplorer.Items.FindNodeWithText(SVariables);
       i := 0;
       for i := 0 to FRequiredFiles.Count - 1 do
         if FileExistsUTF8(GetFullPath(FRequiredFiles[i], FIncludePath,

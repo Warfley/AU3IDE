@@ -59,7 +59,7 @@ object FormEditFrame: TFormEditFrame
       TabIndex = 0
       TabOrder = 0
       object ControlProps: TTabSheet
-        Caption = 'Eigenschaften'
+        Caption = 'Properties'
         ClientHeight = 456
         ClientWidth = 526
         object PropEditor: TTIPropertyGrid
@@ -79,7 +79,7 @@ object FormEditFrame: TFormEditFrame
         end
       end
       object ControlEvents: TTabSheet
-        Caption = 'Ereignisse'
+        Caption = 'Events'
         ClientHeight = 456
         ClientWidth = 526
         object EventEditor: TValueListEditor

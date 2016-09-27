@@ -28,13 +28,13 @@ object CompilerOptionsForm: TCompilerOptionsForm
     Top = 129
     Width = 75
     Anchors = [akRight, akBottom]
-    Caption = 'Abbrechen'
+    Caption = 'Cancel'
     ModalResult = 2
     TabOrder = 1
   end
   object PathEdit: TDirectoryEdit
     Left = 24
-    Height = 33
+    Height = 23
     Top = 40
     Width = 304
     ShowHidden = False
@@ -45,18 +45,18 @@ object CompilerOptionsForm: TCompilerOptionsForm
   end
   object Label1: TLabel
     Left = 8
-    Height = 25
+    Height = 15
     Top = 8
-    Width = 90
-    Caption = 'Autoit Pfad'
+    Width = 60
+    Caption = 'AutoIt Path'
     ParentColor = False
   end
   object SaveIntBox: TCheckBox
     Left = 8
-    Height = 29
+    Height = 19
     Top = 88
-    Width = 270
-    Caption = 'Interpreter Ausgabe Speichern'
+    Width = 120
+    Caption = 'Save debug output'
     TabOrder = 3
   end
 end

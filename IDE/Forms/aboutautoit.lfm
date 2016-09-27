@@ -4,7 +4,7 @@ object AboutAutoitForm: TAboutAutoitForm
   Top = 0
   Width = 565
   BorderStyle = bsNone
-  Caption = 'Über Autoit'
+  Caption = 'About Autoit'
   ClientHeight = 770
   ClientWidth = 565
   OnHide = FormHide

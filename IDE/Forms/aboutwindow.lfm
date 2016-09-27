@@ -5,7 +5,7 @@ object AboutForm: TAboutForm
   Width = 498
   ActiveControl = InfoMemo
   BorderStyle = bsToolWindow
-  Caption = 'Über'
+  Caption = 'About'
   ClientHeight = 483
   ClientWidth = 498
   Position = poMainFormCenter
@@ -318,16 +318,13 @@ object AboutForm: TAboutForm
     Align = alClient
     BorderStyle = bsNone
     Lines.Strings = (
-      'Automate Studio ist eine Entwicklungsumgebung für die '
-      'Automatisierungssprache Autoit.'
+      'Automate Studio is an integrated development environment (IDE) for the scripting language '
+      'AutoIt'
       ''
-      'Der Fokus liegt sowohl darauf kleinere Makros als auch '
-      'komplexe GUI Anwendungen zu schreiben und zu Managen.'
+      'The focus is to write small macros as well as complex GUI projects with many different files.'
       ''
-      'Das Projekt ist Opensource und unter GPL Lizens '
-      'veröffentlicht. '
-      'Der Sourcode ist erhältlich auf GitHub.com '
-      'unter:'
+      'The project is released as open source under the terms of the GPL License.'
+      'The sourcecode is available on GitHub via:'
       'https://github.com/Warfley/AU3IDE'
     )
     OnEnter = InfoMemoEnter
@@ -349,9 +346,9 @@ object AboutForm: TAboutForm
     OnPaint = Panel1Paint
     object Label1: TLabel
       Left = 0
-      Height = 25
+      Height = 15
       Top = 17
-      Width = 273
+      Width = 178
       Caption = 'Copyright © F. Kehrein 2015-2016'
       Font.Color = clGray
       ParentColor = False
@@ -363,7 +360,7 @@ object AboutForm: TAboutForm
       Top = 0
       Width = 79
       Align = alRight
-      Caption = 'Hilfe'
+      Caption = 'Help'
       OnClick = HilfeClick
       TabOrder = 0
     end
@@ -373,7 +370,7 @@ object AboutForm: TAboutForm
       Top = 0
       Width = 90
       Align = alRight
-      Caption = 'Schließen'
+      Caption = 'Close'
       ModalResult = 2
       TabOrder = 1
     end

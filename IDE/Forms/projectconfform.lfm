@@ -5,7 +5,7 @@ object ProjectSettings: TProjectSettings
   Width = 536
   ActiveControl = PageControl1
   BorderStyle = bsSingle
-  Caption = 'Projekteinstellungen'
+  Caption = 'Project settings'
   ClientHeight = 471
   ClientWidth = 536
   OnShow = FormShow
@@ -22,7 +22,7 @@ object ProjectSettings: TProjectSettings
     TabIndex = 0
     TabOrder = 0
     object Allgemein: TTabSheet
-      Caption = 'Allgemein'
+      Caption = 'General'
       ClientHeight = 401
       ClientWidth = 528
       object Label1: TLabel
@@ -55,8 +55,8 @@ object ProjectSettings: TProjectSettings
         Left = 0
         Height = 15
         Top = 80
-        Width = 58
-        Caption = 'Verzeichnis'
+        Width = 48
+        Caption = 'Directory'
         ParentColor = False
       end
       object AppTypeBox: TComboBox
@@ -79,14 +79,14 @@ object ProjectSettings: TProjectSettings
         Left = 0
         Height = 15
         Top = 160
-        Width = 19
-        Caption = 'Typ'
+        Width = 45
+        Caption = 'Apptype'
         ParentColor = False
       end
     end
     object Compiler: TTabSheet
       Caption = 'Compiler'
-      ClientHeight = 468
+      ClientHeight = 401
       ClientWidth = 528
       object CompTrackBar: TTrackBar
         Left = 16
@@ -100,15 +100,15 @@ object ProjectSettings: TProjectSettings
       end
       object Label3: TLabel
         Left = 0
-        Height = 25
+        Height = 15
         Top = 8
-        Width = 151
-        Caption = 'Compiler Ausgabe:'
+        Width = 93
+        Caption = 'Compiler Output:'
         ParentColor = False
       end
       object CompileEdit: TFileNameEdit
         Left = 16
-        Height = 33
+        Height = 23
         Top = 40
         Width = 320
         Filter = 'Executeable|*.exe'
@@ -121,7 +121,7 @@ object ProjectSettings: TProjectSettings
       end
       object IconEdit: TFileNameEdit
         Left = 16
-        Height = 33
+        Height = 23
         Top = 112
         Width = 320
         Filter = 'Icon|*.ico'
@@ -134,26 +134,26 @@ object ProjectSettings: TProjectSettings
       end
       object UPXBox: TCheckBox
         Left = 0
-        Height = 29
+        Height = 19
         Top = 240
-        Width = 180
-        Caption = 'UPX Komprimieren'
+        Width = 115
+        Caption = 'UPX Compression'
         TabOrder = 3
       end
       object Label4: TLabel
         Left = 0
-        Height = 25
+        Height = 15
         Top = 80
-        Width = 38
+        Width = 26
         Caption = 'Icon:'
         ParentColor = False
       end
       object Label5: TLabel
         Left = 0
-        Height = 25
+        Height = 15
         Top = 152
-        Width = 108
-        Caption = 'Kompression:'
+        Width = 73
+        Caption = 'Compression:'
         ParentColor = False
       end
       object CompLabel: TLabel
@@ -164,13 +164,13 @@ object ProjectSettings: TProjectSettings
         ParentColor = False
       end
     end
-    object TabSheet1: TTabSheet
-      Caption = 'Start Parameter'
-      ClientHeight = 468
+    object RunParameter: TTabSheet
+      Caption = 'Run parameter'
+      ClientHeight = 401
       ClientWidth = 528
       object ParamBox: TListBox
         Left = 0
-        Height = 434
+        Height = 367
         Top = 0
         Width = 528
         Align = alClient
@@ -180,7 +180,7 @@ object ProjectSettings: TProjectSettings
       object Panel2: TPanel
         Left = 0
         Height = 34
-        Top = 434
+        Top = 367
         Width = 528
         Align = alBottom
         BevelOuter = bvNone
@@ -220,20 +220,20 @@ object ProjectSettings: TProjectSettings
     end
     object TabSheet2: TTabSheet
       Caption = 'Version'
-      ClientHeight = 391
+      ClientHeight = 401
       ClientWidth = 528
       object UseVersion: TCheckBox
         Left = 8
-        Height = 29
+        Height = 19
         Top = 8
-        Width = 89
-        Caption = 'Version'
+        Width = 146
+        Caption = 'Use version information'
         OnChange = UseVersionChange
         TabOrder = 0
       end
       object VersionEdit: TEdit
         Left = 8
-        Height = 33
+        Height = 23
         Top = 80
         Width = 56
         Enabled = False
@@ -244,7 +244,7 @@ object ProjectSettings: TProjectSettings
       end
       object SubversionEdit: TEdit
         Left = 112
-        Height = 33
+        Height = 23
         Top = 80
         Width = 56
         Enabled = False
@@ -255,7 +255,7 @@ object ProjectSettings: TProjectSettings
       end
       object RevisionEdit: TEdit
         Left = 224
-        Height = 33
+        Height = 23
         Top = 80
         Width = 56
         Enabled = False
@@ -266,7 +266,7 @@ object ProjectSettings: TProjectSettings
       end
       object BuiltEdit: TEdit
         Left = 328
-        Height = 33
+        Height = 23
         Top = 80
         Width = 56
         Enabled = False
@@ -277,17 +277,17 @@ object ProjectSettings: TProjectSettings
       end
       object IncBuildBox: TCheckBox
         Left = 416
-        Height = 29
+        Height = 19
         Top = 84
-        Width = 95
-        Caption = 'Erhöhen'
+        Width = 110
+        Caption = 'Increase on build'
         Enabled = False
         TabOrder = 5
       end
       object VersionData: TValueListEditor
         Left = 0
         Height = 236
-        Top = 155
+        Top = 165
         Width = 528
         Align = alBottom
         DefaultColWidth = 150
@@ -318,34 +318,34 @@ object ProjectSettings: TProjectSettings
       end
       object Label6: TLabel
         Left = 8
-        Height = 25
+        Height = 15
         Top = 48
-        Width = 58
+        Width = 38
         Caption = 'Version'
         ParentColor = False
       end
       object Label7: TLabel
         Left = 112
-        Height = 25
+        Height = 15
         Top = 48
-        Width = 100
-        Caption = 'Unterversion'
+        Width = 58
+        Caption = 'Subversion'
         ParentColor = False
       end
       object Label8: TLabel
         Left = 224
-        Height = 25
+        Height = 15
         Top = 48
-        Width = 65
+        Width = 44
         Caption = 'Revision'
         ParentColor = False
       end
       object Label9: TLabel
         Left = 328
-        Height = 25
+        Height = 15
         Top = 48
-        Width = 81
-        Caption = 'Kompiliert'
+        Width = 27
+        Caption = 'Build'
         ParentColor = False
       end
     end
@@ -366,7 +366,7 @@ object ProjectSettings: TProjectSettings
       Top = 0
       Width = 107
       Align = alRight
-      Caption = 'Abbruch'
+      Caption = 'Cancel'
       ModalResult = 2
       TabOrder = 0
     end
@@ -376,7 +376,7 @@ object ProjectSettings: TProjectSettings
       Top = 0
       Width = 107
       Align = alRight
-      Caption = 'Speichern'
+      Caption = 'Save'
       ModalResult = 1
       TabOrder = 1
     end

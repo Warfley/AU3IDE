@@ -14,7 +14,8 @@
       </XPManifest>
     </General>
     <i18n>
-      <EnableI18N LFM="False"/>
+      <EnableI18N Value="True"/>
+      <OutDir Value="Languages"/>
     </i18n>
     <VersionInfo>
       <UseVersionInfo Value="True"/>

@@ -323,7 +323,7 @@ object EditorManager: TEditorManager
           Tag = 1
           Left = 1
           Height = 22
-          Hint = 'Editor öffnen'
+          Hint = 'Open Editor'
           Top = 2
           Width = 23
           Flat = True
@@ -411,7 +411,7 @@ object EditorManager: TEditorManager
           Tag = 1
           Left = 426
           Height = 24
-          Hint = 'Editor bewegen'
+          Hint = 'Move Editor'
           Top = 2
           Width = 25
           Align = alRight
@@ -537,7 +537,7 @@ object EditorManager: TEditorManager
         object OpenEditorButton1: TSpeedButton
           Left = 1
           Height = 22
-          Hint = 'Editor öffnen'
+          Hint = 'Open Editor'
           Top = 2
           Width = 23
           Flat = True
@@ -624,7 +624,7 @@ object EditorManager: TEditorManager
         object MoveToButton1: TSpeedButton
           Left = 431
           Height = 24
-          Hint = 'Editor bewegen'
+          Hint = 'Move Editor'
           Top = 2
           Width = 25
           Align = alRight
@@ -756,7 +756,7 @@ object EditorManager: TEditorManager
           Tag = 3
           Left = 1
           Height = 22
-          Hint = 'Editor öffnen'
+          Hint = 'Open Editor'
           Top = 2
           Width = 23
           Flat = True
@@ -844,7 +844,7 @@ object EditorManager: TEditorManager
           Tag = 3
           Left = 426
           Height = 24
-          Hint = 'Editor bewegen'
+          Hint = 'Move Editor'
           Top = 2
           Width = 25
           Align = alRight
@@ -972,7 +972,7 @@ object EditorManager: TEditorManager
           Tag = 2
           Left = 1
           Height = 22
-          Hint = 'Editor öffnen'
+          Hint = 'Open Editor'
           Top = 2
           Width = 23
           Flat = True
@@ -1060,7 +1060,7 @@ object EditorManager: TEditorManager
           Tag = 2
           Left = 431
           Height = 24
-          Hint = 'Editor bewegen'
+          Hint = 'Move Editor'
           Top = 2
           Width = 25
           Align = alRight
@@ -1161,39 +1161,43 @@ object EditorManager: TEditorManager
   object FilesPopUp: TPopupMenu
     left = 528
     top = 104
+    object MenuItem2: TMenuItem
+      Caption = 'New Item1'
+    end
   end
   object MoveToPopup: TPopupMenu
     left = 416
     top = 112
     object TLMoveMenu: TMenuItem
-      Caption = 'Oben Links'
+      Caption = 'Top Left'
       OnClick = TLMoveMenuClick
     end
     object TRMoveMenu: TMenuItem
       Tag = 1
-      Caption = 'Oben Rechts'
+      Caption = 'Top Right'
       OnClick = TLMoveMenuClick
     end
     object BLMoveMenu: TMenuItem
       Tag = 2
-      Caption = 'Unten Links'
+      Caption = 'Bottom Left'
       OnClick = TLMoveMenuClick
     end
     object BRMoveMenu: TMenuItem
       Tag = 3
-      Caption = 'Unten Rechts'
+      Caption = 'Bottom Right'
       OnClick = TLMoveMenuClick
     end
     object MenuItem1: TMenuItem
       Caption = '-'
     end
     object NewWindowMoveMenu: TMenuItem
-      Caption = 'Neues Fenster'
+      Caption = 'New Window'
       OnClick = NewWindowMoveMenuClick
     end
   end
   object OpenAU3FileDialog: TOpenDialog
-    Filter = 'AU3 Quellcode|*.au3;*.afm;*.apr'
+    Title = 'Open File'
+    Filter = 'AutoIt source|*.au3;*.afm;*.apr'
     Options = [ofExtensionDifferent, ofFileMustExist, ofEnableSizing, ofViewDetail]
     left = 440
     top = 176

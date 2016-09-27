@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Types, FileUtil, Forms, Controls, ComCtrls, Editor, FormEditor,
-  Dialogs, Buttons, Menus, ExtCtrls, au3Types, Project, fgl, EditorWindow, Math, TLStrings;
+  Dialogs, Buttons, Menus, ExtCtrls, au3Types, Project, fgl, EditorWindow, Math, TLStrings, LCLTranslator;
 
 type
   TCloseEditorEvent = procedure(Sender: TObject; Editor: integer;
@@ -27,6 +27,7 @@ type
     BLMoveMenu: TMenuItem;
     BRMoveMenu: TMenuItem;
     MenuItem1: TMenuItem;
+    MenuItem2: TMenuItem;
     MoveToButton2: TSpeedButton;
     MoveToButton3: TSpeedButton;
     MoveToButton4: TSpeedButton;

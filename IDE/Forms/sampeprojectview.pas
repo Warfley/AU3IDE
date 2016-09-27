@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, LazFileUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  ListFilterEdit;
+  ListFilterEdit, LCLTranslator;
 
 type
 

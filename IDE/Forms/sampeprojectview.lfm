@@ -3,8 +3,9 @@ object SampleForm: TSampleForm
   Height = 298
   Top = 179
   Width = 444
+  ActiveControl = ListBox1
   BorderStyle = bsToolWindow
-  Caption = 'Beispiele'
+  Caption = 'Examples'
   ClientHeight = 298
   ClientWidth = 444
   OnShow = FormShow
@@ -13,8 +14,8 @@ object SampleForm: TSampleForm
   Visible = False
   object ListBox1: TListBox
     Left = 0
-    Height = 265
-    Top = 33
+    Height = 275
+    Top = 23
     Width = 444
     Align = alClient
     ItemHeight = 0
@@ -23,7 +24,7 @@ object SampleForm: TSampleForm
   end
   object ListFilterEdit1: TListFilterEdit
     Left = 0
-    Height = 33
+    Height = 23
     Top = 0
     Width = 444
     ButtonWidth = 23

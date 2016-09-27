@@ -24,7 +24,7 @@ object EditorFrame: TEditorFrame
       Height = 15
       Top = 4
       Width = 35
-      Caption = 'Suche:'
+      Caption = 'Search'
       ParentColor = False
     end
     object SearchEdit: TEdit
@@ -40,7 +40,7 @@ object EditorFrame: TEditorFrame
       Height = 33
       Top = 0
       Width = 67
-      Caption = 'Suchen'
+      Caption = 'Find'
       OnClick = SearchButtonClick
       TabOrder = 1
     end
@@ -57,7 +57,7 @@ object EditorFrame: TEditorFrame
       Height = 33
       Top = 0
       Width = 83
-      Caption = 'Ersetzen'
+      Caption = 'Replace'
       OnClick = ReplaceButtonClick
       TabOrder = 3
     end
@@ -66,7 +66,7 @@ object EditorFrame: TEditorFrame
       Height = 33
       Top = 0
       Width = 120
-      Caption = 'Alle Ersetzen'
+      Caption = 'Replace all'
       OnClick = ReplaceAllButtonClick
       TabOrder = 4
     end
@@ -636,9 +636,9 @@ object EditorFrame: TEditorFrame
       Options = [tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoShowLines, tvoShowRoot, tvoToolTips]
       Items.Data = {
         F9FFFFFF0200030000000000000000000000FFFFFFFFFFFFFFFF000000000000
-        00000008000000496E636C756465730000000000000000FFFFFFFFFFFFFFFF00
-        0000000000000000090000005661726961626C656E0000000000000000FFFFFF
-        FFFFFFFFFF0000000000000000000A00000046756E6B74696F6E656E
+        00000007000000496E636C7564650000000000000000FFFFFFFFFFFFFFFF0000
+        00000000000000090000005661726961626C65730000000000000000FFFFFFFF
+        FFFFFFFF0000000000000000000900000046756E6374696F6E73
       }
     end
   end

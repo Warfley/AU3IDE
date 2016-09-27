@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  ColorBox, au3Types, TLStrings;
+  ColorBox, au3Types, TLStrings, LCLTranslator;
 
 type
 

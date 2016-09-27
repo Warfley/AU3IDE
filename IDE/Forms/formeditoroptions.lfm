@@ -3,6 +3,7 @@ object FormEditorOptionsForm: TFormEditorOptionsForm
   Height = 304
   Top = 213
   Width = 378
+  ActiveControl = OISideBox
   Caption = 'Formular Editor Optionen'
   ClientHeight = 304
   ClientWidth = 378
@@ -14,7 +15,7 @@ object FormEditorOptionsForm: TFormEditorOptionsForm
     Height = 15
     Top = 8
     Width = 90
-    Caption = 'Objekt Inspektor:'
+    Caption = 'Object inspektor:'
     ParentColor = False
   end
   object OISideBox: TToggleBox
@@ -22,7 +23,7 @@ object FormEditorOptionsForm: TFormEditorOptionsForm
     Height = 25
     Top = 8
     Width = 92
-    Caption = 'Rechts'
+    Caption = 'Right'
     Checked = True
     OnChange = OISideBoxChange
     State = cbChecked
@@ -32,8 +33,8 @@ object FormEditorOptionsForm: TFormEditorOptionsForm
     Left = 0
     Height = 15
     Top = 51
-    Width = 68
-    Caption = 'Hintergrund:'
+    Width = 67
+    Caption = 'Background:'
     ParentColor = False
   end
   object BGColorPicklist: TColorBox
@@ -80,8 +81,8 @@ object FormEditorOptionsForm: TFormEditorOptionsForm
     Left = 0
     Height = 15
     Top = 91
-    Width = 69
-    Caption = 'Vordergrund:'
+    Width = 65
+    Caption = 'Foreground:'
     ParentColor = False
   end
   object TBColorButton: TButton
@@ -127,18 +128,18 @@ object FormEditorOptionsForm: TFormEditorOptionsForm
     Height = 32
     Top = 264
     Width = 99
-    Caption = 'Abbrechen'
+    Caption = 'Cancel'
     ModalResult = 2
     TabOrder = 8
   end
   object Label5: TLabel
     Left = 0
     Height = 25
-    Hint = 'Zeigt ein Raster auf allen Containerkomponenten an'#13#10#13#10'Verlangsamt den Editor bei großen Formen drastisch'
+    Hint = 'Shows the grid on the formular. Not recommended on a slow computer'
     Top = 176
     Width = 168
     AutoSize = False
-    Caption = 'Raster:'
+    Caption = 'Grid:'
     ParentColor = False
     ParentShowHint = False
     ShowHint = True
@@ -146,7 +147,7 @@ object FormEditorOptionsForm: TFormEditorOptionsForm
   object RasterBox: TCheckBox
     Left = 168
     Height = 19
-    Hint = 'Zeigt ein Raster auf allen Containerkomponenten an'#13#10#13#10'Verlangsamt den Editor bei großen Formen drastisch'
+    Hint = 'Shows the grid on the formular. Not recommended on a slow computer'
     Top = 174
     Width = 20
     Checked = True
@@ -159,8 +160,8 @@ object FormEditorOptionsForm: TFormEditorOptionsForm
     Left = 192
     Height = 15
     Top = 176
-    Width = 35
-    Caption = 'Größe:'
+    Width = 23
+    Caption = 'Size:'
     ParentColor = False
   end
   object RasterSizeEdit: TEdit
@@ -176,10 +177,10 @@ object FormEditorOptionsForm: TFormEditorOptionsForm
   object HelpLineBox: TCheckBox
     Left = 0
     Height = 19
-    Hint = 'Hilfslinien zum Positionieren von Controls'
+    Hint = 'Lines to help position controls based on ther controls position.'
     Top = 216
-    Width = 73
-    Caption = 'Hilfslinien'
+    Width = 82
+    Caption = 'Helper lines'
     Checked = True
     ParentShowHint = False
     ShowHint = True
@@ -189,10 +190,10 @@ object FormEditorOptionsForm: TFormEditorOptionsForm
   object DBBox: TCheckBox
     Left = 168
     Height = 19
-    Hint = 'Auf langsamen Computern und VMs nicht empfohlen'
+    Hint = 'Not recommended on a slow computer'
     Top = 216
     Width = 93
-    Caption = 'Doppel Puffer'
+    Caption = 'Double buffer'
     Checked = True
     ParentShowHint = False
     ShowHint = True
@@ -200,6 +201,7 @@ object FormEditorOptionsForm: TFormEditorOptionsForm
     TabOrder = 12
   end
   object ColorDialog1: TColorDialog
+    Title = 'Select Color'
     Color = clBlack
     CustomColors.Strings = (
       'ColorA=000000'

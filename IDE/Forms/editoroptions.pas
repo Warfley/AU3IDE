@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ExtCtrls,
   StdCtrls, ColorBox, ComCtrls, Editor, strutils, SynGutterBase, SynEdit,
-  SynGutterChanges, au3Highlighter, SynEditTypes, au3Types, GraphUtil;
+  SynGutterChanges, au3Highlighter, SynEditTypes, au3Types, GraphUtil, LCLTranslator;
 
 type
 
@@ -21,6 +21,7 @@ type
     Button2: TButton;
     AddKeywordButton: TButton;
     DeleteFuncButton: TButton;
+    EditorFrame1: TEditorFrame;
     FuncNameEdit: TEdit;
     KeyTypeBox: TComboBox;
     EditorFontButton: TButton;
@@ -136,7 +137,6 @@ type
     CaretAlwaysVisibleBox: TCheckBox;
     EditorColorButton: TButton;
     BGColorPicklist: TColorBox;
-    EditorFrame1: TEditorFrame;
     GutterColorButton: TButton;
     EditorColorPicklist: TColorBox;
     ColorDialog1: TColorDialog;

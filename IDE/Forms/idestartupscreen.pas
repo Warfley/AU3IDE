@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, Buttons, TLStrings,
-  ExtCtrls, StdCtrls, ComCtrls, EditBtn, Project, strutils, au3Types, ProjectConfForm;
+  ExtCtrls, StdCtrls, ComCtrls, EditBtn, Project, strutils, au3Types, ProjectConfForm, LCLTranslator;
 
 type
 

@@ -42,7 +42,7 @@ object MainForm: TMainForm
         object AddUnitBtn: TSpeedButton
           Left = 0
           Height = 32
-          Hint = 'Neue AU3 Quelltextdatei'
+          Hint = 'New AutoIt source file'
           Top = 0
           Width = 32
           Align = alLeft
@@ -186,7 +186,7 @@ object MainForm: TMainForm
         object AddFormBtn: TSpeedButton
           Left = 32
           Height = 32
-          Hint = 'Neue AU3 Form'
+          Hint = 'New AutoIt form'
           Top = 0
           Width = 32
           Align = alLeft
@@ -274,7 +274,7 @@ object MainForm: TMainForm
         object SaveAsBtn: TSpeedButton
           Left = 128
           Height = 32
-          Hint = 'Speichern unter...'
+          Hint = 'Save as...'
           Top = 0
           Width = 32
           Align = alLeft
@@ -362,7 +362,7 @@ object MainForm: TMainForm
         object SaveBtn: TSpeedButton
           Left = 96
           Height = 32
-          Hint = 'Speichern'
+          Hint = 'Save'
           Top = 0
           Width = 32
           Align = alLeft
@@ -450,7 +450,7 @@ object MainForm: TMainForm
         object SaveAllBtn: TSpeedButton
           Left = 160
           Height = 32
-          Hint = 'Alle Speichern'
+          Hint = 'Save all'
           Top = 0
           Width = 32
           Align = alLeft
@@ -538,7 +538,7 @@ object MainForm: TMainForm
         object CloseAllBtn: TSpeedButton
           Left = 224
           Height = 32
-          Hint = 'Alle schließen'
+          Hint = 'Close all'
           Top = 0
           Width = 32
           Align = alLeft
@@ -626,7 +626,7 @@ object MainForm: TMainForm
         object CloseEditorBtn: TSpeedButton
           Left = 192
           Height = 32
-          Hint = 'Editorfenster schließen'
+          Hint = 'Close editor'
           Top = 0
           Width = 32
           Align = alLeft
@@ -714,7 +714,7 @@ object MainForm: TMainForm
         object NewProjBtn: TSpeedButton
           Left = 64
           Height = 32
-          Hint = 'Neues Project'
+          Hint = 'New project'
           Top = 0
           Width = 32
           Align = alLeft
@@ -811,7 +811,7 @@ object MainForm: TMainForm
         object RunBtn: TSpeedButton
           Left = 0
           Height = 32
-          Hint = 'Ausführen (F5)'
+          Hint = 'Run (F5)'
           Top = 0
           Width = 32
           Align = alLeft
@@ -988,7 +988,7 @@ object MainForm: TMainForm
         object SelectModeBox: TComboBox
           Left = 80
           Height = 23
-          Hint = 'Modus'
+          Hint = 'Mode'
           Top = 3
           Width = 100
           Anchors = [akLeft]
@@ -1052,43 +1052,43 @@ object MainForm: TMainForm
     left = 512
     top = 304
     object FileMenuItem: TMenuItem
-      Caption = 'Datei'
+      Caption = 'File'
       object NewMenuItem: TMenuItem
-        Caption = 'Neu'
+        Caption = 'New'
         object NewProjectItem: TMenuItem
-          Caption = 'Projekt'
+          Caption = 'Project'
           ShortCut = 24654
           OnClick = NewProjectItemClick
         end
         object NewFileItem: TMenuItem
-          Caption = 'AU3 Source'
+          Caption = 'AutoIt source'
           ShortCut = 16462
           OnClick = NewFileItemClick
         end
         object NewFormItem: TMenuItem
-          Caption = 'AU3 Form'
+          Caption = 'AutoIt form'
           OnClick = NewFormItemClick
         end
       end
       object NewEditView: TMenuItem
-        Caption = 'Neues Editorfenster'
+        Caption = 'New editor window'
         OnClick = NewEditViewClick
       end
       object MenuSplitItem1: TMenuItem
         Caption = '-'
       end
       object SaveFileItem: TMenuItem
-        Caption = 'Speichern'
+        Caption = 'Save'
         ShortCut = 16467
         OnClick = SaveFileItemClick
       end
       object SaveAsItem: TMenuItem
-        Caption = 'Speichern Unter'
+        Caption = 'Save as...'
         ShortCut = 24659
         OnClick = SaveAsItemClick
       end
       object SaveAllItem: TMenuItem
-        Caption = 'Alle Speichern'
+        Caption = 'Save all'
         ShortCut = 49235
         OnClick = SaveAllItemClick
       end
@@ -1096,12 +1096,12 @@ object MainForm: TMainForm
         Caption = '-'
       end
       object CloseFileItem: TMenuItem
-        Caption = 'Schließen'
+        Caption = 'Close editor'
         ShortCut = 16471
         OnClick = CloseFileItemClick
       end
       object CloseAllItem: TMenuItem
-        Caption = 'Alle schließen'
+        Caption = 'Close all'
         ShortCut = 24663
         OnClick = CloseAllItemClick
       end
@@ -1109,19 +1109,19 @@ object MainForm: TMainForm
         Caption = '-'
       end
       object QuitMenuItem: TMenuItem
-        Caption = 'Beenden'
+        Caption = 'Quit'
         ShortCut = 16465
       end
     end
     object EditMenuItem: TMenuItem
-      Caption = 'Bearbeiten'
+      Caption = 'Edit'
       object UndoMenuItem: TMenuItem
-        Caption = 'Rückgängig'
+        Caption = 'Undo'
         ShortCut = 16474
         OnClick = UndoMenuItemClick
       end
       object RedoMenuItem: TMenuItem
-        Caption = 'Wiederherstellen'
+        Caption = 'Redo'
         ShortCut = 16473
         OnClick = RedoMenuItemClick
       end
@@ -1129,94 +1129,96 @@ object MainForm: TMainForm
         Caption = '-'
       end
       object SearchMenuItem: TMenuItem
-        Caption = 'Suchen'
+        Caption = 'Search'
         ShortCut = 16454
       end
       object MenuSplitItem4: TMenuItem
         Caption = '-'
       end
       object FormatMenuItem: TMenuItem
-        Caption = 'Code Formatieren'
+        Caption = 'Format code'
         ShortCut = 16452
       end
       object MenuSplitItem6: TMenuItem
         Caption = '-'
       end
       object NextTabItem: TMenuItem
-        Caption = 'Nächster Editor'
+        Caption = 'Next editor'
         ShortCut = 49191
         OnClick = NextTabItemClick
       end
       object PrevTabItem: TMenuItem
-        Caption = 'Vorheriger Editor'
+        Caption = 'Previous editor'
         ShortCut = 49189
         OnClick = PrevTabItemClick
       end
     end
     object RunMenu: TMenuItem
-      Caption = 'Start'
+      Caption = 'Run'
       GlyphShowMode = gsmNever
       object RunMenuItem: TMenuItem
-        Caption = 'Ausführen'
+        Caption = 'Run'
         ShortCut = 116
         OnClick = RunMenuItemClick
       end
       object CompileMenuItem: TMenuItem
-        Caption = 'Kompilieren'
+        Caption = 'Build'
         ShortCut = 16450
         OnClick = CompileMenuItemClick
       end
     end
     object ExtrasMenuItem: TMenuItem
-      Caption = 'Extras'
+      Caption = 'Tools'
       object SampeButton: TMenuItem
-        Caption = 'Beispiele'
+        Caption = 'Examples'
         OnClick = SampeButtonClick
       end
       object UpdateMenuItem: TMenuItem
-        Caption = 'Nach Updates suchen'
+        Caption = 'Search for updates'
         OnClick = UpdateMenuItemClick
       end
       object InfoMenuItem: TMenuItem
-        Caption = 'Über...'
+        Caption = 'About...'
         OnClick = InfoMenuItemClick
       end
       object AboutAutoitItem: TMenuItem
-        Caption = 'Über Autoit'
+        Caption = 'About AutoIt'
         OnClick = AboutAutoitItemClick
       end
     end
     object ConfigMenuItem: TMenuItem
-      Caption = 'Einstellungen'
+      Caption = 'Options'
       object IDEOptionItem: TMenuItem
         AutoCheck = True
-        Caption = 'Projektinspektor Links'
+        Caption = 'Project inspector left'
         OnClick = IDEOptionItemClick
       end
       object CompOptionMenuItem: TMenuItem
-        Caption = 'Compiler Optionen'
+        Caption = 'Compiler options'
         OnClick = CompOptionMenuItemClick
       end
       object TextEditorOptionsItem: TMenuItem
-        Caption = 'AU3 Editor Optionen'
+        Caption = 'Scripteditor options'
         OnClick = TextEditorOptionsItemClick
       end
       object FormOptionsItem: TMenuItem
-        Caption = 'Formular Editor Optionen'
+        Caption = 'Formeditor options'
         OnClick = FormOptionsItemClick
       end
       object OtherOptionsItem: TMenuItem
-        Caption = 'Weitere'
+        Caption = 'Other'
         OnClick = OtherOptionsItemClick
       end
     end
   end
   object SaveAU3FileDialog: TSaveDialog
+    Title = 'Save file as'
     Options = [ofExtensionDifferent, ofEnableSizing, ofViewDetail]
     left = 512
   end
   object OpenAU3FileDialog: TOpenDialog
-    Filter = 'AU3 Quellcode|*.au3;*.afm;*.apr'
+    Title = 'Open File'
+    Filter = 'AutoIt Source|*.au3;*.afm;*.apr'
     Options = [ofExtensionDifferent, ofFileMustExist, ofEnableSizing, ofViewDetail]
     left = 512
     top = 128

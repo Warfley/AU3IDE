@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ComCtrls,
-  ExtCtrls, Menus, StdCtrls, EditBtn, ValEdit, TLStrings;
+  ExtCtrls, Menus, StdCtrls, EditBtn, ValEdit, TLStrings, LCLTranslator;
 
 type
 
@@ -48,7 +48,7 @@ type
     Panel1: TPanel;
     Allgemein: TTabSheet;
     Compiler: TTabSheet;
-    TabSheet1: TTabSheet;
+    RunParameter: TTabSheet;
     CompTrackBar: TTrackBar;
     VersionData: TValueListEditor;
     procedure AddParamBtnClick(Sender: TObject);

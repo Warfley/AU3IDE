@@ -6,13 +6,15 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  ComCtrls, Spin, Menus;
+  ComCtrls, Spin, Menus, LCLTranslator;
 
 type
 
   { TOtherOptions }
 
   TOtherOptions = class(TForm)
+    LangBox: TComboBox;
+    Label6: TLabel;
     UpdateBox: TCheckBox;
     OKButton: TButton;
     IncVarBox: TCheckBox;
