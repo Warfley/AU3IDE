@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, TreeFilterEdit, Forms, Controls, ComCtrls,
-  ExtCtrls, StdCtrls, Project, Dialogs, au3Types, ProjectConfForm;
+  ExtCtrls, StdCtrls, Project, Dialogs, au3Types, ProjectConfForm, TLStrings;
 
 type
 
@@ -93,10 +93,8 @@ begin
     hasForm := (ExtractFileExt(Openau3FileDialog.FileName) = '.au3') and
       FileExists(ChangeFileExt(Openau3FileDialog.FileName, '.afm'));
     if Pos(FProject.ProjectDir, Openau3FileDialog.FileName) < 1 then
-      if MessageDlg('Datei nicht im Projektverzeichnis', 'Die gewählte Datei ' +
-        'befindet sich nicht im Projektverzeichnis'#10#13 +
-        'Wollen sie die Datei in das Projektverzeichnis kopieren?',
-        mtConfirmation, mbYesNo, 'Kopieren') = mrYes then
+      if MessageDlg(SFileNotProjDirTitle, SFileNotProjDirText,
+        mtConfirmation, mbYesNo, SFileNotProjDirKeyword) = mrYes then
       begin
         if hasForm then
           CopyFile(ChangeFileExt(Openau3FileDialog.FileName, '.afm'),
@@ -196,8 +194,8 @@ procedure TProjectInspector.DeleteButtonClick(Sender: TObject);
 var
   fm, p: string;
 begin
-  if MessageDlg('Wirklich löschen', 'Diese Datei wirklich löschen',
-    mtConfirmation, mbYesNo, 'Bestätigen') = mrYes then
+  if MessageDlg(SDeleteFileTitle, SDeleteFileText,
+    mtConfirmation, mbYesNo, SDeleteFileKeyword) = mrYes then
   begin
     fm := '';
     p := FProject.FilePath[IntPtr(ProjectFileTreeView.Selected.Data)];

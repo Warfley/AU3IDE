@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  ColorBox, au3Types;
+  ColorBox, au3Types, TLStrings;
 
 type
 
@@ -86,9 +86,9 @@ end;
 procedure TFormEditorOptionsForm.OISideBoxChange(Sender: TObject);
 begin
   if OISideBox.Checked then
-    OISideBox.Caption := 'Rechts'
+    OISideBox.Caption := SRight
   else
-    OISideBox.Caption := 'Links';
+    OISideBox.Caption := SLeft;
 end;
 
 procedure TFormEditorOptionsForm.TBColorButtonClick(Sender: TObject);

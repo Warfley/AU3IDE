@@ -9,7 +9,7 @@ uses
   au3Highlighter, Types, contnrs, LCLType, ExtCtrls, au3Types, UnitParser,
   Dialogs, Graphics, StdCtrls, Buttons, ComCtrls, strutils, CodeFormatter,
   ToolTip, ListRecords, SynEditTypes, Math, SynGutterBase, SynGutterChanges,
-  GraphUtil, Project, gvector, fgl;
+  GraphUtil, Project, gvector, fgl, TLStrings;
 
 type
 
@@ -845,29 +845,28 @@ procedure TEditorFrame.ReplaceAllButtonClick(Sender: TObject);
 begin
   if CodeEditor.SearchReplaceEx(SearchEdit.Text, '', [ssoReplace, ssoReplaceAll],
     Point(0, 0)) = 0 then
-    ShowMessage('Keine Ergebnisse gefunden');
+    ShowMessage(SNoMatchFound);
 end;
 
 procedure TEditorFrame.ReplaceButtonClick(Sender: TObject);
 begin
   if CodeEditor.SearchReplaceEx(SearchEdit.Text, '', [ssoReplace],
     CodeEditor.BlockEnd) = 0 then
-    if MessageDlg('Dateiende Erreicht',
-      'Die Suche hat das Dateiende erreicht, von Dateianfang erneut suchen?',
-      mtConfirmation, mbYesNo, 'Suche') = mrYes then
+    if MessageDlg(SEOFReachedTitle, SEOFReachedText,
+      mtConfirmation, mbYesNo, SEOFReachedKeyword) = mrYes then
       if CodeEditor.SearchReplaceEx(SearchEdit.Text, '', [ssoReplace],
         Point(0, 0)) = 0 then
-        ShowMessage('Keine Ergebnisse gefunden');
+        ShowMessage(SNoMatchFound);
 end;
 
 procedure TEditorFrame.SearchButtonClick(Sender: TObject);
 begin
   if CodeEditor.SearchReplaceEx(SearchEdit.Text, '', [], CodeEditor.BlockEnd) = 0 then
-    if MessageDlg('Dateiende Erreicht',
-      'Die Suche hat das Dateiende erreicht, von Dateianfang erneut suchen?',
-      mtConfirmation, mbYesNo, 'Suche') = mrYes then
+    if MessageDlg(SEOFReachedTitle,
+      SEOFReachedText,
+      mtConfirmation, mbYesNo, SEOFReachedKeyword) = mrYes then
       if CodeEditor.SearchReplaceEx(SearchEdit.Text, '', [], Point(0, 0)) = 0 then
-        ShowMessage('Keine Ergebnisse gefunden');
+        ShowMessage(SNoMatchFound);
 end;
 
 procedure TEditorFrame.ReplaceEditKeyUp(Sender: TObject; var Key: word;
@@ -1519,8 +1518,8 @@ var
   c: TCodeFormatter;
   i: integer;
 begin
-  if MessageDlg('Code Formatieren', 'Codeformatter:'#10#13'Wirklich formatieren?',
-    mtConfirmation, mbYesNo, 'Confirmation') = mrYes then
+  if MessageDlg(SCodeFormatterTitle, SCodeFormatterText,
+    mtConfirmation, mbYesNo, SCodeFormatterKeyword) = mrYes then
   begin
     c := TCodeFormatter.Create;
     try
@@ -1706,7 +1705,7 @@ begin
     CodeExplorer.Show;
     CodeExplorerPanel.Width := 235;
     CloseCodeExplorerButton.Caption := 'x';
-    CodeExplorerHead.Caption := 'Code Explorer';
+    CodeExplorerHead.Caption := SCodeExplorer;
     UpdateTimerTimer(nil);
   end;
 end;

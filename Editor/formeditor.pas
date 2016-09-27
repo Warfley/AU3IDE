@@ -10,7 +10,7 @@ interface
 uses
   Classes, SysUtils, FileUtil, TreeFilterEdit, RTTIGrids, Forms, Controls,
   Graphics, ExtCtrls, StdCtrls, ValEdit, ComCtrls, Grids, contnrs, au3Types,
-  Dialogs, FormEditComponents, LCLIntf, Math, GraphUtil, PropEdits, ObjectInspector;
+  Dialogs, FormEditComponents, LCLIntf, Math, GraphUtil, PropEdits, ObjectInspector, TLStrings;
 
 type
 
@@ -454,7 +454,7 @@ begin
     (EventEditor.ScreenToClient(Mouse.CursorPos).x < EventEditor.Width - 20) then
   begin
     if EventEditor.Rows[EventEditor.Row][1] = '' then
-      EventEditor.Rows[EventEditor.Row][1] := '(Neu...)';
+      EventEditor.Rows[EventEditor.Row][1] := Format('(%s...)', [SNew]);
     EventEditorPickListSelect(EventEditor);
   end;
   FLastClickTime := c;
@@ -1145,8 +1145,8 @@ end;
 procedure TFormEditFrame.EventEditorGetPickList(Sender: TObject;
   const KeyName: string; Values: TStrings);
 begin
-  Values.Add('(Kein)');
-  Values.Add('(Neu...)');
+  Values.Add(Format('(%s)', [SNone]));
+  Values.Add(Format('(%s)', [SNew]));
   Values.AddStrings(FFuncList);
 end;
 
@@ -1157,14 +1157,14 @@ var
 begin
   s := EventEditor.Rows[EventEditor.Row][0];
   v := EventEditor.Rows[EventEditor.Row][1];
-  if v = '(Kein)' then
+  if v = Format('(%s)', [SNone]) then
   begin
     EventEditor.Values[s] := '';
     Exit;
   end;
   if v = '' then
     Exit;
-  if v = '(Neu...)' then
+  if v = Format('(%s)', [SNew]) then
   begin
     v := FormControlView.Selected.Text + Copy(s, 3, Length(s));
     if StringsContain(FFuncList, v) then
@@ -1337,7 +1337,7 @@ begin
   EventEditor.Row := 0;
   s := EventEditor.Rows[0][0];
   if EventEditor.Values[s] = '' then
-    EventEditor.Values[s] := '(Neu...)';
+    EventEditor.Values[s] := Format('(%s)', [SNew]);
   EventEditorPickListSelect(EventEditor);
 end;
 

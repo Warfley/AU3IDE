@@ -11,7 +11,8 @@ uses
   IDEStartupScreen, ProjectInspector, au3Types, Editor, FormEditor,
   EditorManagerFrame, au3FileInfo, FormEditComponents, au3Compiler,
   CompilerOptions, EditorOptions, FormEditorOptions, SampeProjectView,
-  AboutWindow, ProjectConfForm, aboutautoit, EditorWindow, OtherOptionsForm
+  AboutWindow, ProjectConfForm, aboutautoit, EditorWindow, OtherOptionsForm,
+  TLStrings
   { you can add units after this };
 
 {$R *.res}

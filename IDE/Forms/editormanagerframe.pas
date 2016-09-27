@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Types, FileUtil, Forms, Controls, ComCtrls, Editor, FormEditor,
-  Dialogs, Buttons, Menus, ExtCtrls, au3Types, Project, fgl, EditorWindow, Math;
+  Dialogs, Buttons, Menus, ExtCtrls, au3Types, Project, fgl, EditorWindow, Math, TLStrings;
 
 type
   TCloseEditorEvent = procedure(Sender: TObject; Editor: integer;
@@ -224,7 +224,7 @@ begin
     FilesPopUp.Items[0].Free;
   ProjItem := TMenuItem.Create(FilesPopUp);
   FilesPopUp.Items.Add(ProjItem);
-  ProjItem.Caption := 'Projekt';
+  ProjItem.Caption := SProject;
   tmpItem := TMenuItem.Create(ProjItem);
   tmpItem.Caption := ExtractFileName(FProject.MainFile);
   tmpItem.Tag := -1;
@@ -242,7 +242,7 @@ begin
   begin
     ProjItem := TMenuItem.Create(FilesPopUp);
     FilesPopUp.Items.Add(ProjItem);
-    ProjItem.Caption := 'Offen';
+    ProjItem.Caption := SOpend;
     for i := 0 to Count - 1 do
     begin
       tmpItem := TMenuItem.Create(ProjItem);
@@ -258,7 +258,7 @@ begin
 
   ProjItem := TMenuItem.Create(FilesPopUp);
   FilesPopUp.Items.Add(ProjItem);
-  ProjItem.Caption := 'Datei...';
+  ProjItem.Caption := SFile+'...';
   ProjItem.OnClick := @OpenNewItemClick;
 
   c := Sender as TControl;

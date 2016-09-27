@@ -7,12 +7,13 @@ object FormEditorOptionsForm: TFormEditorOptionsForm
   ClientHeight = 304
   ClientWidth = 378
   Position = poScreenCenter
-  LCLVersion = '1.7'
+  LCLVersion = '1.6.0.4'
+  Visible = False
   object Label1: TLabel
     Left = 0
-    Height = 25
+    Height = 15
     Top = 8
-    Width = 137
+    Width = 90
     Caption = 'Objekt Inspektor:'
     ParentColor = False
   end
@@ -29,9 +30,9 @@ object FormEditorOptionsForm: TFormEditorOptionsForm
   end
   object Label2: TLabel
     Left = 0
-    Height = 25
+    Height = 15
     Top = 51
-    Width = 100
+    Width = 68
     Caption = 'Hintergrund:'
     ParentColor = False
   end
@@ -77,9 +78,9 @@ object FormEditorOptionsForm: TFormEditorOptionsForm
   end
   object Label3: TLabel
     Left = 0
-    Height = 25
+    Height = 15
     Top = 91
-    Width = 105
+    Width = 69
     Caption = 'Vordergrund:'
     ParentColor = False
   end
@@ -106,9 +107,9 @@ object FormEditorOptionsForm: TFormEditorOptionsForm
   end
   object Label4: TLabel
     Left = 0
-    Height = 25
+    Height = 15
     Top = 131
-    Width = 125
+    Width = 84
     Caption = 'Toolbox Button:'
     ParentColor = False
   end
@@ -144,10 +145,10 @@ object FormEditorOptionsForm: TFormEditorOptionsForm
   end
   object RasterBox: TCheckBox
     Left = 168
-    Height = 29
+    Height = 19
     Hint = 'Zeigt ein Raster auf allen Containerkomponenten an'#13#10#13#10'Verlangsamt den Editor bei großen Formen drastisch'
     Top = 174
-    Width = 30
+    Width = 20
     Checked = True
     ParentShowHint = False
     ShowHint = True
@@ -156,15 +157,15 @@ object FormEditorOptionsForm: TFormEditorOptionsForm
   end
   object Label6: TLabel
     Left = 192
-    Height = 25
+    Height = 15
     Top = 176
-    Width = 52
+    Width = 35
     Caption = 'Größe:'
     ParentColor = False
   end
   object RasterSizeEdit: TEdit
     Left = 248
-    Height = 33
+    Height = 23
     Top = 174
     Width = 80
     Alignment = taRightJustify
@@ -174,10 +175,10 @@ object FormEditorOptionsForm: TFormEditorOptionsForm
   end
   object HelpLineBox: TCheckBox
     Left = 0
-    Height = 29
+    Height = 19
     Hint = 'Hilfslinien zum Positionieren von Controls'
     Top = 216
-    Width = 106
+    Width = 73
     Caption = 'Hilfslinien'
     Checked = True
     ParentShowHint = False
@@ -187,10 +188,10 @@ object FormEditorOptionsForm: TFormEditorOptionsForm
   end
   object DBBox: TCheckBox
     Left = 168
-    Height = 29
+    Height = 19
     Hint = 'Auf langsamen Computern und VMs nicht empfohlen'
     Top = 216
-    Width = 141
+    Width = 93
     Caption = 'Doppel Puffer'
     Checked = True
     ParentShowHint = False

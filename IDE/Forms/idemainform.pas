@@ -6,11 +6,10 @@ interface
 
 uses
   Classes, SysUtils, LazFileUtils, FileUtil, Forms, Controls, Graphics,
-  Dialogs, StdCtrls,
-  Menus, ComCtrls, Buttons, ExtCtrls, PairSplitter, Project, IDEStartupScreen,
+  Dialogs, StdCtrls, Menus, ComCtrls, Buttons, ExtCtrls, PairSplitter, Project, IDEStartupScreen,
   ProjectInspector, EditorManagerFrame, au3Types, FormEditor, Editor,
   au3FileInfo, strutils, CompilerOptions, au3Compiler, EditorOptions, FormEditorOptions,
-  SampeProjectView, fphttpclient, process, AboutWindow, Math, aboutautoit, OtherOptionsForm;
+  SampeProjectView, fphttpclient, process, AboutWindow, Math, aboutautoit, OtherOptionsForm, TLStrings, Types;
 
 type
 
@@ -50,7 +49,6 @@ type
     CenterPanel: TPanel;
     PrevTabItem: TMenuItem;
     MenuSplitItem6: TMenuItem;
-    ProjectInspector1: TProjectInspector;
     RunMenuItem: TMenuItem;
     OutBoxSplitter: TSplitter;
     ProjectExplorerSplitter: TSplitter;
@@ -121,6 +119,9 @@ type
     procedure NewProjectItemClick(Sender: TObject);
     procedure NextTabItemClick(Sender: TObject);
     procedure OtherOptionsItemClick(Sender: TObject);
+    procedure OutputBoxClick(Sender: TObject);
+    procedure OutputBoxDrawItem(Control: TWinControl; Index: Integer;
+      ARect: TRect; State: TOwnerDrawState);
     procedure PrevTabItemClick(Sender: TObject);
     procedure RedoMenuItemClick(Sender: TObject);
     procedure RunBtnClick(Sender: TObject);
@@ -137,6 +138,8 @@ type
     procedure UndoMenuItemClick(Sender: TObject);
     procedure UpdateMenuItemClick(Sender: TObject);
   private
+    ProjectInspector: TProjectInspector;
+    FDrawState: TList;
     EditorManager: TEditorManager;
     FFirstLoad: boolean;
     FSaveOnClosing: boolean;
@@ -293,20 +296,23 @@ end;
 procedure TMainForm.PrintText(Sender: TObject; FileName: string; Output: string);
 begin
   OutputBox.Items.Add(FCurrentProject.GetRelPath(FileName) + ': ' + Output);
+  FDrawState.Add(Pointer(clWhite));
   OutputBox.ItemIndex := OutputBox.Items.Count - 1;
   OutputBox.ItemIndex := -1;
 end;
 
 procedure TMainForm.FinishedComp(Sender: TObject);
 begin
-  OutputBox.Items.Add('Kompilieren abgeschlossen');
+  FDrawState.Add(Pointer(clLime));
+  OutputBox.Items.Add(Format(SDoneCompileing, [FCurrentProject.Name]));
   OutputBox.ItemIndex := OutputBox.Items.Count - 1;
   OutputBox.ItemIndex := -1;
 end;
 
 procedure TMainForm.FinishedRun(Sender: TObject);
 begin
-  OutputBox.Items.Add('Ausführung beendet');
+  FDrawState.Add(Pointer(clLime));
+  OutputBox.Items.Add(SDoneExec);
   OutputBox.ItemIndex := OutputBox.Items.Count - 1;
   OutputBox.ItemIndex := -1;
   RunBtn.Enabled := True;
@@ -315,7 +321,8 @@ end;
 
 procedure TMainForm.CompileError(Sender: TObject);
 begin
-  OutputBox.Items.Add('Compiler Fehler, ausführung beendet');
+  OutputBox.Items.Add(Format(SErrorCompiling, [FCurrentProject.Name]));
+  FDrawState.Add(Pointer(clRed));
   OutputBox.ItemIndex := OutputBox.Items.Count - 1;
   OutputBox.ItemIndex := -1;
   RunBtn.Enabled := True;
@@ -369,9 +376,9 @@ begin
   try
   if CheckForUpdates then
   begin
-    if MessageDlg('Neue Version gefunden',
-      'Eine neue Version steht zum Download bereit.'#10#13'Jetzt aktualisieren?',
-      mtInformation, mbYesNo, 'Update') = mrYes then
+    if MessageDlg(SNewUpdateTitle,
+      SNewUpdateText,
+      mtInformation, mbYesNo, SNewUpdateKeyword) = mrYes then
       begin
       PerformUpdate;
       Exit;
@@ -406,7 +413,7 @@ begin
     FCurrentProject.CheckInclude := @CheckInclude;
     FCurrentProject.AddInclude := @AddInclude;
     EditorManager.Project := FCurrentProject;
-    ProjectInspector1.Project := FCurrentProject;
+    ProjectInspector.Project := FCurrentProject;
     Openau3FileDialog.InitialDir := FCurrentProject.ProjectDir;
     Saveau3FileDialog.InitialDir := FCurrentProject.ProjectDir;
       EditorManager.ViewOpened[1]:=vwTopRight in FCurrentProject.Views;
@@ -422,8 +429,8 @@ begin
           Point(FCurrentProject.OpendFiles[i].Pos, FCurrentProject.OpendFiles[i].Line), FCurrentProject.OpendFiles[i].View);
     for i:=0 to 3+FCurrentProject.ViewWindows do
       EditorManager.Focused[i]:=FCurrentProject.FocusedFile[i];
-    ProjectInspector1.OpenEditor := @OpenFile;
-    ProjectInspector1.CloseEditor := @KillEditor;
+    ProjectInspector.OpenEditor := @OpenFile;
+    ProjectInspector.CloseEditor := @KillEditor;
     EditorManager.OnEditorClose := @EditorClosing;
     EditorManager.OnEditorChanged := @EditorChanged;
     EditorManager.OnEditorCreated := @EditorCreated;
@@ -441,9 +448,9 @@ var
 begin
   FSaveOnClosing := False;
   if FCompiler.Active then
-    if MessageDlg('Ausführung noch nicht beendet',
-      'Der Compiler oder Interpreter ist noch aktiv, soll der Prozess gestoppt werden?',
-      mtConfirmation, [mbYes, mbCancel], 'Beenden?') = mrYes then
+    if MessageDlg(SStillRunningTitle,
+      SStillRunningText,
+      mtConfirmation, [mbYes, mbCancel], SStillRunningKeyword) = mrYes then
       FCompiler.Stop
     else
     begin
@@ -462,9 +469,7 @@ begin
   else
   if FCurrentProject.Changed then
   begin
-    mr := MessageDlg('Projekt sichern',
-      'Das Projekt hat sich seit dem Letzten öffnen geändert'#10#13'Projekt sichern?',
-      mtConfirmation, mbYesNoCancel, 'Sichern');
+    mr := MessageDlg(SSaveProjectTitle,SSaveProjectText,mtConfirmation, mbYesNoCancel, SSaveProjectKeyword);
     case mr of
       mrYes: FCurrentProject.Save;
       mrAbort: CloseAction := caNone;
@@ -499,6 +504,7 @@ procedure TMainForm.CompileMenuItemClick(Sender: TObject);
 begin
   SaveAllItemClick(nil);
   OutputBox.Clear;
+  FDrawState.Clear;
   if SelectModeBox.ItemIndex = 0 then
     FCompiler.Compile(FCurrentProject, cax86)
   else
@@ -713,9 +719,8 @@ begin
   begin
     EditorManager.EditorIndex := Editor;
     EditorManager.Invalidate;
-    res := MessageDlg('Datei wurde Verändert',
-      'Datei wurde Verändert'#10#13'Vor dem schließen Sichern?',
-      mtConfirmation, mbYesNoCancel, 'Schließen?');
+    res := MessageDlg(SSaveFileTitle, SSaveFileText,
+      mtConfirmation, mbYesNoCancel, SSaveFileKeyword);
     case res of
       mrYes: if FFormIsClosing then
         begin
@@ -782,7 +787,7 @@ begin
     HotKey := 'F5'
   else
     HotKey := 'Strg + R';
-  RunBtn.Hint := Format('Ausführen %s (%s)',
+  RunBtn.Hint := Format(SRunBtnHint,
     [SelectModeBox.Items[SelectModeBox.ItemIndex], Hotkey]);
 end;
 
@@ -818,13 +823,13 @@ procedure TMainForm.UpdateMenuItemClick(Sender: TObject);
 begin
   if CheckForUpdates then
   begin
-    if MessageDlg('Neue Version gefunden',
-      'Eine neue Version steht zum Download bereit.'#10#13'Jetzt aktualisieren?',
-      mtInformation, mbYesNo, 'Update') = mrYes then
+    if MessageDlg(SNewUpdateTitle,
+      SNewUpdateText,
+      mtInformation, mbYesNo, SNewUpdateKeyword) = mrYes then
       PerformUpdate;
   end
   else
-    ShowMessage('Keine neue Version gefunden');
+    ShowMessage(SNoNewUpdate);
 end;
 
 procedure TMainForm.EditorParserFinished(Sender: TObject);
@@ -865,10 +870,10 @@ begin
       idx := FFileData.CreateFile((Sender as TFormEditFrame).FileName);
     (Sender as TFormEditFrame).AddToVarlist(FFileData[idx].Variables);
     idx := FFileData.FileIndex[ChangeFileExt(
-      (Sender as TFormEditFrame).FileName, 'au3')];
+      (Sender as TFormEditFrame).FileName, '.au3')];
     if idx = -1 then
       idx := FFileData.LoadFile(ChangeFileExt(
-        (Sender as TFormEditFrame).FileName, 'au3'));
+        (Sender as TFormEditFrame).FileName, '.au3'));
   end
   else if Sender is TEditorFrame then
   begin
@@ -1009,6 +1014,9 @@ var
   f: file of TIDEState;
   fs: TFileStream;
 begin
+  ProjectInspector:=TProjectInspector.Create(Self);
+  ProjectInspector.Parent:=Self;
+  ProjectInspector.Align:=alLeft;
   if FileExists(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) +
     'wnd.cnf') then
   begin
@@ -1035,9 +1043,9 @@ begin
   // Load IDE Conf
   if not FileExistsUTF8(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'IDE.cnf') then
   begin
-    SearchForUpdates := MessageDlg('Nach Updates suchen',
-      'Soll die IDE bei jedem Start automatisch nach Updates suchen?',
-      mtConfirmation, mbYesNo, 'Update') = mrYes;
+    SearchForUpdates := MessageDlg(SSearchForUpdatesTitle,
+      SSearchForUpdatesText,
+      mtConfirmation, mbYesNo, SSearchForUpdatesKeyword) = mrYes;
     SaveIDESettings;
   end
   else
@@ -1075,7 +1083,8 @@ begin
   FFileData := Tau3FileManager.Create;
   EditorManager.OnParserFinished := @EditorParserFinished;
   EditorManager.IDEOpenFile := @OpenFile;
-  ProjectInspector1.ChangeMainForm := @ChangeMainForm;
+  ProjectInspector.ChangeMainForm := @ChangeMainForm;
+  FDrawState:=TList.Create;
   FLastOpend := TStringList.Create;
   FLastOpend.LoadFromFile(ExtractFilePath(ParamStr(0)) + 'LastOpend.txt');
   i := 0;
@@ -1094,6 +1103,7 @@ begin
   FFileData.Free;
   FCurrentProject.Free;
   FCompiler.Free;
+  FDrawState.Free;
 end;
 
 procedure TMainForm.FormOptionsItemClick(Sender: TObject);
@@ -1128,14 +1138,14 @@ procedure TMainForm.IDEOptionItemClick(Sender: TObject);
 begin
   if (Sender as TMenuItem).Checked then
   begin
-    (Sender as TMenuItem).Caption := 'Projektinspektor Links';
-    ProjectInspector1.Align := alLeft;
+    (Sender as TMenuItem).Caption := Format('%s %s', [SProjectInspector, SLeft]);
+    ProjectInspector.Align := alLeft;
     ProjectExplorerSplitter.Align := alLeft;
   end
   else
   begin
-    (Sender as TMenuItem).Caption := 'Projektinspektor Rechts';
-    ProjectInspector1.Align := alRight;
+    (Sender as TMenuItem).Caption := Format('%s %s', [SProjectInspector, SRight]);
+    ProjectInspector.Align := alRight;
     ProjectExplorerSplitter.Align := alRight;
   end;
   FCurrentState.PILeft := (Sender as TMenuItem).Checked;
@@ -1249,6 +1259,30 @@ begin
   end;
 end;
 
+procedure TMainForm.OutputBoxClick(Sender: TObject);
+begin
+  OutputBox.Invalidate;
+end;
+
+procedure TMainForm.OutputBoxDrawItem(Control: TWinControl; Index: Integer;
+  ARect: TRect; State: TOwnerDrawState);
+begin
+  with OutputBox.Canvas do
+  begin
+  Brush.Color:=TColor(FDrawState[Index]);
+  Brush.Style:=bsSolid;
+    pen.Style:=psSolid  ;
+  if OutputBox.ItemIndex=Index then
+  pen.Color:=clBlack
+  else
+  pen.Color:=clWhite             ;
+  Rectangle(ARect);
+  Brush.Style:=bsClear;
+  Font.Color:=OutputBox.Font.Color;
+  TextOut(ARect.Left,ARect.Top, OutputBox.Items[Index]);
+  end;
+end;
+
 procedure TMainForm.PrevTabItemClick(Sender: TObject);
 begin
   EditorManager.EditorIndex := Max(EditorManager.EditorIndex - 1, 0);
@@ -1272,6 +1306,7 @@ begin
   RunBtn.Enabled := False;
   StopBtn.Enabled := True;
   OutputBox.Clear;
+  FDrawState.Clear;
   if SelectModeBox.ItemIndex = 0 then
     FCompiler.Run(FCurrentProject, cax86)
   else
@@ -1302,11 +1337,11 @@ begin
   oldFile := EditorManager.EditorFiles[EditorManager.EditorIndex];
   ext := ExtractFileExt(oldFile);
   if ext = '.afm' then
-    Saveau3FileDialog.Filter := 'AutoIt Formular|*.afm'
+    Saveau3FileDialog.Filter := Format('%s %s|*.afm', [SAutoIt, SForm])
   else if ext = '.au3' then
-    Saveau3FileDialog.Filter := 'AutoIt Quellcode Datei|*.au3'
+    Saveau3FileDialog.Filter := Format('%s %s|*.au3', [SAutoIt, SUnit])
   else if ext = '.apr' then
-    Saveau3FileDialog.Filter := 'AutoIt Hauptdatei|*.apr';
+    Saveau3FileDialog.Filter := Format('%s %s|*.apr', [SAutoIt, SProgrammFile])  ;
   Saveau3FileDialog.FileName := ExtractFileName(oldFile);
   if Saveau3FileDialog.Execute then
   begin

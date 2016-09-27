@@ -12,7 +12,6 @@
       <XPManifest>
         <DpiAware Value="True"/>
       </XPManifest>
-      <Icon Value="0"/>
     </General>
     <i18n>
       <EnableI18N LFM="False"/>
@@ -21,7 +20,7 @@
       <UseVersionInfo Value="True"/>
       <AutoIncrementBuild Value="True"/>
       <RevisionNr Value="7"/>
-      <BuildNr Value="34"/>
+      <BuildNr Value="36"/>
       <Language Value="0407"/>
       <Attributes pvaPreRelease="True"/>
       <StringTable Comments="Automate Studio early Alpha" FileDescription="IDE for AutoIt language" LegalCopyright="Copyright (c) F. Kehrein 2016" ProductName="Automate Studio" ProductVersion="0.0.x Alpha"/>
@@ -115,7 +114,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="26">
+    <Units Count="27">
       <Unit0>
         <Filename Value="AU3IDE.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -162,6 +161,7 @@
       <Unit7>
         <Filename Value="..\Editor\codeformatter.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="CodeFormatter"/>
       </Unit7>
       <Unit8>
         <Filename Value="..\Editor\editor.pas"/>
@@ -288,6 +288,11 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="OtherOptionsForm"/>
       </Unit25>
+      <Unit26>
+        <Filename Value="Common\tlstrings.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="TLStrings"/>
+      </Unit26>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

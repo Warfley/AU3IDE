@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ComCtrls,
-  ExtCtrls, Menus, StdCtrls, EditBtn, ValEdit;
+  ExtCtrls, Menus, StdCtrls, EditBtn, ValEdit, TLStrings;
 
 type
 
@@ -68,7 +68,7 @@ var
   ProjectSettings: TProjectSettings;
 
 const
-  ACompStr: array[0..4] of string = ('Keine', 'Schwach', 'Normal', 'Stark', 'Max');
+  ACompStr: array[0..4] of string = (SComp0, SComp1, SComp2, SComp3, SComp4);
 
 implementation
 

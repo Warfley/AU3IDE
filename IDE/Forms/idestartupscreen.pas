@@ -5,7 +5,7 @@ unit IDEStartupScreen;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, Buttons,
+  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, Buttons, TLStrings,
   ExtCtrls, StdCtrls, ComCtrls, EditBtn, Project, strutils, au3Types, ProjectConfForm;
 
 type
@@ -148,19 +148,19 @@ var
 begin
   if NewProjectView.ItemIndex < 0 then
   begin
-    ShowMessage('Bitte einen Projekttypen auswählen');
+    ShowMessage(SSelectProjectTemplate);
     Exit;
   end;
   if not isValid(NewProjectNameEdit.Text) then
   begin
-    ShowMessage('Der Name darf nur aus Alphanumerischen Zeichen und _ bestehen');
+    ShowMessage(SAllowedSymbols);
     Exit;
   end;
   if not DirectoryExists(NewProjectDirEdit.Directory) then
   begin
     if not ForceDirectories(NewProjectDirEdit.Directory) then
     begin
-      ShowMessage('Fehler beim erstellen des Projektverzeichnisses');
+      ShowMessage(SErrorCreateProjectDir);
       exit;
     end;
   end
@@ -169,10 +169,9 @@ begin
     sl := TStringList.Create;
     try
       FindAllFiles(sl, NewProjectDirEdit.Directory);
-      if (sl.Count > 0) and (MessageDlg('Verzeichnis ist nicht leer',
-        'Das gewählte Projektverzeichnis ist nicht leer, wollen sie dennoch ' +
-        'fortfahren?'#10#13'Möglicherweise werden bereits vorhandend Dateien überschrieben',
-        mtWarning, mbYesNo, 'Dateien überschreiben') = mrNo) then
+      if (sl.Count > 0) and (MessageDlg(SDirNotEmptyTitle,
+      SDirNotEmptyText,
+      mtWarning, mbYesNo, SDirNotEmptyKeyword) = mrNo) then
         Exit;
     finally
       sl.Free;
