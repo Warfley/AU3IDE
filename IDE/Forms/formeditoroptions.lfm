@@ -4,7 +4,7 @@ object FormEditorOptionsForm: TFormEditorOptionsForm
   Top = 213
   Width = 378
   ActiveControl = OISideBox
-  Caption = 'Formular Editor Optionen'
+  Caption = 'GUI editor options'
   ClientHeight = 304
   ClientWidth = 378
   Position = poScreenCenter

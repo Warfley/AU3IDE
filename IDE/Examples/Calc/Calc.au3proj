@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<AU3Projekt1 Version="2">
+<Calc Version="2">
   <MainFile>AU3Projekt1.apr</MainFile>
   <Apptype>GUI</Apptype>
   <MainForm>MainForm.afm</MainForm>
@@ -35,9 +35,10 @@
     <File>MainForm.afm</File>
   </Files>
   <Paths> </Paths>
-  <Views TL="1" Windows="0"/>
+  <Views TL="1" Windows="1"/>
   <OpendFiles>
-    <Opend Pos="0" Line="0" View="0">MainForm.afm</Opend>
-    <Opend Pos="53" Line="7" View="0" Focused="1">MainForm.au3</Opend>
+    <Opend Pos="0" Line="0" View="0" Focused="1">MainForm.afm</Opend>
+    <Opend Pos="53" Line="7" View="1" Focused="1">MainForm.au3</Opend>
+    <Opend Pos="2" Line="3" View="4" Focused="1">AU3Projekt1.apr</Opend>
   </OpendFiles>
-</AU3Projekt1>
+</Calc>

@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ExtCtrls,
   StdCtrls, ColorBox, ComCtrls, Editor, strutils, SynGutterBase, SynEdit,
-  SynGutterChanges, au3Highlighter, SynEditTypes, au3Types, GraphUtil, LCLTranslator;
+  SynGutterChanges, au3Highlighter, SynEditTypes, au3Types, GraphUtil, TLStrings, LCLTranslator;
 
 type
 
@@ -836,7 +836,7 @@ end;
 
 procedure TEditorConf.CESideBoxChange(Sender: TObject);
 begin
-  CESideBox.Caption := IfThen(CESideBox.Checked, 'Rechts', 'Links');
+  CESideBox.Caption := IfThen(CESideBox.Checked, SRight, SLeft);
   if CESideBox.Checked then
   begin
     EditorFrame1.CodeExplorerPanel.Align := alRight;

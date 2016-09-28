@@ -61,17 +61,17 @@ object ProjectSettings: TProjectSettings
       end
       object AppTypeBox: TComboBox
         Left = 16
-        Height = 31
+        Height = 23
         Top = 192
         Width = 184
-        ItemHeight = 25
+        ItemHeight = 15
         ItemIndex = 0
         Items.Strings = (
           'Console'
           'NoConsole'
           'GUI'
         )
-        Style = csOwnerDrawFixed
+        Style = csDropDownList
         TabOrder = 2
         Text = 'Console'
       end

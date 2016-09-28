@@ -67,6 +67,7 @@ type
     procedure SetAbsoluteFileName(i: integer; f: string);
     procedure FilesChange(Sender: TObject);
     procedure SetRunParams(p: TStringList);
+    procedure SetViews(AValue: TViews);
     procedure SetViewWindows(AValue: Integer);
   public
     function GetAbsPath(Rel: string): string;
@@ -100,7 +101,7 @@ type
     property Paths: TStringList read FPaths write SetPaths;
     property Version: TVersion read FVersion write FVersion;
     property VersionData: TStringList read FVersionData write SetVersionData;
-    property Views: TViews read FViews write FViews;
+    property Views: TViews read FViews write SetViews;
     property ViewWindows: Integer read FViewWindows write SetViewWindows;
   end;
 
@@ -115,6 +116,12 @@ begin
   FRunParams.Assign(p);
   if Assigned(FOnChange) then
     FOnChange(Self);
+end;
+
+procedure Tau3Project.SetViews(AValue: TViews);
+begin
+  if FViews=AValue then Exit;
+  FViews:=AValue;
 end;
 
 procedure Tau3Project.SetViewWindows(AValue: Integer);

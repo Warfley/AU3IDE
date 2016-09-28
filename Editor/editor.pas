@@ -427,6 +427,22 @@ end;
 constructor TEditorFrame.Create(TheOwner: TComponent);
 begin
   inherited;
+  CodeExplorer.Items.Clear;
+  with CodeExplorer.Items.Add(nil, SInclude) do
+  begin
+    ImageIndex:=0;
+    SelectedIndex:=0;
+  end;
+  with CodeExplorer.Items.Add(nil, SVariables) do
+  begin
+    ImageIndex:=0;
+    SelectedIndex:=0;
+  end;
+  with CodeExplorer.Items.Add(nil, SFunctions) do
+  begin
+    ImageIndex:=0;
+    SelectedIndex:=0;
+  end;
   currInfo := '';
   Completion.OnKeyDown := @CompleteKeyDown;
   CodeEditor.Lines.Add('');

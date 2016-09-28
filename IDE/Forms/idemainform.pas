@@ -153,7 +153,7 @@ type
     FCurrentState: TIDEState;
     IncludePath: string;
     SearchForUpdates: boolean;
-    FCurrentLang: String;
+    FCurrentLang: string;
     { private declarations }
     procedure OpenProject(P: string);
     function ShowFormConf: boolean;
@@ -455,8 +455,8 @@ var
 begin
   FSaveOnClosing := False;
   if FCompiler.Active then
-    if MessageDlg(SStillRunningTitle, SStillRunningText,
-      mtConfirmation, [mbYes, mbCancel], SStillRunningKeyword) = mrYes then
+    if MessageDlg(SStillRunningTitle, SStillRunningText, mtConfirmation,
+      [mbYes, mbCancel], SStillRunningKeyword) = mrYes then
       FCompiler.Stop
     else
     begin
@@ -764,6 +764,7 @@ begin
       OpendFileInfo(FCurrentProject.GetRelPath(EditorManager.EditorFiles[i]),
       EditorManager.EditorCaret[i].Y, EditorManager.EditorCaret[i].X,
       EditorManager.EditorView[i]));
+  FCurrentProject.Views := [vwTopLeft];
   if EditorManager.ViewOpened[1] then
     FCurrentProject.Views := FCurrentProject.Views + [vwTopRight];
   if EditorManager.ViewOpened[2] then
@@ -773,7 +774,6 @@ begin
   FCurrentProject.ViewWindows := EditorManager.WindowCount;
   for i := 0 to 3 + EditorManager.WindowCount do
     FCurrentProject.FocusedFile[i] := EditorManager.Focused[i];
-  FCurrentProject.Views := [vwTopLeft];
   FCurrentProject.Changed := True;
 end;
 
@@ -1023,18 +1023,18 @@ var
   i: integer;
   f: file of TIDEState;
   fs: TFileStream;
-  s: String;
+  s: string;
 begin
   if FileExistsUTF8(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) +
     'lang') then
   begin
-    fs:=TFileStream.Create(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) +
-    'lang', fmOpenRead);
+    fs := TFileStream.Create(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) +
+      'lang', fmOpenRead);
     try
       SetLength(s, fs.Size);
       fs.Read(s[1], fs.Size);
       SetDefaultLang(s);
-      FCurrentLang:=s;
+      FCurrentLang := s;
     finally
       fs.Free;
     end;
@@ -1262,9 +1262,11 @@ begin
 end;
 
 procedure TMainForm.OtherOptionsItemClick(Sender: TObject);
-var sl: TStringList;
-  i: Integer;
+var
+  sl: TStringList;
+  i: integer;
   fs: TFileStream;
+  s: string;
 begin
   with OtherOptions do
   begin
@@ -1277,23 +1279,23 @@ begin
     UpdateBox.Checked := SearchForUpdates;
     LangBox.Clear;
     LangBox.Items.Add(SDefault);
-    sl:=TStringList.Create;
+    sl := TStringList.Create;
     try
       FindAllFiles(sl, IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) +
-    'Languages', '*.po');
-      for i:=0 to sl.Count-1 do
+        'Languages', '*.po');
+      for i := 0 to sl.Count - 1 do
       begin
-        sl[i]:=ExtractFileName(ExtractFileNameWithoutExt(sl[i]));
-        if Pos('.', sl[i])>0 then
+        sl[i] := ExtractFileName(ExtractFileNameWithoutExt(sl[i]));
+        if Pos('.', sl[i]) > 0 then
           LangBox.Items.Add(Copy(ExtractFileExt(sl[i]), 2, 2));
       end;
     finally
       sl.Free;
     end;
-    if FCurrentLang='' then
-      LangBox.ItemIndex:=0
+    if FCurrentLang = '' then
+      LangBox.ItemIndex := 0
     else
-      LangBox.ItemIndex:=LangBox.Items.IndexOf(FCurrentLang);
+      LangBox.ItemIndex := LangBox.Items.IndexOf(FCurrentLang);
     if ShowModal = mrOk then
     begin
       EditorManager.UndoSteps := UndoBox.Value;
@@ -1304,18 +1306,20 @@ begin
       EditorManager.BorderHeight := WinHeightEdit.Value;
       EditorManager.WriteConfig(IncludeTrailingPathDelimiter(
         ExtractFilePath(ParamStr(0))) + 'other.cnf');
-      if LangBox.ItemIndex>0 then
-        FCurrentLang:=LangBox.Items[LangBox.ItemIndex]
+      if LangBox.ItemIndex > 0 then
+        s := LangBox.Items[LangBox.ItemIndex]
       else
-        FCurrentLang:='';
-      fs:=TFileStream.Create(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) +
-    'lang', fmCreate);
+        s := '';
+      if s <> FCurrentLang then
+        MessageDlg(SLanguageTitle, SLanguageText, mtInformation, [mbOK], SLanguageKeyword);
+      FCurrentLang := s;
+      fs := TFileStream.Create(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) +
+        'lang', fmCreate);
       try
         fs.Write(PChar(FCurrentLang)^, Length(FCurrentLang));
       finally
         fs.Free;
       end;
-      SetDefaultLang(FCurrentLang);
       SearchForUpdates := UpdateBox.Checked;
       SaveIDESettings;
     end;

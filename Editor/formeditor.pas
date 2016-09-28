@@ -455,7 +455,7 @@ begin
   begin
     if EventEditor.Rows[EventEditor.Row][1] = '' then
       EventEditor.Rows[EventEditor.Row][1] := Format('(%s...)', [SNew]);
-    EventEditorPickListSelect(EventEditor);
+    EventEditorPickListSelect(nil);
   end;
   FLastClickTime := c;
   FLastClickRow := EventEditor.Row;
@@ -1146,7 +1146,7 @@ procedure TFormEditFrame.EventEditorGetPickList(Sender: TObject;
   const KeyName: string; Values: TStrings);
 begin
   Values.Add(Format('(%s)', [SNone]));
-  Values.Add(Format('(%s)', [SNew]));
+  Values.Add(Format('(%s...)', [SNew]));
   Values.AddStrings(FFuncList);
 end;
 
@@ -1164,8 +1164,9 @@ begin
   end;
   if v = '' then
     Exit;
-  if v = Format('(%s)', [SNew]) then
+  if v = Format('(%s...)', [SNew]) then
   begin
+    Sender:=Nil;
     v := FormControlView.Selected.Text + Copy(s, 3, Length(s));
     if StringsContain(FFuncList, v) then
     begin
@@ -1175,10 +1176,9 @@ begin
       v := v + IntToStr(i);
     end;
     EventEditor.Values[s] := v;
-
-    if Assigned(FEnterFunc) then
-      FEnterFunc(ChangeFileExt(FFileName, '.au3'), v, '', True);
   end;
+    if Assigned(FEnterFunc) and (Sender=nil) then
+      FEnterFunc(ChangeFileExt(FFileName, '.au3'), v, '', True);
 end;
 
 procedure TFormEditFrame.FormControlViewEdited(Sender: TObject;
@@ -1337,8 +1337,8 @@ begin
   EventEditor.Row := 0;
   s := EventEditor.Rows[0][0];
   if EventEditor.Values[s] = '' then
-    EventEditor.Values[s] := Format('(%s)', [SNew]);
-  EventEditorPickListSelect(EventEditor);
+    EventEditor.Values[s] := Format('(%s...)', [SNew]);
+  EventEditorPickListSelect(nil);
 end;
 
 procedure TFormEditFrame.Save(p: string = '');

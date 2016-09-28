@@ -954,9 +954,22 @@ msgstr "Functions"
 msgid "Include"
 msgstr "Include"
 
+#: tlstrings.slanguagekeyword
+msgid "Language"
+msgstr "Language"
+
+#: tlstrings.slanguagetext
+msgid "Language changes will only apply after restarting the application"
+msgstr "Language changes will only apply after restarting the application"
+
+#: tlstrings.slanguagetitle
+msgid "Language Changed"
+msgstr "Language Changed"
+
 #: tlstrings.sleft
-msgid "left"
-msgstr "left"
+#| msgid "left"
+msgid "Left"
+msgstr "Left"
 
 #: tlstrings.snew
 msgctxt "tlstrings.snew"
@@ -1010,8 +1023,10 @@ msgid "Project inspector"
 msgstr "Project inspector"
 
 #: tlstrings.sright
-msgid "right"
-msgstr "right"
+#| msgid "right"
+msgctxt "tlstrings.sright"
+msgid "Right"
+msgstr "Right"
 
 #: tlstrings.srunbtnhint
 msgid "Run %s (%s)"

@@ -33,8 +33,8 @@ resourcestring
   SRunBtnHint = 'Run %s (%s)';
 
   SProjectInspector = 'Project inspector';
-  SLeft = 'left';
-  SRight = 'right';
+  SLeft = 'Left';
+  SRight = 'Right';
 
   SAutoIt = 'AutoIt';
   SForm = 'form';
@@ -87,6 +87,10 @@ resourcestring
   SFunctions = 'Functions';
 
   SDefault = 'Default';
+
+  SLanguageText = 'Language changes will only apply after restarting the application';
+  SLanguageTitle= 'Language Changed';
+  SLanguageKeyword = 'Language';
 
 implementation
 

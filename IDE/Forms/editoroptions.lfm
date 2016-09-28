@@ -5,7 +5,7 @@ object EditorConf: TEditorConf
   Width = 747
   ActiveControl = Button1
   BorderStyle = bsToolWindow
-  Caption = 'AU3 Editor Optionen'
+  Caption = 'Scripteditor options'
   ClientHeight = 682
   ClientWidth = 747
   OnCreate = FormCreate
@@ -462,7 +462,7 @@ object EditorConf: TEditorConf
       end
       object HighlightOptionsTab: TTabSheet
         Caption = 'Highlighter'
-        ClientHeight = 320
+        ClientHeight = 332
         ClientWidth = 739
         object Label11: TLabel
           Left = 0
@@ -1543,14 +1543,14 @@ object EditorConf: TEditorConf
         Height = 238
         Width = 507
         Lines.Strings = (
-          '; Kommentar'
+          '; Comment'
           '$Var1 = 3 + 0x5F * 2'
-          ';*Doc Kommentar'
+          ';*Doc Comment'
           'Func MyFunc($Arg1)'
-          #9'ConsoleWrite("Hallo " & $Arg1)'
+          #9'ConsoleWrite("Hello " & $Arg1)'
           'EndFunc'
           ''
-          'Anderer Text'
+          'Other Text'
         )
         ReadOnly = True
       end
@@ -1558,13 +1558,8 @@ object EditorConf: TEditorConf
         Left = 512
         Height = 238
         ClientHeight = 238
-        inherited CodeExplorerHead: TPanel
-          ClientHeight = 30
-          ClientWidth = 231
-        end
         inherited CodeExplorer: TTreeView
           Height = 204
-          DefaultItemHeight = 24
         end
       end
       inherited CESplitter: TSplitter
