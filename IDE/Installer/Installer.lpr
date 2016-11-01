@@ -29,13 +29,25 @@ type
 const
   SDownloadURL = 'http://kehrein.org/AS/Updates/';
 
+function WriteSize(s: UInt64): String;
+begin
+  if s<1000 then
+    Result:=IntToStr(s)+'B'
+  else if s<1000000 then
+    Result:=FloatToStrF(s/1000, ffFixed, 10, 2)+'K'
+  else if s<1000000000 then
+    Result:=FloatToStrF(s/1000000, ffFixed, 10, 2)+'M'
+  else if s<1000000000000 then
+    Result:=FloatToStrF(s/1000000000, ffFixed, 10, 2)+'G'
+  else
+    Result:=FloatToStrF(s/1000000000000, ffFixed, 10, 2)+'T'
+end;
+
   procedure TPrintObject.PrintOutput(Sender: TObject;
   const ContentLength, CurrentPos: int64);
   begin
     GotoXY(Length(DownloadName) + 1, WhereY);
-    ClrEol;
-    Write(CurrentPos);
-    Write('b ...');
+    Write(WriteSize(CurrentPos),'...');
   end;
 
 
