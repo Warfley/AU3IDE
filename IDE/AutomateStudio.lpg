@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectGroup FileVersion="1">
+    <Targets Count="4">
+      <Target0 FileName="AU3IDE.lpi">
+        <BuildModes Count="3"/>
+        <Mode1 Name="Default"/>
+        <Mode2 Name="Release"/>
+        <Mode3 Name="Release64"/>
+      </Target0>
+      <Target1 FileName="Updater\Updater.lpi">
+        <BuildModes Count="2"/>
+        <Mode1 Name="Default" Compile="True"/>
+        <Mode2 Name="Release"/>
+      </Target1>
+      <Target2 FileName="Updater\ListGen\UpdateListGen.lpi">
+        <BuildModes Count="1"/>
+        <Mode1 Name="Default"/>
+      </Target2>
+      <Target3 FileName="Installer\Installer.lpi">
+        <BuildModes Count="2"/>
+        <Mode1 Name="Default" Compile="True"/>
+        <Mode2 Name="Release"/>
+      </Target3>
+    </Targets>
+  </ProjectGroup>
+</CONFIG>
