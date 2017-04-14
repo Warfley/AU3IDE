@@ -346,7 +346,7 @@ begin
     FCompiler.Path := CompilerOptionsForm.PathEdit.Directory;
     FCompiler.SaveIntData := CompilerOptionsForm.SaveIntBox.Checked;
     FCompiler.WriteConf(IncludeTrailingPathDelimiter(
-      ExtractFilePath(ParamStr(0))) + 'compiler.cfg');
+      ExtractFilePath(ParamStr(0))) + 'compiler.cnf');
     IncludePath := IncludeTrailingPathDelimiter(FCompiler.Path) + 'Include';
     EditorManager.IncludePath := IncludePath;
     Result := True;
@@ -394,9 +394,9 @@ begin
     end;
 
   if FileExists(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) +
-    'compiler.cfg') then
+    'compiler.cnf') then
     FCompiler.ReadConf(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) +
-      'compiler.cfg')
+      'compiler.cnf')
   else if not ShowCompilerOptions then
   begin
     Close;
@@ -489,7 +489,7 @@ begin
     FFormIsClosing := False;
     FSaveOnClosing := True;
   end;
-  FLastOpend.SaveToFile(ExtractFilePath(ParamStr(0)) + 'LastOpend.txt');
+  FLastOpend.SaveToFile(ExtractFilePath(ParamStr(0)) + 'lastopend.cnf');
 
   FCurrentState.Left := Left;
   FCurrentState.Top := Top;
@@ -1114,7 +1114,8 @@ begin
   ProjectInspector.ChangeMainForm := @ChangeMainForm;
   FDrawState := TList.Create;
   FLastOpend := TStringList.Create;
-  FLastOpend.LoadFromFile(ExtractFilePath(ParamStr(0)) + 'LastOpend.txt');
+  if FileExists(ExtractFilePath(ParamStr(0)) + 'lastopend.cnf') then
+    FLastOpend.LoadFromFile(ExtractFilePath(ParamStr(0)) + 'lastopend.cnf');
   i := 0;
   while i < FLastOpend.Count do
     if FileExists(FLastOpend[i]) then

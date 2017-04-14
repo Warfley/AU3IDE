@@ -10,7 +10,8 @@ interface
 uses
   Classes, SysUtils, FileUtil, TreeFilterEdit, RTTIGrids, Forms, Controls,
   Graphics, ExtCtrls, StdCtrls, ValEdit, ComCtrls, Grids, contnrs, au3Types,
-  Dialogs, FormEditComponents, LCLIntf, Math, GraphUtil, PropEdits, ObjectInspector, TLStrings, LCLTranslator;
+  Dialogs, FormEditComponents, LCLIntf, Math, GraphUtil, PropEdits,
+  ObjectInspector, TLStrings, LCLTranslator;
 
 type
 
@@ -24,7 +25,6 @@ type
     PositionPicker: TPaintBox;
     PropEditor: TTIPropertyGrid;
     OISplitter: TSplitter;
-    ToolSelect: TListView;
     ToolboxHeaderPanel: TPanel;
     ToolBoxPanel: TPanel;
     PropertyPages: TPageControl;
@@ -34,6 +34,7 @@ type
     EditorScrollBox: TScrollBox;
     TreeFilterEdit1: TTreeFilterEdit;
     FormControlView: TTreeView;
+    ToolSelect: TTreeView;
     procedure EditorScrollBoxPaint(Sender: TObject);
     procedure EventEditorEditingDone(Sender: TObject);
     procedure EventEditorGetPickList(Sender: TObject; const KeyName: string;
@@ -105,6 +106,7 @@ type
     procedure SetMaxUndoSize(AValue: integer);
     procedure UpdateFormCaption(Sender: TObject);
     procedure PushOnUndo(c: TChangeData);
+    function CheckToolSelected: Boolean; inline;
   public
     procedure ReLoadConf;
     procedure DoUndo;
@@ -173,6 +175,11 @@ begin
   finally
     tmp.Free;
   end;
+end;
+
+function TFormEditFrame.CheckToolSelected: Boolean; inline;
+begin
+  Result:=Assigned(ToolSelect.Selected) and (ToolSelect.Selected.ImageIndex>=0);
 end;
 
 procedure TFormEditFrame.PropChanged(Sender: TObject; PropName, PropVal, OldVal: string);
@@ -768,7 +775,7 @@ begin
                   FDrawLines := False;
                 end;
           end;
-          if (ToolSelect.ItemIndex >= 0) and (Sender is TWinControl) then
+          if CheckToolSelected and (Sender is TWinControl) then
           begin
             FSelPoint := FFormular.ScreenToClient(
               (Sender as TControl).ClientToScreen(Point(X, Y)));
@@ -793,13 +800,13 @@ var
 begin
   if mbLeft = Button then
   begin
-    if (ToolSelect.ItemIndex >= 0) then
+    if CheckToolSelected then
     begin
-      case ToolSelect.ItemIndex of
-        0: c := CreateButton(FFormular);
-        1: c := CreateCheckBox(FFormular);
-        2: c := CreateEdit(FFormular);
-        3: c := CreateLabel(FFormular);
+      case ToolSelect.Selected.ImageIndex of
+        1: c := CreateButton(FFormular);
+        2: c := CreateCheckBox(FFormular);
+        3: c := CreateEdit(FFormular);
+        4: c := CreateLabel(FFormular);
       end;
 
       if (FSelPoint.X - FMousePoint.x >= 0) and (FSelPoint.y - FMousePoint.Y >= 0) then
@@ -809,7 +816,7 @@ begin
         FSelPoint := Point(-1, -1);
         c.Parent.Invalidate;
       end;
-      ToolSelect.ItemIndex := -1;
+      ToolSelect.Selected:=nil;
       if Assigned(FOnVarChanged) then
         FOnVarChanged(Self);
       if Assigned(FOnChange) then
@@ -1334,8 +1341,8 @@ procedure TFormEditFrame.FormPanelDblClick(Sender: TObject);
 var
   s: string;
 begin
-  EventEditor.Row := 0;
-  s := EventEditor.Rows[0][0];
+  EventEditor.Row := 1;
+  s := EventEditor.Rows[1][0];
   if EventEditor.Values[s] = '' then
     EventEditor.Values[s] := Format('(%s...)', [SNew]);
   EventEditorPickListSelect(nil);

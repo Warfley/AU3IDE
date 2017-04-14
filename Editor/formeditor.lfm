@@ -13,12 +13,12 @@ object FormEditFrame: TFormEditFrame
     Height = 563
     Top = 0
     Width = 620
-    HorzScrollBar.Increment = 5
-    HorzScrollBar.Page = 50
+    HorzScrollBar.Increment = 6
+    HorzScrollBar.Page = 68
     HorzScrollBar.Smooth = True
     HorzScrollBar.Tracking = True
-    VertScrollBar.Increment = 2
-    VertScrollBar.Page = 23
+    VertScrollBar.Increment = 3
+    VertScrollBar.Page = 33
     VertScrollBar.Smooth = True
     VertScrollBar.Tracking = True
     Align = alClient
@@ -30,9 +30,9 @@ object FormEditFrame: TFormEditFrame
     OnPaint = EditorScrollBoxPaint
     object FormCaptionLabel: TLabel
       Left = 16
-      Height = 15
+      Height = 25
       Top = 8
-      Width = 34
+      Width = 52
       Caption = 'Form1'
       ParentColor = False
       ParentFont = False
@@ -60,11 +60,11 @@ object FormEditFrame: TFormEditFrame
       TabOrder = 0
       object ControlProps: TTabSheet
         Caption = 'Properties'
-        ClientHeight = 228
+        ClientHeight = 218
         ClientWidth = 263
         object PropEditor: TTIPropertyGrid
           Left = 0
-          Height = 228
+          Height = 218
           Top = 0
           Width = 263
           Align = alClient
@@ -80,11 +80,11 @@ object FormEditFrame: TFormEditFrame
       end
       object ControlEvents: TTabSheet
         Caption = 'Events'
-        ClientHeight = 456
-        ClientWidth = 526
+        ClientHeight = 218
+        ClientWidth = 263
         object EventEditor: TValueListEditor
           Left = 0
-          Height = 228
+          Height = 218
           Top = 0
           Width = 263
           Align = alClient
@@ -106,18 +106,18 @@ object FormEditFrame: TFormEditFrame
           OnGetPickList = EventEditorGetPickList
           ColWidths = (
             64
-            181
+            172
           )
         end
       end
     end
     object FormControlView: TTreeView
       Left = 0
-      Height = 284
-      Top = 23
+      Height = 274
+      Top = 33
       Width = 271
       Align = alClient
-      DefaultItemHeight = 24
+      DefaultItemHeight = 28
       Images = ImageList1
       MultiSelect = True
       MultiSelectStyle = [msControlSelect, msShiftSelect]
@@ -129,7 +129,7 @@ object FormEditFrame: TFormEditFrame
     end
     object TreeFilterEdit1: TTreeFilterEdit
       Left = 0
-      Height = 23
+      Height = 33
       Top = 0
       Width = 271
       ButtonWidth = 23
@@ -142,37 +142,19 @@ object FormEditFrame: TFormEditFrame
   end
   object ToolBoxPanel: TPanel
     Left = 4
-    Height = 184
+    Height = 200
     Top = 528
-    Width = 200
+    Width = 292
     Anchors = [akLeft, akBottom]
     BevelOuter = bvNone
-    ClientHeight = 184
-    ClientWidth = 200
+    ClientHeight = 200
+    ClientWidth = 292
     TabOrder = 2
-    object ToolSelect: TListView
-      Left = 0
-      Height = 150
-      Top = 34
-      Width = 200
-      Align = alClient
-      Columns = <>
-      Items.LazData = {
-        6F0000000400000001000000FFFFFFFFFFFFFFFF000000000600000042757474
-        6F6E02000000FFFFFFFFFFFFFFFF0000000008000000436865636B626F780300
-        0000FFFFFFFFFFFFFFFF00000000040000004564697404000000FFFFFFFFFFFF
-        FFFF00000000050000004C6162656C
-      }
-      ReadOnly = True
-      RowSelect = True
-      SmallImages = ImageList1
-      TabOrder = 0
-    end
     object ToolboxHeaderPanel: TPanel
       Left = 0
       Height = 34
       Top = 0
-      Width = 200
+      Width = 292
       Align = alTop
       Alignment = taLeftJustify
       BevelOuter = bvNone
@@ -180,10 +162,30 @@ object FormEditFrame: TFormEditFrame
       Caption = 'Toolbox'
       Color = clBtnFace
       ParentColor = False
-      TabOrder = 1
+      TabOrder = 0
       OnClick = ToolboxHeaderPanelClick
       OnMouseEnter = ToolboxHeaderPanelMouseEnter
       OnMouseLeave = ToolboxHeaderPanelMouseLeave
+    end
+    object ToolSelect: TTreeView
+      Left = 0
+      Height = 166
+      Top = 34
+      Width = 292
+      Align = alClient
+      DefaultItemHeight = 28
+      ExpandSignColor = clHotLight
+      Images = ImageList1
+      ScrollBars = ssAutoVertical
+      TabOrder = 1
+      Items.Data = {
+        F9FFFFFF020001000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF040000000000
+        000001080000005374616E64617264010000000100000001000000FFFFFFFF00
+        000000000000000006000000427574746F6E020000000200000002000000FFFF
+        FFFF00000000000000000008000000436865636B626F78030000000300000003
+        000000FFFFFFFF00000000000000000004000000456469740400000004000000
+        04000000FFFFFFFF000000000000000000050000004C6162656C
+      }
     end
   end
   object PositionPickerPanel: TPanel
