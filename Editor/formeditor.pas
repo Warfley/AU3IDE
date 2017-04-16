@@ -827,8 +827,8 @@ begin
       for i := 0 to FormControlView.Items.Count - 1 do
         if FormControlView.Items[i].Selected then
         begin
-          c := TControl(FormControlView.Items[i].Data);
-          cd.comp := c;
+          c := GetEditorControl(FormControlView.Items[i]);
+          cd.comp := GetComponent(c);
           if sizing then
           begin
             cd.Prop := 'Size';
@@ -1099,7 +1099,7 @@ begin
   EventEditor.Clear;
   for i := 0 to FormControlView.Items.Count - 1 do
   begin
-    if TObject(FormControlView.Items[i]) is IEditorComponent then
+    if TObject(FormControlView.Items[i].Data) is IEditorComponent then
       (GetEditorControl(FormControlView.Items[i]) as TEditorComponent).Selected:=FormControlView.Items[i].Selected;
     if FormControlView.Items[i].Selected then
       LoadControlData(TComponent(FormControlView.Items[i].Data));
@@ -1182,7 +1182,9 @@ begin
         Inc(i);
       v := v + IntToStr(i);
     end;
-    EventEditor.Values[s] := v;
+    for i:=0 to FormControlView.Items.Count-1 do
+      if FormControlView.Items[i].Selected  then
+      (TObject(FormControlView.Items[i].Data) as Iau3Component).SetEvent(s, v);
   end;
     if Assigned(FEnterFunc) and (Sender=nil) then
       FEnterFunc(ChangeFileExt(FFileName, '.au3'), v, '', True);
@@ -1349,7 +1351,7 @@ begin
     EventEditor.Values[s] := Format('(%s...)', [SNew]);
   EventEditorPickListSelect(nil);
   // Bugfix (dont know why this works
-  Sleep(100);
+  Sleep(150);
 end;
 
 procedure TFormEditFrame.Save(p: string = '');

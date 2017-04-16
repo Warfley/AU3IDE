@@ -615,6 +615,7 @@ type
     procedure SetStyle(val: TWindowStyles);
     procedure SetButtonStyle(val: TButtonStyles);
     procedure SetStyleEx(val: TWindowExStyles);
+    procedure SetChecked(Value: Boolean); override;
 
     procedure SetColor(Value: TColor); override;
     procedure SetCursorIcon(c: TAU3Cursor);
@@ -1078,8 +1079,8 @@ begin
   if FComponent = AValue then
     Exit;
   FComponent := AValue;
-  if FComponent is TControl then
-    with FComponent as TControl do
+  if AValue is TControl then
+    with AValue as TControl do
     begin
       Parent := Self;
       Left := (Width)*2;
@@ -1098,21 +1099,11 @@ begin
 end;
 
 procedure TEditorComponent.Paint;
-var
-  ARect: TRect;
 begin
   inherited Paint;
-  if FComponent is TWinControl then
-    with FComponent as TWinControl do
-    begin
-      LCLIntf.GetWindowRect(Handle, ARect);
-      with GetClientOrigin do
-        PaintTo(Self.Canvas, ARect.Left - X, ARect.Top - Y);
-    end
-  else if FComponent is TGraphicControl then
-    with FComponent as TGraphicControl do
-    Self.Canvas.CopyRect(Rect(0, 0, Width, Height), Canvas, Rect(0, 0, Width, Height));
-
+  Canvas.Lock;
+  try
+  (FComponent as IEditorComponent).PaintToEditor(Canvas);
   if Selected then
     with Canvas do
     begin
@@ -1120,8 +1111,11 @@ begin
       Pen.Mode := pmCopy;
       Brush.Style := bsClear;
       Pen.Color := clHighlight;
-      Rectangle(0, 0, ClientWidth-2, ClientHeight-2);
+      Rectangle(0, 0, ClientWidth-1, ClientHeight-1);
     end;
+  finally
+    Canvas.Unlock;
+  end;
 end;
 
 procedure TEditorComponent.ChangeBounds(ALeft, ATop, AWidth, AHeight: integer;
@@ -1138,10 +1132,8 @@ begin
   OldTop:=StrToInt(c.GetProp('Y'));
   OldWidth:=StrToInt(c.GetProp('Width'));
   OldHeight:=StrToInt(c.GetProp('Height'));
-  if ALeft<>OldLeft then c.SetProp('X', IntToStr(ALeft));
-  if ATop<>OldTop then c.SetProp('Y', IntToStr(ATop));
-  if AWidth<>OldWidth then c.SetProp('Width', IntToStr(AWidth));
-  if AHeight<>OldHeight then c.SetProp('Height', IntToStr(AHeight));
+  if (ALeft<>OldLeft) or (ATop<>OldTop) then c.SetProp('pos', Format('%d:%d', [ALeft, ATop]));
+  if (AWidth<>OldWidth) or (AHeight<>OldHeight) then c.SetProp('size', Format('%d:%d', [AWidth, AHeight]));
 end;
 
 constructor TEditorComponent.Create(AOwner: TComponent);
@@ -1499,6 +1491,7 @@ end;
 
 procedure Tau3Form.SetEvent(e, val: string);
 begin
+  if Pos(e, FEvents.Text) = 0 then exit;
   FEvents.Values[e] := val;
 end;
 
@@ -2049,7 +2042,7 @@ end;
 
 procedure Tau3Edit.SetEvent(e, val: string);
 begin
-  FEvents.Values[e] := val;
+  FEvents.ValueFromIndex[0] := val;
 end;
 
 constructor Tau3Edit.Create(AOwner: TComponent);
@@ -2063,6 +2056,7 @@ begin
   Color := clWhite;
   FIsVisible := True;
   FisEnabled := True;
+  Self.AutoSize:=False;
 end;
 
 destructor Tau3Edit.Destroy;
@@ -2320,7 +2314,7 @@ begin
   oldVal := Hint;
   inherited SetHint(Value);
   if Assigned(FOnChangeProp) then
-    FOnChangeProp(Self, 'Hint', Value, Hint);
+    FOnChangeProp(Self, 'Hint', Value, oldVal);
 end;
 
 procedure Tau3Button.SetHotKey(h: TShortCut);
@@ -2543,7 +2537,7 @@ end;
 
 procedure Tau3Button.SetEvent(e, val: string);
 begin
-  FEvents.Values[e] := val;
+  FEvents.ValueFromIndex[0] := val;
 end;
 
 function Tau3Button.GetHotkey: string;
@@ -2781,6 +2775,17 @@ begin
     FOnChangeProp(Self, 'StyleEx', IntToStr(cardinal(Val)), oldVal);
 end;
 
+procedure Tau3Checkbox.SetChecked(Value: Boolean);
+var oldval: String;
+begin
+  if Value=Checked then exit;
+  oldval:=BoolToStr(Checked, True);
+  inherited SetChecked(Value);
+  if Assigned(FOnChangeProp) then
+    FOnChangeProp(Self, 'Checked', BoolToStr(Checked, True), oldval);
+  GetEditor.Invalidate;
+end;
+
 procedure Tau3Checkbox.SetColor(Value: TColor);
 var
   oldVal: string;
@@ -2895,10 +2900,50 @@ begin
   FOnChangeProp := a;
 end;
 
-    procedure Tau3Checkbox.PaintToEditor(C: TCanvas);
+procedure Tau3Checkbox.PaintToEditor(C: TCanvas);
+var
+  m, p, i: Integer;
+  sl: TStringList;
+begin
+  with c do
+  begin
+    brush.Color:=Color;
+    Brush.Style:=bsSolid;
+    pen.Style:=psClear;
+    FillRect(0,0, Self.Width, self.Height);
+    Pen.Style:=psSolid;
+    Pen.Color:=clBlack;
+    Brush.Color:=clWhite;
+    Brush.Style:=bsSolid;
+    m := self.Height div 2;
+    Rectangle(0, m - 10, 20, m + 10);
+    if Checked then
     begin
-      PaintTo(C, 0, 0);
+    AntialiasingMode:=amOn;
+      Pen.Width:=2;
+      MoveTo(4,m);
+      LineTo(6, m+5);
+      LineTo(16, m-5);
+    pen.Width:=1;
+    AntialiasingMode:=amDontCare;
     end;
+    Font.Assign(Self.Font);
+    Brush.Style:=bsClear;
+
+    sl := TStringList.Create;
+    try
+      sl.Text := Caption;
+      p := m-(C.TextHeight('A')*sl.Count) div 2;
+      for i := 0 to sl.Count - 1 do
+      begin
+        C.TextOut(26, p, sl[i]);
+        Inc(p, C.TextHeight(sl[i]));
+      end;
+    finally
+      sl.Free;
+    end;
+  end;
+end;
 
 function Tau3Checkbox.GetEditor: TEditorComponent;
 begin
@@ -3006,7 +3051,7 @@ end;
 
 procedure Tau3Checkbox.SetEvent(e, val: string);
 begin
-  FEvents.Values[e] := val;
+  FEvents.ValueFromIndex[0] := val;
 end;
 
 constructor Tau3Checkbox.Create(AOwner: TComponent);
@@ -3323,8 +3368,25 @@ begin
 end;
 
 procedure Tau3Label.PaintToEditor(C: TCanvas);
+var
+  p, i: integer;
+  sl: TStringList;
 begin
-  c.TextOut(0,0, Text);
+  C.Font.Assign(Font);
+  p := 0;
+  C.Brush.Style := bsSolid;
+  C.Brush.Color := Color;
+  sl := TStringList.Create;
+  try
+    sl.Text := Caption;
+    for i := 0 to sl.Count - 1 do
+    begin
+      C.TextOut(0, p, sl[i]);
+      Inc(p, C.TextHeight(sl[i]));
+    end;
+  finally
+    sl.Free;
+  end;
 end;
 
 function Tau3Label.GetEditor: TEditorComponent;
@@ -3429,28 +3491,12 @@ end;
 
 procedure Tau3Label.SetEvent(e, val: string);
 begin
-  FEvents.Values[e] := val;
+  FEvents.ValueFromIndex[0] := val;
 end;
 
 procedure Tau3Label.Paint;
-var
-  p, i: integer;
-  sl: TStringList;
 begin
-  p := 0;
-  sl := TStringList.Create;
-  Canvas.Brush.Style := bsSolid;
-  Canvas.Brush.Color := Color;
-  try
-    sl.Text := Caption;
-    for i := 0 to sl.Count - 1 do
-    begin
-      Canvas.TextOut(0, p, sl[i]);
-      Inc(p, Canvas.TextHeight(sl[i]));
-    end;
-  finally
-    sl.Free;
-  end;
+  PaintToEditor(Canvas);
   inherited;
 end;
 
