@@ -92,12 +92,15 @@ type
     FMaxUndoSize: integer;
     FBorderHeight, FBorderWidth: Integer;
     { private declarations }
+
+    function GetComponent(C: TComponent): TComponent;
+    function GetEditorControl(n: TTreeNode): TControl;
     function CopyComponent(c: TComponent): TComponent;
     procedure DeleteItem(n: TTreeNode);
     function FindControl(s: string): integer;
     function GetFreeName(Prefix: String): String;
-    function CreateComponent(P: TWinControl; Component: TComponent;
-      IconIndex: Integer): TEditorComponent;
+    function CreateEditorControl(P: TWinControl): TEditorComponent;
+    function AddComponent(C: TComponent; IconIndex: Integer): Integer;
     // Control Creations
     procedure LoadControlData(c: TComponent);
     procedure PropChanged(Sender: TObject; PropName, PropVal, OldVal: string);
@@ -223,14 +226,15 @@ begin
             Iau3Component).CheckProperty(PropName) and
             (Sender <> TObject(FormControlView.Items[i].Data)) then
           begin
+            (TObject(FormControlView.Items[i].Data) as Iau3Component).SetProp(
+              PropName, PropVal);
             undoItem.OldVal :=
               (TObject(FormControlView.Items[i].Data) as
               Iau3Component).GetProp(PropName);
-            (TObject(FormControlView.Items[i].Data) as Iau3Component).SetProp(
-              PropName, PropVal);
             undoItem.comp := TObject(FormControlView.Items[i].Data);
             UndoStack.Push(undoItem);
           end;
+        if Sender is TControl then
         (Sender as TControl).Parent.Invalidate;
       end;
     finally
@@ -403,46 +407,49 @@ begin
   Result:=Prefix+IntToStr(i);
 end;
 
-function TFormEditFrame.CreateComponent(P: TWinControl; Component: TComponent;
-  IconIndex: Integer): TEditorComponent;
+function TFormEditFrame.CreateEditorControl(P: TWinControl): TEditorComponent;
 var
   i: Integer;
+  Selected: Boolean;
 begin
   Result := TEditorComponent.Create(FFormular);
-  Result.Component:=Component;
   Result.Parent := P;
   Result.Left := FPanelMousePoint.x;
   Result.Top := FPanelMousePoint.Y;
-  if Component is TControl then
-  begin
-    Result.Width:=(Component as TControl).Width;
-    Result.Height:=(Component as TControl).Height;
-  end
-  else
-  begin
-    Result.Width:=32;
-    Result.Height:=32;
-  end;
+  Result.Width:=200;
+  Result.Height:=75;
+  Result.Selected := True;
 
   Result.OnDblClick := @FormPanelDblClick;
   Result.OnMouseDown := @FormPanelMouseDown;
   Result.OnMouseUp := @FormPanelMouseUp;
   Result.OnKeyUp := @FormControlViewKeyUp;
   Result.OnMouseMove := @FormPanelMouseMove;
-  (Result.Component as Iau3Component).SetOnChangeProp(@PropChanged);
+end;
 
+function TFormEditFrame.AddComponent(C: TComponent; IconIndex: Integer): Integer;
+var p: TComponent;
+  i: Integer;
+begin
+  if c is IEditorComponent then
+    p:=GetComponent((c as IEditorComponent).GetEditor.Parent)
+  else
+    p:=GetComponent((c as TControl).Parent);
   for i := 0 to FormControlView.Items.Count - 1 do
     if FormControlView.Items[i].Data = Pointer(P) then
-      with FormControlView.Items.AddChild(FormControlView.Items[i], Result.Component.Name) do
+      with FormControlView.Items.AddChild(FormControlView.Items[i],
+                                          C.Name) do
       begin
         TreeView.Items[i].Expand(False);
-        Data := Result.Component;
+        Data := C;
         ImageIndex := IconIndex;
         SelectedIndex := IconIndex;
         FormControlView.ClearSelection;
-        Selected := True;
+        Selected:=True;
         Break;
       end;
+  (C as Iau3Component).SetOnChangeProp(@PropChanged);
+  Result:=FindControl(C.Name);
 end;
 
 procedure TFormEditFrame.PickListClick(Sender: TObject);
@@ -461,6 +468,19 @@ begin
   FLastClickRow := EventEditor.Row;
 end;
 
+function TFormEditFrame.GetComponent(C: TComponent): TComponent;
+begin
+  if C is TEditorComponent then Result:=(C as TEditorComponent).Component
+  else Result:=C;
+end;
+
+function TFormEditFrame.GetEditorControl(n: TTreeNode): TControl;
+begin
+  Result:=TControl(n.Data);
+  if Result is IEditorComponent then
+    Result:=(Result as IEditorComponent).GetEditor;
+end;
+
 function TFormEditFrame.CopyComponent(c: TComponent): TComponent;
 var n: String;
   i: Integer;
@@ -477,14 +497,15 @@ begin
   i:=FindControl(c.Name);
   if i >= 0 then i:=FormControlView.Items[i].ImageIndex;
 
-  CreateComponent((C as Iau3Component).GetEditor.Parent, Result, i);
+  CreateEditorControl((C as IEditorComponent).GetEditor.Parent).Component:=Result;
+  AddComponent(Result, i);
 
-  if c is TControl then
+  if c is TComponent then
   begin
-    n:=(c as TControl).Name;
+    n:=(c as TComponent).Name;
     while FindControl(n)>0 do
       n:=FindNewName(n);
-    (Result as TControl).Name:=n;
+    (Result as TComponent).Name:=n;
   end;
 
   (c as Iau3Component).CopyTo(Result as TControl);
@@ -662,9 +683,9 @@ begin
               if (i >= 0) and (i < FormControlView.Items.Count) and
                 FormControlView.Items[i].Selected and
                 (FormControlView.Items[i].Data <> Pointer(FFormular)) and
-                (FormControlView.Items[i].Data <> Pointer(MovingControl))
+                (FormControlView.Items[i].Data <> Pointer(GetComponent(MovingControl)))
                 and (TObject(FormControlView.Items[i].Data) is TControl) then
-                with TControl(FormControlView.Items[i].Data) do
+                with GetEditorControl(FormControlView.Items[i]) do
                 begin
                   Left := Left + (MovingControl.Left - FOldLeft);
                   Top := Top + (MovingControl.Top - FOldTop);
@@ -734,35 +755,43 @@ var
   c: TControl;
   i: integer;
   cd: TChangeData;
+  e: TEditorComponent;
 begin
   if mbLeft = Button then
   begin
     if CheckToolSelected then
     begin
+      e:=CreateEditorControl(FFormular);
       case ToolSelect.Selected.ImageIndex of
         1:
         begin
           c := Tau3Button.Create(FFormular);
+          e.Component:=C;
           c.Name:=GetFreeName('Button');
         end;
         2:
         begin
           c := Tau3Checkbox.Create(FFormular);
+          e.Component:=C;
           c.Name:=GetFreeName('CheckBox');
         end;
         3:
         begin
           c := Tau3Edit.Create(FFormular);
+          e.Component:=C;
           c.Name:=GetFreeName('Edit');
         end;
         4:
         begin
           c := Tau3Label.Create(FFormular);
+          e.Component:=C;
           c.Name:=GetFreeName('Label');
         end;
       end;
 
-      with CreateComponent(FFormular, c, ToolSelect.Selected.ImageIndex) do
+      AddComponent(c, ToolSelect.Selected.ImageIndex);
+
+      with e do
       if (FSelPoint.X - FMousePoint.x >= 0) and (FSelPoint.y - FMousePoint.Y >= 0) then
       begin
         Width := FSelPoint.X - FMousePoint.x;
@@ -867,14 +896,14 @@ begin
       if FormControlView.Items[i].Selected then
       begin
         if not Assigned(FormControlView.Items[i].Data) then Continue;
-        c := (TObject(FormControlView.Items[i].Data)As Iau3Component).GetEditor;
+        c := GetEditorControl(FormControlView.Items[i]);
         if not Assigned(c) then
           c := (Sender as TCustomControl).FindChildControl(
             TControl(FormControlView.Items[i].Data).Name);
         if Assigned(c) then
           with (Sender as TCustomControl).Canvas do
           begin
-            if not FDrawLines and not Assigned((TObject(FormControlView.Items[i].Data)As Iau3Component).GetEditor) then
+            if not FDrawLines and not Assigned(GetEditorControl(FormControlView.Items[i])) then
             begin
               Pen.Style := psDash;
               Pen.Mode := pmCopy;
@@ -1060,7 +1089,6 @@ end;
 procedure TFormEditFrame.FormControlViewChange(Sender: TObject; Node: TTreeNode);
 var
   i: integer;
-  c: TEditorComponent;
 begin
   if not Assigned(Node) then
   begin
@@ -1071,8 +1099,8 @@ begin
   EventEditor.Clear;
   for i := 0 to FormControlView.Items.Count - 1 do
   begin
-    c:= (TComponent(FormControlView.Items[i].Data) as Iau3Component).GetEditor;
-  if Assigned(c) then c.Selected:=FormControlView.Items[i].Selected;
+    if TObject(FormControlView.Items[i]) is IEditorComponent then
+      (GetEditorControl(FormControlView.Items[i]) as TEditorComponent).Selected:=FormControlView.Items[i].Selected;
     if FormControlView.Items[i].Selected then
       LoadControlData(TComponent(FormControlView.Items[i].Data));
   end;
@@ -1200,8 +1228,8 @@ begin
     DeleteItem(n.GetFirstChild);
   if TObject(n.Data) <> FFormular then
   begin
-    if Assigned((TObject(n.Data) as Iau3Component).GetEditor) then
-      (TObject(n.Data) as Iau3Component).GetEditor.Free;
+    if(TObject(n.Data)) is IEditorComponent then
+      (TObject(n.Data) as IEditorComponent).GetEditor.Free;
     TObject(n.Data).Free;
     FormControlView.Items.Delete(n);
   end;
@@ -1518,8 +1546,9 @@ begin
               IsNumeric(FuncParams[5]) and IsNumeric(FuncParams[6])) then
               Continue;
             // Read Data
-            c := CreateComponent(TObject(currParent.Data) as TWinControl,
-                                 Tau3Button.Create(FFormular), IcoButton);
+            c := CreateEditorControl(TObject(currParent.Data) as TWinControl);
+            c.Component:=Tau3Button.Create(FFormular);
+            AddComponent(c.Component, IcoButton);
             c.Component.Name := VarName;
             FormControlView.Items[curr].Text := VarName;
             (c.Component as Tau3Button).Caption := FuncParams[0];
@@ -1538,7 +1567,9 @@ begin
               IsNumeric(FuncParams[5]) and IsNumeric(FuncParams[6])) then
               Continue;
             // Read Data
-            c := CreateComponent(TObject(currParent.Data) as TWinControl, Tau3Checkbox.Create(FFormular), IcoCheckbox);
+            c := CreateEditorControl(TObject(currParent.Data) as TWinControl);
+            c.Component:=Tau3Checkbox.Create(FFormular);
+            AddComponent(c.Component, IcoCheckbox);
             c.Component.Name := VarName;
             FormControlView.Items[curr].Text := VarName;
             (c.Component as Tau3Checkbox).Caption := FuncParams[0];
@@ -1557,7 +1588,9 @@ begin
               IsNumeric(FuncParams[5]) and IsNumeric(FuncParams[6])) then
               Continue;
             // Read Data
-            CreateComponent(TObject(currParent.Data) as TWinControl, Tau3Label.Create(FFormular), IcoCheckbox);
+            CreateEditorControl(TObject(currParent.Data) as TWinControl);
+            c.Component:=Tau3Label.Create(FFormular);
+            AddComponent(c.Component, IcoLabel);
             c.Component.Name := VarName;
             FormControlView.Items[curr].Text := VarName;
             (c.Component as Tau3Label).Caption := FuncParams[0];
@@ -1576,7 +1609,9 @@ begin
               IsNumeric(FuncParams[5]) and IsNumeric(FuncParams[6])) then
               Continue;
             // Read Data
-            CreateComponent(TObject(currParent.Data) as TWinControl, Tau3Edit.Create(FFormular), IcoCheckbox);
+            CreateEditorControl(TObject(currParent.Data) as TWinControl);
+            c.Component:=Tau3Edit.Create(FFormular);
+            AddComponent(c.Component, IcoEdit);
             c.Component.Name := VarName;
             FormControlView.Items[curr].Text := VarName;
             (c.Component as Tau3Edit).Text := FuncParams[0];

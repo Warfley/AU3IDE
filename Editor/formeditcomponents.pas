@@ -145,6 +145,12 @@ type
     function GetHotkey: string;
   end;
 
+  IEditorComponent = interface
+    ['{EC667588-9E2D-40FC-9EB8-341D1C941ED5}']
+    function GetEditor: TEditorComponent;
+    procedure PaintToEditor(C: TCanvas);
+  end;
+
   { Iau3Component }
 
   Iau3Component = interface
@@ -152,7 +158,6 @@ type
     procedure CopyTo(c: TControl);
     procedure FillEvents(g: TValueListEditor);
     function Getau3String(FormName: string): string;
-    function GetEditor: TEditorComponent;
 
     function GetEvent(e: string): string;
     procedure SetEvent(e, val: string);
@@ -162,7 +167,6 @@ type
     function GetEvents: TStringList;
     function GetOnChangeProp: TPropertyChangeEvent;
     procedure SetOnChangeProp(a: TPropertyChangeEvent);
-
 
     property ComponentProp[prop: string]: string read GetProp write SetProp;
     property isProperty[prop: string]: boolean read CheckProperty;
@@ -185,6 +189,7 @@ type
     procedure ChangeBounds(ALeft, ATop, AWidth, AHeight: integer;
       KeepBase: boolean); override;
   public
+    constructor Create(AOwner: TComponent); override;
     property Component: TComponent read FComponent write SetComponent;
   published
     property Selected: Boolean read FSelected write SetSelected;
@@ -245,7 +250,6 @@ type
     function GetResize: TResizeModes;
     procedure Paint; override;
   public
-    function GetEditor: TEditorComponent;
     procedure SetFormPos(x, y: integer);
     function GetOnChangeProp: TPropertyChangeEvent;
     procedure SetOnChangeProp(a: TPropertyChangeEvent);
@@ -311,7 +315,7 @@ type
 
   { Tau3Edit }
 
-  Tau3Edit = class(TCustomEdit, Iau3Component)
+  Tau3Edit = class(TCustomEdit, Iau3Component, IEditorComponent)
   private
     FEnabled: boolean;
     FStyle: cardinal;
@@ -356,6 +360,7 @@ type
     function GetText: string;
   public
     function GetEditor: TEditorComponent;
+    procedure PaintToEditor(C: TCanvas);
     function GetOnChangeProp: TPropertyChangeEvent;
     procedure SetOnChangeProp(a: TPropertyChangeEvent);
     function GetEvent(e: string): string;
@@ -454,7 +459,7 @@ type
     property TextHintFontStyle;
   end;
 
-  Tau3Button = class(TCustomBitBtn, Iau3Component, IHotKeyComponent)
+  Tau3Button = class(TCustomBitBtn, Iau3Component, IHotKeyComponent, IEditorComponent)
   private
     FStyle: cardinal;
     FStyleEX: cardinal;
@@ -501,6 +506,7 @@ type
     function GetText: string;
   public
     function GetEditor: TEditorComponent;
+    procedure PaintToEditor(C: TCanvas);
     procedure Click; override;
     function GetOnChangeProp: TPropertyChangeEvent;
     procedure SetOnChangeProp(a: TPropertyChangeEvent);
@@ -587,7 +593,7 @@ type
     property TabStop;
   end;
 
-  Tau3Checkbox = class(TCustomCheckBox, Iau3Component)
+  Tau3Checkbox = class(TCustomCheckBox, Iau3Component, IEditorComponent)
   private
     FStyle: cardinal;
     FStyleEX: cardinal;
@@ -628,6 +634,7 @@ type
     function GetText: string;
   public
     function GetEditor: TEditorComponent;
+    procedure PaintToEditor(C: TCanvas);
     function GetOnChangeProp: TPropertyChangeEvent;
     procedure SetOnChangeProp(a: TPropertyChangeEvent);
     function GetEvent(e: string): string;
@@ -717,7 +724,7 @@ type
     property TabStop default True;
   end;
 
-  Tau3Label = class(TCustomControl, Iau3Component)
+  Tau3Label = class(TCustomControl, Iau3Component, IEditorComponent)
   private
     FStyle: cardinal;
     FStyleEX: cardinal;
@@ -760,6 +767,7 @@ type
     procedure Paint; override;
   public
     function GetEditor: TEditorComponent;
+    procedure PaintToEditor(C: TCanvas);
     function GetOnChangeProp: TPropertyChangeEvent;
     procedure SetOnChangeProp(a: TPropertyChangeEvent);
     function GetEvent(e: string): string;
@@ -1074,7 +1082,7 @@ begin
     with FComponent as TControl do
     begin
       Parent := Self;
-      Left := MaxInt-(Width);
+      Left := (Width)*2;
       Self.Width := Width;
       Self.Height := Height;
       Visible:=True;
@@ -1125,6 +1133,7 @@ begin
   inherited ChangeBounds(ALeft, ATop, AWidth, AHeight, KeepBase);
   if not (Component is TControl) then Exit;
   c:=Component as Iau3Component;
+      (Component as TControl).Left := (Component as TControl).Width*2;
   OldLeft:=StrToInt(c.GetProp('X'));
   OldTop:=StrToInt(c.GetProp('Y'));
   OldWidth:=StrToInt(c.GetProp('Width'));
@@ -1135,12 +1144,14 @@ begin
   if AHeight<>OldHeight then c.SetProp('Height', IntToStr(AHeight));
 end;
 
-{ Form }
-
-function Tau3Form.GetEditor: TEditorComponent;
+constructor TEditorComponent.Create(AOwner: TComponent);
 begin
-  Result := nil;
+  inherited Create(AOwner);
+  FComponent:=nil;
+  FSelected:=False;
 end;
+
+{ Form }
 
 procedure Tau3Form.SetFormPos(x, y: integer);
 begin
@@ -1959,7 +1970,7 @@ begin
   else if prop = 'Visible' then
     Result := BoolToStr(FIsVisible, True)
   else if prop = 'pos' then
-    Result := Format('%d:%d', [Left, Top])
+    Result := Format('%d:%d', [X, Y])
   else if prop = 'size' then
     Result := Format('%d:%d', [Width, Height]);
 end;
@@ -2011,6 +2022,11 @@ begin
     SetSize(Self, val);
 end;
 
+    procedure Tau3Edit.PaintToEditor(C: TCanvas);
+    begin
+      PaintTo(C, 0,0);
+    end;
+
 function Tau3Edit.GetEditor: TEditorComponent;
 begin
   Result := Parent as TEditorComponent;
@@ -2057,8 +2073,6 @@ end;
 
 procedure Tau3Edit.CopyTo(c: TControl);
 begin
-  c.Left := Left;
-  c.Top := Top;
   c.Width := Width;
   c.Height := Height;
   if (c is Tau3Edit) then
@@ -2067,6 +2081,8 @@ begin
       (c as Tau3Edit).Text := c.Name
     else
       (c as Tau3Edit).Text := Text;
+  (c as Tau3Edit).Y := Y;
+  (c as Tau3Edit).X := X;
     (c as Tau3Edit).Style := Style;
     (c as Tau3Edit).EditStyle := EditStyle;
     (c as Tau3Edit).StyleEX := StyleEX;
@@ -2082,7 +2098,7 @@ begin
   sl := TStringList.Create;
   try
     sl.Add(Format('$%s = GUICtrlCreateInput("%s", %d, %d, %d, %d, %d, %d)',
-      [Name, Text, Left, Top, Width, Height, FStyle, FStyleEX]));
+      [Name, Text, X, Y, Width, Height, FStyle, FStyleEX]));
     // MaxLength
     if MaxLength > 0 then
       sl.Add(Format('GUICtrlSetLimit($%s, %d)', [Name, MaxLength]));
@@ -2456,7 +2472,7 @@ begin
   else if p = 'visible' then
     Result := BoolToStr(FIsVisible, True)
   else if p = 'pos' then
-    Result := Format('%d:%d', [Left, Top])
+    Result := Format('%d:%d', [X, Y])
   else if p = 'size' then
     Result := Format('%d:%d', [Width, Height]);
 end;
@@ -2509,6 +2525,11 @@ begin
   else if (p = 'size') then
     SetSize(Self, val);
 end;
+
+    procedure Tau3Button.PaintToEditor(C: TCanvas);
+    begin
+      PaintTo(C, 0,0);
+    end;
 
 function Tau3Button.GetEditor: TEditorComponent;
 begin
@@ -2564,8 +2585,6 @@ end;
 
 procedure Tau3Button.CopyTo(c: TControl);
 begin
-  c.Left := Left;
-  c.Top := Top;
   c.Width := Width;
   c.Height := Height;
   if Name = Caption then
@@ -2574,6 +2593,8 @@ begin
     c.Caption := Caption;
   if (c is Tau3Button) then
   begin
+    (c as Tau3Button).X := X;
+    (c as Tau3Button).Y := Y;
     (c as Tau3Button).CompleteStyle := CompleteStyle;
     (c as Tau3Button).StyleEX := StyleEX;
     (c as Tau3Button).Events.Assign(FEvents);
@@ -2588,7 +2609,7 @@ begin
   sl := TStringList.Create;
   try
     sl.Add('$%s = GUICtrlCreateButton("%s", %d, %d, %d, %d, %d, %d)',
-      [Name, Caption, Left, Top, Width, Height, FStyle, FStyleEX]);
+      [Name, Caption, X, Y, Width, Height, FStyle, FStyleEX]);
     // Picture
     if Length(FPicture) > 0 then
       sl.Add(Format('GUICtrlSetImage($%s, "%s")', [Name, FPicture]));
@@ -2874,6 +2895,11 @@ begin
   FOnChangeProp := a;
 end;
 
+    procedure Tau3Checkbox.PaintToEditor(C: TCanvas);
+    begin
+      PaintTo(C, 0, 0);
+    end;
+
 function Tau3Checkbox.GetEditor: TEditorComponent;
 begin
   Result := Parent as TEditorComponent;
@@ -2921,7 +2947,7 @@ begin
   else if p = 'visible' then
     Result := BoolToStr(FIsVisible, True)
   else if p = 'pos' then
-    Result := Format('%d:%d', [Left, Top])
+    Result := Format('%d:%d', [X, Y])
   else if p = 'size' then
     Result := Format('%d:%d', [Width, Height]);
 end;
@@ -3001,8 +3027,6 @@ end;
 
 procedure Tau3Checkbox.CopyTo(c: TControl);
 begin
-  c.Left := Left;
-  c.Top := Top;
   c.Width := Width;
   c.Height := Height;
   if Name = Caption then
@@ -3011,6 +3035,8 @@ begin
     c.Caption := Caption;
   if (c is Tau3Checkbox) then
   begin
+    (c as Tau3Checkbox).X := X;
+    (c as Tau3Checkbox).Y := Y;
     (c as Tau3Checkbox).CompleteStyle := CompleteStyle;
     (c as Tau3Checkbox).StyleEX := StyleEX;
     (c as Tau3Checkbox).Events.Assign(FEvents);
@@ -3025,7 +3051,7 @@ begin
   sl := TStringList.Create;
   try
     sl.Add('$%s = GUICtrlCreateCheckbox("%s", %d, %d, %d, %d, %d, %d)',
-      [Name, Caption, Left, Top, Width, Height, FStyle, FStyleEX]);
+      [Name, Caption, X, Y, Width, Height, FStyle, FStyleEX]);
     // Checked
     if Checked then
       sl.Add(Format('GUICtrlSetState($%s, 1)', [Name]));
@@ -3296,6 +3322,11 @@ begin
   FOnChangeProp := a;
 end;
 
+procedure Tau3Label.PaintToEditor(C: TCanvas);
+begin
+  c.TextOut(0,0, Text);
+end;
+
 function Tau3Label.GetEditor: TEditorComponent;
 begin
   Result := Parent as TEditorComponent;
@@ -3341,7 +3372,7 @@ begin
   else if p = 'visible' then
     Result := BoolToStr(FIsVisible, True)
   else if p = 'pos' then
-    Result := Format('%d:%d', [Left, Top])
+    Result := Format('%d:%d', [X, Y])
   else if p = 'size' then
     Result := Format('%d:%d', [Width, Height]);
 end;
@@ -3441,8 +3472,6 @@ end;
 
 procedure Tau3Label.CopyTo(c: TControl);
 begin
-  c.Left := Left;
-  c.Top := Top;
   c.Width := Width;
   c.Height := Height;
   if Name = Caption then
@@ -3451,6 +3480,8 @@ begin
     c.Caption := Caption;
   if (c is Tau3Label) then
   begin
+    (c as Tau3Label).X := X;
+    (c as Tau3Label).Y := Y;
     (c as Tau3Label).CompleteStyle := CompleteStyle;
     (c as Tau3Label).StyleEX := StyleEX;
     (c as Tau3Label).Events.Assign(FEvents);
@@ -3465,7 +3496,7 @@ begin
   sl := TStringList.Create;
   try
     sl.Add('$%s = GUICtrlCreateLabel("%s", %d, %d, %d, %d, %d, %d)',
-      [Name, Caption, Left, Top, Width, Height, FStyle, FStyleEX]);
+      [Name, Caption, x, y, Width, Height, FStyle, FStyleEX]);
     // Font
     //if Font.Name<>'default' then
     sl.Add(Format('GUICtrlSetFont($%s, %s)', [Name, GetFontString(Font)]));
@@ -3498,8 +3529,11 @@ var
   oldVal: string;
 begin
   oldVal := FCaption;
+  if Assigned(Parent) then
+  begin
   Width := Canvas.TextWidth(val);
   Height := Canvas.TextHeight(val);
+  end;
   FCaption := val;
   Invalidate;
   if Assigned(FOnChangeProp) then
