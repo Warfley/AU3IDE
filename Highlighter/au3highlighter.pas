@@ -446,7 +446,7 @@ procedure Tau3SynHighlight.LoadConfig(Path: string);
 
 begin
   LoadHLTable(IncludeTrailingPathDelimiter(Path) + 'Keywords.lst');
-  LoadHLConfig(IncludeTrailingPathDelimiter(Path) + 'Colors.cnf');
+  LoadHLConfig(IncludeTrailingPathDelimiter(Path) + 'Colors.cfg');
 end;
 
 function Tau3SynHighlight.GetAttr(a: TTokenType): TSynHighlighterAttributes;

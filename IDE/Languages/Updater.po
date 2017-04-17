@@ -1,0 +1,35 @@
+msgid ""
+msgstr "Content-Type: text/plain; charset=UTF-8"
+
+#: updater.sanykeyexit
+msgid "Press any key to exit"
+msgstr ""
+
+#: updater.scheckfile
+msgid "Checking file:"
+msgstr ""
+
+#: updater.sdone
+msgid "done"
+msgstr ""
+
+#: updater.sfiles
+msgid "files"
+msgstr ""
+
+#: updater.sloadfile
+msgid "Loading file %s:"
+msgstr ""
+
+#: updater.sloadinformation
+msgid "Loading update information: "
+msgstr ""
+
+#: updater.supdatedone
+msgid "Update completed"
+msgstr ""
+
+#: updater.supdateto
+msgid "Update to version: "
+msgstr ""
+

@@ -25,6 +25,17 @@ type
 const
   SUpdateURL = 'http://kehrein.org/AS/Updates/';
 
+resourcestring
+  SLoadInformation = 'Loading update information: ';
+  SDone = 'done';
+  SUpdateTo = 'Update to version: ';
+  SFiles = 'files';
+  SCheckFile = 'Checking file:';
+  SLoadFile = 'Loading file %s:';
+  SUpdateDone = 'Update completed';
+  SAnyKeyExit = 'Press any key to exit';
+
+
 function WriteSize(s: UInt64): String;
 begin
   if s<1000 then
@@ -98,29 +109,29 @@ begin
     (*{$IfDef WINDOWS}KillTask('AU3IDE.exe');{$else}*)Sleep(1000);//{$EndIf}
     f.OnDataReceived := @po.PrintOutput;
     TextColor(LightRed);
-    po.DownloadName := 'Updateinformationen werden geladen: ';
-    Write('Updateinformationen werden geladen: ');
+    po.DownloadName := SLoadInformation;
+    Write(SLoadInformation);
     TextColor(White);
     sl.Text := f.Get(SUpdateURL + 'Update.txt');
     TextColor(LightGreen);
-    WriteLn('Fertig');
+    WriteLn(SDone);
     TextColor(White);
-    WriteLn('Update auf Version: ' + sl[0]);
-    WriteLn(sl[1] + ' Dateien');
+    WriteLn(SUpdateTo + sl[0]);
+    WriteLn(sl[1] + ' '+SFiles);
     for i := 2 to sl.Count - 1 do
       if sl[i] <> '' then
       begin
         f.RequestHeaders.Clear;
         TextColor(White);
-        Write('Prüfe Datei ' + sl.Names[i] + '... ');
+        Write(SCheckFile + ' ' + sl.Names[i] + '... ');
         if (not FileExists(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) +
           sl.Names[i])) or (GetHash(IncludeTrailingPathDelimiter(
           ExtractFilePath(ParamStr(0))) + sl.Names[i]) <> sl.ValueFromIndex[i]) then
         begin
           WriteLn('');
           TextColor(LightRed);
-          po.DownloadName := Format('Datei %s wird geladen: ', [sl.Names[i]]);
-          Write(Format('Datei %s wird geladen: ', [sl.Names[i]]));
+          po.DownloadName := Format(SLoadFile+' ', [sl.Names[i]]);
+          Write(Format(SLoadFile+' ', [sl.Names[i]]));
           TextColor(White);
           ForceDirectories(ExtractFilePath(IncludeTrailingPathDelimiter(
             ExtractFilePath(ParamStr(0))) + sl.Names[i]));
@@ -130,11 +141,11 @@ begin
             IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + sl.Names[i]);
         end;
         TextColor(LightGreen);
-        WriteLn('Fertig');
+        WriteLn(SDone);
       end;
     TextColor(Yellow);
-    WriteLn('Update abgeschlossen');
-    Write('Mit beliebiger Taste Beenden...');
+    WriteLn(SUpdateDone);
+    Write(SAnyKeyExit);
     ReadKey;
     p := TProcess.Create(nil);
     try

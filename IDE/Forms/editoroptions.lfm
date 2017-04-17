@@ -12,7 +12,7 @@ object EditorConf: TEditorConf
   OnDestroy = FormDestroy
   OnShow = FormShow
   Position = poMainFormCenter
-  LCLVersion = '1.6.0.4'
+  LCLVersion = '1.6.4.0'
   Visible = False
   object ModalPanel: TPanel
     Left = 0
@@ -65,13 +65,13 @@ object EditorConf: TEditorConf
       TabOrder = 0
       object GeneralOptionsTab: TTabSheet
         Caption = 'General'
-        ClientHeight = 332
+        ClientHeight = 322
         ClientWidth = 739
         object Label1: TLabel
           Left = 0
-          Height = 15
+          Height = 25
           Top = 8
-          Width = 74
+          Width = 111
           Caption = 'Explorer align:'
           ParentColor = False
         end
@@ -100,9 +100,9 @@ object EditorConf: TEditorConf
         end
         object Label2: TLabel
           Left = 0
-          Height = 15
+          Height = 25
           Top = 43
-          Width = 67
+          Width = 99
           Caption = 'Background:'
           ParentColor = False
         end
@@ -138,9 +138,9 @@ object EditorConf: TEditorConf
         end
         object Label3: TLabel
           Left = 0
-          Height = 15
+          Height = 25
           Top = 80
-          Width = 98
+          Width = 148
           Caption = 'Editor background'
           ParentColor = False
         end
@@ -167,9 +167,9 @@ object EditorConf: TEditorConf
         end
         object Label4: TLabel
           Left = 0
-          Height = 15
+          Height = 25
           Top = 120
-          Width = 109
+          Width = 164
           Caption = 'Sidebar Background:'
           ParentColor = False
         end
@@ -196,9 +196,9 @@ object EditorConf: TEditorConf
         end
         object Label5: TLabel
           Left = 0
-          Height = 15
+          Height = 25
           Top = 160
-          Width = 67
+          Width = 102
           Caption = 'Sidebar font:'
           ParentColor = False
         end
@@ -229,9 +229,9 @@ object EditorConf: TEditorConf
         end
         object Label6: TLabel
           Left = 0
-          Height = 15
+          Height = 25
           Top = 200
-          Width = 75
+          Width = 111
           Caption = 'Row changed:'
           ParentColor = False
         end
@@ -258,9 +258,9 @@ object EditorConf: TEditorConf
         end
         object Label7: TLabel
           Left = 0
-          Height = 15
+          Height = 25
           Top = 240
-          Width = 59
+          Width = 89
           Caption = 'Row saved:'
           ParentColor = False
         end
@@ -287,9 +287,9 @@ object EditorConf: TEditorConf
         end
         object Label8: TLabel
           Left = 0
-          Height = 15
+          Height = 25
           Top = 280
-          Width = 81
+          Width = 120
           Caption = 'Selection color:'
           ParentColor = False
         end
@@ -316,41 +316,41 @@ object EditorConf: TEditorConf
         end
         object Label9: TLabel
           Left = 376
-          Height = 15
+          Height = 25
           Top = 9
-          Width = 99
+          Width = 149
           Caption = 'Selected text color:'
           ParentColor = False
         end
         object ScrollPastEOLBox: TCheckBox
           Left = 376
-          Height = 19
+          Height = 29
           Top = 80
-          Width = 133
+          Width = 201
           Caption = 'Scroll past end of line'
           OnChange = ScrollPastEOLBoxChange
           TabOrder = 17
         end
         object CaretAlwaysVisibleBox: TCheckBox
           Left = 376
-          Height = 19
+          Height = 29
           Top = 116
-          Width = 129
+          Width = 193
           Caption = 'Cursor always visible'
           OnChange = CaretAlwaysVisibleBoxChange
           TabOrder = 18
         end
         object Label10: TLabel
           Left = 376
-          Height = 15
+          Height = 25
           Top = 153
-          Width = 55
+          Width = 80
           Caption = 'Tab width:'
           ParentColor = False
         end
         object TabLenEdit: TEdit
           Left = 544
-          Height = 23
+          Height = 33
           Top = 153
           Width = 160
           Alignment = taRightJustify
@@ -382,17 +382,17 @@ object EditorConf: TEditorConf
         end
         object Label25: TLabel
           Left = 376
-          Height = 15
+          Height = 25
           Top = 201
-          Width = 70
+          Width = 103
           Caption = 'Tooltip color:'
           ParentColor = False
         end
         object Label26: TLabel
           Left = 376
-          Height = 15
+          Height = 25
           Top = 233
-          Width = 92
+          Width = 137
           Caption = 'Tooltip font color'
           ParentColor = False
         end
@@ -417,9 +417,9 @@ object EditorConf: TEditorConf
         end
         object Label27: TLabel
           Left = 376
-          Height = 15
+          Height = 25
           Top = 280
-          Width = 59
+          Width = 89
           Caption = 'Editor font:'
           ParentColor = False
         end
@@ -453,9 +453,9 @@ object EditorConf: TEditorConf
         end
         object Label31: TLabel
           Left = 377
-          Height = 15
+          Height = 25
           Top = 43
-          Width = 57
+          Width = 85
           Caption = 'Font color:'
           ParentColor = False
         end
@@ -1415,10 +1415,10 @@ object EditorConf: TEditorConf
         end
         object KeyTypeBox: TComboBox
           Left = 416
-          Height = 23
+          Height = 33
           Top = 112
           Width = 320
-          ItemHeight = 15
+          ItemHeight = 25
           ItemIndex = 1
           Items.Strings = (
             'Comment'
@@ -1535,6 +1535,16 @@ object EditorConf: TEditorConf
         Top = 238
         Width = 747
         ClientWidth = 747
+        inherited Label1: TLabel
+          Height = 25
+          Width = 52
+        end
+        inherited SearchEdit: TEdit
+          Height = 33
+        end
+        inherited ReplaceEdit: TEdit
+          Height = 33
+        end
         inherited CloseSearchButton: TSpeedButton
           Left = 712
         end
@@ -1558,6 +1568,10 @@ object EditorConf: TEditorConf
         Left = 512
         Height = 238
         ClientHeight = 238
+        inherited CodeExplorerHead: TPanel
+          ClientHeight = 30
+          ClientWidth = 231
+        end
         inherited CodeExplorer: TTreeView
           Height = 204
         end

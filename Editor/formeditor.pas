@@ -96,6 +96,7 @@ type
 
     function GetComponent(C: TComponent): TComponent;
     function GetEditorControl(n: TTreeNode): TControl;
+    function GetEditorControl(c: TComponent): TControl;
     function CopyComponent(c: TComponent): TComponent;
     procedure DeleteItem(n: TTreeNode);
     function FindControl(s: string): integer;
@@ -409,9 +410,6 @@ begin
 end;
 
 function TFormEditFrame.CreateEditorControl(P: TWinControl): TEditorComponent;
-var
-  i: Integer;
-  Selected: Boolean;
 begin
   Result := TEditorComponent.Create(FFormular);
   Result.Parent := P;
@@ -477,9 +475,15 @@ end;
 
 function TFormEditFrame.GetEditorControl(n: TTreeNode): TControl;
 begin
-  Result:=TControl(n.Data);
-  if Result is IEditorComponent then
-    Result:=(Result as IEditorComponent).GetEditor;
+  Result:=GetEditorControl(TComponent(n.Data));
+end;
+
+function TFormEditFrame.GetEditorControl(c: TComponent): TControl;
+begin
+  if c is IEditorComponent then
+    Result:=(c as IEditorComponent).GetEditor
+  else
+    Result := c as TControl;
 end;
 
 function TFormEditFrame.CopyComponent(c: TComponent): TComponent;
@@ -1161,8 +1165,6 @@ begin
 end;
 
 procedure TFormEditFrame.EditorScrollBoxPaint(Sender: TObject);
-var
-  i: integer;
 begin
   EditorScrollBox.Canvas.Brush.Color := (EditorScrollBox.Color);
   EditorScrollBox.Canvas.Brush.Style := bsSolid;
@@ -1348,8 +1350,8 @@ begin
             FormControlView.Items[n].Selected := True;
             Break;
           end;
-        (tmplst[i] as TControl).Left := (tmplst[i] as TControl).Left + 10;
-        (tmplst[i] as TControl).Top := (tmplst[i] as TControl).Top + 10;
+        GetEditorControl(tmplst[i] as TControl).Left := GetEditorControl(tmplst[i] as TControl).Left + 10;
+        GetEditorControl(tmplst[i] as TControl).Top := GetEditorControl(tmplst[i] as TControl).Top + 10;
       end;
       for i := 0 to tmplst.Count do
         if tmplst[i] is TWinControl then
@@ -1379,8 +1381,6 @@ end;
 procedure TFormEditFrame.Save(p: string = '');
 var
   sl: TStringList;
-  i: integer;
-  c: Iau3Component;
 begin
   if p = '' then
     p := FFileName;

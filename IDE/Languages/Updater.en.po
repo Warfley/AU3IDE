@@ -1,0 +1,45 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 2.0.1\n"
+"Last-Translator: \n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language: en\n"
+
+#: updater.sanykeyexit
+msgid "Press any key to exit"
+msgstr "Press any key to exit"
+
+#: updater.scheckfile
+msgid "Checking file:"
+msgstr "Checking file:"
+
+#: updater.sdone
+msgid "done"
+msgstr "done"
+
+#: updater.sfiles
+msgid "files"
+msgstr "files"
+
+#: updater.sloadfile
+msgid "Loading file %s:"
+msgstr "Loading file %s:"
+
+#: updater.sloadinformation
+msgid "Loading update information: "
+msgstr "Loading update information: "
+
+#: updater.supdatedone
+msgid "Update completed"
+msgstr "Update completed"
+
+#: updater.supdateto
+msgid "Update to version: "
+msgstr "Update to version: "

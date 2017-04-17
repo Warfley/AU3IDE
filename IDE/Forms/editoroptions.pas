@@ -567,7 +567,7 @@ procedure TEditorConf.Save(P: string);
 
 begin
   SaveGeneralData(IncludeTrailingPathDelimiter(p) + 'editor.cfg');
-  SaveHLFonts(IncludeTrailingPathDelimiter(p) + 'HL' + PathDelim + 'colors.cnf');
+  SaveHLFonts(IncludeTrailingPathDelimiter(p) + 'HL' + PathDelim + 'colors.cfg');
   SaveSTDFunc(IncludeTrailingPathDelimiter(p) + 'Funcs.lst');
   SaveHLKeywords(IncludeTrailingPathDelimiter(p) + 'HL' + PathDelim + 'Keywords.lst');
   SaveKeywords(IncludeTrailingPathDelimiter(p) + 'Keywords.lst');
@@ -827,7 +827,7 @@ procedure TEditorConf.Load(P: string);
 
 begin
   LoadGeneralData(IncludeTrailingPathDelimiter(p) + 'editor.cfg');
-  LoadHLFonts(IncludeTrailingPathDelimiter(p) + 'HL' + PathDelim + 'colors.cnf');
+  LoadHLFonts(IncludeTrailingPathDelimiter(p) + 'HL' + PathDelim + 'colors.cfg');
   LoadSTDFunc(IncludeTrailingPathDelimiter(p) + 'Funcs.lst');
   LoadKeywords(IncludeTrailingPathDelimiter(p) + 'Keywords.lst');
   LoadHLKeywords(IncludeTrailingPathDelimiter(p) + 'HL' + PathDelim + 'Keywords.lst');

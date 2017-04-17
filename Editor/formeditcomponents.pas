@@ -1553,6 +1553,7 @@ var
   sl, hkey: TStringList;
   i, k: integer;
   s: string;
+  c: TComponent;
 begin
   sl := TStringList.Create;
   try
@@ -1620,10 +1621,16 @@ begin
     try
       for i := 0 to Self.ControlCount - 1 do
       begin
-        sl.Add((Self.Controls[i] as Iau3Component).Getau3String(FormName));
-        if Self.Controls[i] is IHotKeyComponent then
+
+        if (Self.Controls[i] is TEditorComponent) then
+          c:=(Self.Controls[i] as TEditorComponent).Component
+        else
+          c:=(Self.Controls[i] as TComponent);
+
+        sl.Add((c as Iau3Component).Getau3String(FormName));
+        if c is IHotKeyComponent then
         begin
-          s := (Self.Controls[i] as IHotKeyComponent).GetHotkey;
+          s := (c as IHotKeyComponent).GetHotkey;
           if Length(s) > 0 then
             hkey.Add(s);
         end;
@@ -2075,8 +2082,8 @@ begin
   (c as Tau3Edit).Width := Width;
   (c as Tau3Edit).Height := Height;
       (c as Tau3Edit).Text := Text;
-  (c as Tau3Edit).Y := Y+20;
-  (c as Tau3Edit).X := X+20;
+  (c as Tau3Edit).Y := Y;
+  (c as Tau3Edit).X := X;
     (c as Tau3Edit).Style := Style;
     (c as Tau3Edit).EditStyle := EditStyle;
     (c as Tau3Edit).StyleEX := StyleEX;
@@ -2587,8 +2594,8 @@ begin
   begin
     (c as Tau3Button).Width := Width;
     (c as Tau3Button).Height := Height;
-    (c as Tau3Button).X := X+20;
-    (c as Tau3Button).Y := Y+20;
+    (c as Tau3Button).X := X;
+    (c as Tau3Button).Y := Y;
     (c as Tau3Button).CompleteStyle := CompleteStyle;
     (c as Tau3Button).StyleEX := StyleEX;
     (c as Tau3Button).Events.Assign(FEvents);
@@ -3080,8 +3087,8 @@ begin
   begin
     (c as Tau3Checkbox).Width := Width;
     (c as Tau3Checkbox).Height := Height;
-    (c as Tau3Checkbox).X := X+20;
-    (c as Tau3Checkbox).Y := Y+20;
+    (c as Tau3Checkbox).X := X;
+    (c as Tau3Checkbox).Y := Y;
     (c as Tau3Checkbox).CompleteStyle := CompleteStyle;
     (c as Tau3Checkbox).StyleEX := StyleEX;
     (c as Tau3Checkbox).Events.Assign(FEvents);
@@ -3528,8 +3535,8 @@ begin
   begin
     (c as Tau3Label).Width := Width;
     (c as Tau3Label).Height := Height;
-    (c as Tau3Label).X := X+20;
-    (c as Tau3Label).Y := Y+20;
+    (c as Tau3Label).X := X;
+    (c as Tau3Label).Y := Y;
     (c as Tau3Label).CompleteStyle := CompleteStyle;
     (c as Tau3Label).StyleEX := StyleEX;
     (c as Tau3Label).Events.Assign(FEvents);
