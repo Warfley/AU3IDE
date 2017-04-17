@@ -67,6 +67,7 @@ type
     procedure ToolboxHeaderPanelMouseLeave(Sender: TObject);
     procedure PickListClick(Sender: TObject);
   private
+    DoSelect: Boolean;
     FFormular: Tau3Form;
     MovingControl: TControl;
     FChangeProps: boolean;
@@ -79,7 +80,7 @@ type
     sizing: boolean;
     FDrawLines: boolean;
     FMousePoint: TPoint;
-    FPanelMousePoint: TPoint;
+    FParentMousePoint: TPoint;
     FSelPoint: TPoint;
     FCopyLst: TObjectList;
     FOldLeft, FOldTop: integer;
@@ -414,8 +415,8 @@ var
 begin
   Result := TEditorComponent.Create(FFormular);
   Result.Parent := P;
-  Result.Left := FPanelMousePoint.x;
-  Result.Top := FPanelMousePoint.Y;
+  Result.Left := FParentMousePoint.x;
+  Result.Top := FParentMousePoint.Y;
   Result.Width:=200;
   Result.Height:=75;
   Result.Selected := True;
@@ -733,12 +734,12 @@ begin
                   FDrawLines := False;
                 end;
           end;
-          if CheckToolSelected and not (Sender is TEditorComponent) then
+          if CheckToolSelected or DoSelect then
           begin
             FSelPoint := FFormular.ScreenToClient(
               (Sender as TControl).ClientToScreen(Point(X, Y)));
             FFormular.Invalidate;
-            Moved := True;
+            //Moved := True;
           end;
         end;
       end;
@@ -750,15 +751,34 @@ end;
 
 procedure TFormEditFrame.FormPanelMouseUp(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: integer);
+
+procedure Swap(var X, Y: Integer);
+var tmp: Integer;
+begin
+  tmp:=X;
+  X:=Y;
+  Y:=tmp;
+end;
+
 var
   d: TPoint;
   c: TControl;
   i: integer;
   cd: TChangeData;
   e: TEditorComponent;
+  DidMoveMouse: Boolean;
 begin
   if mbLeft = Button then
   begin
+    DidMoveMouse:=(FSelPoint.x>=0) and (FSelPoint.Y>=0) and (FParentMousePoint.X>=0)
+        and (FParentMousePoint.y>=0);
+    if DidMoveMouse then
+    begin
+      if FSelPoint.x<FParentMousePoint.x then
+        Swap(FParentMousePoint.x, FSelPoint.x);
+      if FSelPoint.y<FParentMousePoint.y then
+        Swap(FParentMousePoint.Y, FSelPoint.Y);
+    end;
     if CheckToolSelected then
     begin
       e:=CreateEditorControl(FFormular);
@@ -792,17 +812,12 @@ begin
       AddComponent(c, ToolSelect.Selected.ImageIndex);
 
       with e do
-      if (FSelPoint.X - FMousePoint.x >= 0) and (FSelPoint.y - FMousePoint.Y >= 0) then
+      if DidMoveMouse and (FSelPoint.X - FParentMousePoint.x >= 0) and (FSelPoint.y - FParentMousePoint.Y >= 0) then
       begin
-        Width := FSelPoint.X - FMousePoint.x;
-        Height := FSelPoint.y - FMousePoint.Y;
+        Width := FSelPoint.X - FParentMousePoint.x;
+        Height := FSelPoint.y - FParentMousePoint.Y;
         FSelPoint := Point(-1, -1);
         Parent.Invalidate;
-      end
-      else
-      begin
-        Height:=Max(10, c.Height);
-        Width:=Max(10, c.Width);
       end;
 
       ToolSelect.Selected:=nil;
@@ -810,9 +825,26 @@ begin
         FOnVarChanged(Self);
       if Assigned(FOnChange) then
         FOnChange(Self);
-    end;
-
-    if Moved then
+    end
+    else if DoSelect then
+    begin
+      FormControlView.ClearSelection();
+      if DidMoveMouse then
+        for i:=1 to FormControlView.Items.Count-1 do
+          with GetEditorControl(FormControlView.Items[i]) do
+            if (Left +Width >=FParentMousePoint.x) and (Left<= FSelPoint.x) and
+              (Top+Height>=FParentMousePoint.y) and (Top<=FSelPoint.y) then
+            begin
+              FormControlView.Items[i].Selected:=True;
+              DoSelect:=False;
+            end;
+      if DoSelect then
+      begin
+        FormControlView.Items[0].Selected:=True;
+        DoSelect:=False;
+      end;
+    end
+    else if Moved then
     begin
       if sizing then
       begin
@@ -850,6 +882,7 @@ begin
     Moved := False;
     PositionPickerPanel.Show;
     FMousePoint := Point(-1, -1);
+    FSelPoint:=Point(-1,-1);
     FDrawLines := False;
     LoadControlData(TComponent(FormControlView.Selected.Data));
     FFormular.Invalidate;
@@ -888,10 +921,20 @@ begin
     (Sender as TCustomControl).Canvas.Pen.Style := psDash;
     (Sender as TCustomControl).Canvas.Pen.Color := clBlack;
     (Sender as TCustomControl).Canvas.Pen.Mode := pmNotXor;
-    (Sender as TCustomControl).Canvas.Rectangle(FPanelMousePoint.X,
-      FPanelMousePoint.Y, FSelPoint.x, FSelPoint.Y);
+    (Sender as TCustomControl).Canvas.Rectangle(FParentMousePoint.X,
+      FParentMousePoint.Y, FSelPoint.x, FSelPoint.Y);
   end;
-  if ((FMousePoint.x = -1) and (FMousePoint.y = -1)) or FDrawLines then
+  i:=FindControl((Sender as TControl).Name);
+  if (i>=0) and (FormControlView.Items[i].Selected) then
+    with (Sender as TCustomControl).Canvas do
+    begin
+      Pen.Style:=psSolid;
+      Brush.Style:=bsClear;
+      Pen.Mode:=pmCopy;
+      Pen.Color:=clHighlight;
+      Rectangle(0,0, (Sender as TCustomControl).Width-1, (Sender as TCustomControl).Height-1);
+    end;
+  if ((FParentMousePoint.x = -1) and (FParentMousePoint.y = -1)) or FDrawLines then
     for i := 0 to FormControlView.Items.Count - 1 do
       if FormControlView.Items[i].Selected then
       begin
@@ -903,15 +946,6 @@ begin
         if Assigned(c) then
           with (Sender as TCustomControl).Canvas do
           begin
-            if not FDrawLines and not Assigned(GetEditorControl(FormControlView.Items[i])) then
-            begin
-              Pen.Style := psDash;
-              Pen.Mode := pmCopy;
-              Brush.Style := bsClear;
-              Pen.Color := clBlack;
-              Rectangle(c.Left - 1, c.Top - 1, c.Left + c.Width + 1,
-                c.Top + c.Height + 1);
-            end;
             Pen.Color := clHighlight;
             Pen.Style := psSolid;
             if FConf.UseHelpLines then
@@ -1055,10 +1089,11 @@ begin
   begin
     MovingControl := Sender as TControl;
     FMousePoint := Point(X, Y);
-    FPanelMousePoint := FFormular.ScreenToClient(
+    FParentMousePoint := (Sender as TControl).Parent.ScreenToClient(
       (Sender as TControl).ClientToScreen(Point(X, Y)));
     if FFormular.Cursor = crSizeNWSE then
       PositionPickerPanel.Hide;
+    DoSelect:=(FFormular.Cursor=crDefault) and (Sender=FFormular) and not CheckToolSelected;
     EditorScrollBox.Invalidate;
     FOldLeft := (Sender as TControl).Left;
     FOldTop := (Sender as TControl).Top;
@@ -1074,7 +1109,7 @@ begin
       FStartTop := (Sender as TControl).Height;
       sizing := True;
     end;
-    if not Assigned(ToolSelect.Selected) then
+    if not CheckToolSelected then
       for i := 0 to FormControlView.Items.Count - 1 do
         if FormControlView.Items[i].Data = Pointer(c) then
           if not FormControlView.Items[i].Selected then
@@ -1134,19 +1169,6 @@ begin
   EditorScrollBox.Canvas.Pen.Style := psClear;
   EditorScrollBox.Canvas.Rectangle(0, 0, EditorScrollBox.ClientWidth,
     EditorScrollBox.ClientHeight);
-  if (FMousePoint.x = -1) and (FMousePoint.y = -1) then
-    for i := 0 to FormControlView.Items.Count - 1 do
-      if (FormControlView.Items[i].Selected) and
-        (TControl(FormControlView.Items[i].Data) = FFormular) then
-      begin
-        EditorScrollBox.Canvas.Brush.Style := bsClear;
-        EditorScrollBox.Canvas.Pen.Style := psDash;
-        EditorScrollBox.Canvas.Pen.Mode := pmNotXor;
-        EditorScrollBox.Canvas.Rectangle(FFormular.EditorLeft - 1,
-          FFormular.EditorTop - 1,
-          FFormular.EditorLeft + FFormular.Width + 1, FFormular.EditorTop +
-          FFormular.Height + 1);
-      end;
 end;
 
 procedure TFormEditFrame.EventEditorGetPickList(Sender: TObject;

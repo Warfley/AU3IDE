@@ -1084,8 +1084,8 @@ begin
     begin
       Parent := Self;
       Left := (Width)*2;
-      Self.Width := Width;
-      Self.Height := Height;
+      Self.Width := GetControlClassDefaultSize.cx;
+      Self.Height := GetControlClassDefaultSize.cy;
       Visible:=True;
     end;
   Invalidate;
@@ -2067,16 +2067,16 @@ end;
 
 procedure Tau3Edit.CopyTo(c: TControl);
 begin
-  c.Width := Width;
-  c.Height := Height;
   if (c is Tau3Edit) then
   begin
     if Name = Text then
       (c as Tau3Edit).Text := c.Name
     else
+  (c as Tau3Edit).Width := Width;
+  (c as Tau3Edit).Height := Height;
       (c as Tau3Edit).Text := Text;
-  (c as Tau3Edit).Y := Y;
-  (c as Tau3Edit).X := X;
+  (c as Tau3Edit).Y := Y+20;
+  (c as Tau3Edit).X := X+20;
     (c as Tau3Edit).Style := Style;
     (c as Tau3Edit).EditStyle := EditStyle;
     (c as Tau3Edit).StyleEX := StyleEX;
@@ -2579,16 +2579,16 @@ end;
 
 procedure Tau3Button.CopyTo(c: TControl);
 begin
-  c.Width := Width;
-  c.Height := Height;
   if Name = Caption then
     c.Caption := c.Name
   else
     c.Caption := Caption;
   if (c is Tau3Button) then
   begin
-    (c as Tau3Button).X := X;
-    (c as Tau3Button).Y := Y;
+    (c as Tau3Button).Width := Width;
+    (c as Tau3Button).Height := Height;
+    (c as Tau3Button).X := X+20;
+    (c as Tau3Button).Y := Y+20;
     (c as Tau3Button).CompleteStyle := CompleteStyle;
     (c as Tau3Button).StyleEX := StyleEX;
     (c as Tau3Button).Events.Assign(FEvents);
@@ -3072,16 +3072,16 @@ end;
 
 procedure Tau3Checkbox.CopyTo(c: TControl);
 begin
-  c.Width := Width;
-  c.Height := Height;
   if Name = Caption then
     c.Caption := c.Name
   else
     c.Caption := Caption;
   if (c is Tau3Checkbox) then
   begin
-    (c as Tau3Checkbox).X := X;
-    (c as Tau3Checkbox).Y := Y;
+    (c as Tau3Checkbox).Width := Width;
+    (c as Tau3Checkbox).Height := Height;
+    (c as Tau3Checkbox).X := X+20;
+    (c as Tau3Checkbox).Y := Y+20;
     (c as Tau3Checkbox).CompleteStyle := CompleteStyle;
     (c as Tau3Checkbox).StyleEX := StyleEX;
     (c as Tau3Checkbox).Events.Assign(FEvents);
@@ -3526,8 +3526,10 @@ begin
     c.Caption := Caption;
   if (c is Tau3Label) then
   begin
-    (c as Tau3Label).X := X;
-    (c as Tau3Label).Y := Y;
+    (c as Tau3Label).Width := Width;
+    (c as Tau3Label).Height := Height;
+    (c as Tau3Label).X := X+20;
+    (c as Tau3Label).Y := Y+20;
     (c as Tau3Label).CompleteStyle := CompleteStyle;
     (c as Tau3Label).StyleEX := StyleEX;
     (c as Tau3Label).Events.Assign(FEvents);
