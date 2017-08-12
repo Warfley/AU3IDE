@@ -898,7 +898,7 @@ msgid "End of file reached"
 msgstr ""
 
 #: tlstrings.serrorcompiling
-msgid "Error compiling %s"
+msgid "Error: %s at %s (%d:%d)"
 msgstr ""
 
 #: tlstrings.serrorcreateprojectdir

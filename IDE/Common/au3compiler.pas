@@ -11,6 +11,7 @@ uses
 type
   TCompileArch = (cax86, ca64);
   TOutputEvent = procedure(Sender: TObject; FileName: string; Output: string) of object;
+  TErrorEvent = procedure(Sender: TObject; FileName: string; Line: Integer; Column: Integer; Message: String) of object;
 
   Tau3Compiler = class
   private
@@ -25,7 +26,7 @@ type
     FOnOutput: TOutputEvent;
     FOnFinishedRun: TNotifyEvent;
     FOnFinishedCompiling: TNotifyEvent;
-    FOnCompileError: TNotifyEvent;
+    FOnRunTimeError: TErrorEvent;
     function isRunning: boolean;
     procedure ReadData(Sender: TObject);
     procedure ProcTerm(Sender: TObject);
@@ -45,7 +46,7 @@ type
     property OnFinishedRunning: TNotifyEvent read FOnFinishedRun write FOnFinishedRun;
     property OnFinishedCompiling: TNotifyEvent
       read FOnFinishedCompiling write FOnFinishedCompiling;
-    property OnCompileError: TNotifyEvent read FOnCompileError write FOnCompileError;
+    property OnRunTimeError: TErrorEvent read FOnRunTimeError write FOnRunTimeError;
   end;
 
 implementation
@@ -162,14 +163,47 @@ begin
 end;
 
 procedure Tau3Compiler.ReadData(Sender: TObject);
+function ExtractBetween(const Value, A, B: string): string;
+var
+  aPos, bPos: integer;
+begin
+  Result := '';
+  aPos := Pos(A, Value);
+  if aPos > 0 then
+  begin
+    aPos := aPos + Length(A);
+    bPos := PosEx(B, Value, aPos);
+    if bPos > 0 then
+    begin
+      Result := Copy(Value, aPos, bPos - aPos);
+    end;
+  end;
+end;
 var
   sl: TStringList;
-  i: integer;
+  i, errline, errp, l: integer;
+  errFile, ErrMsg, ln: String;
 begin
   sl := TStringList.Create;
   try
     sl.LoadFromStream(FCProcess.Output);
+    if sl.Count=0 then exit;
     FOutput.AddStrings(sl);
+    errp :=  Pos('^ ERROR', sl[sl.Count-1]);
+    if (errp>0) and Assigned(FOnRunTimeError) then
+    begin
+      ln:=FOutput[FOutput.Count-3];
+      errFile:=ExtractBetween(ln,'"', '"');
+      errline:=StrToInt(ExtractBetween(ln,'(', ')'));
+      ErrMsg:=Copy(ln, Pos(' : ==> ', ln)+7, Length(FOutput[FOutput.Count-3]));
+      ln:=FOutput[FOutput.Count-2];
+      for l:=0 to Length(ln)-errp+1  do
+        if not (ln[errp+l] in ['_', 'A'..'Z', 'a'..'z', '0'..'9']) then
+          break;
+      ErrMsg += ' ' + Copy(ln, errp, l);
+      FOnRunTimeError(self, errFile, errline, errp, ErrMsg);
+      Exit;
+    end;
     for i := 0 to sl.Count - 1 do
       if Assigned(FOnOutput) then
         FOnOutput(Self, FCurrentProject.MainFile, sl[i]);

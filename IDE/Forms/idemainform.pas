@@ -122,6 +122,7 @@ type
     procedure NextTabItemClick(Sender: TObject);
     procedure OtherOptionsItemClick(Sender: TObject);
     procedure OutputBoxClick(Sender: TObject);
+    procedure OutputBoxDblClick(Sender: TObject);
     procedure OutputBoxDrawItem(Control: TWinControl; Index: integer;
       ARect: TRect; State: TOwnerDrawState);
     procedure PrevTabItemClick(Sender: TObject);
@@ -177,9 +178,11 @@ type
     procedure PrintText(Sender: TObject; FileName: string; Output: string);
     procedure FinishedComp(Sender: TObject);
     procedure FinishedRun(Sender: TObject);
-    procedure CompileError(Sender: TObject);
     function CheckForUpdates: boolean;
     procedure PerformUpdate;
+  protected
+    procedure OnRuntimeError(Sender: TObject; FileName: string; Line: Integer;
+      Column: Integer; Message: String);
   public
     property CurrentProject: Tau3Project read FCurrentProject;
     { public declarations }
@@ -232,6 +235,23 @@ begin
     p.Free;
   end;
   Close;
+end;
+
+procedure TMainForm.OnRuntimeError(Sender: TObject; FileName: string;
+  Line: Integer; Column: Integer; Message: String);
+begin
+  OutputBox.Items.BeginUpdate;
+  try
+  OutputBox.Items.Add(Format(SErrorCompiling, [Message,FCurrentProject.GetRelPath(FileName),Line,Column]));
+  FDrawState.Add(Pointer(clRed));
+  OutputBox.ItemIndex := OutputBox.Items.Count - 1;
+  OutputBoxDblClick(OutputBox);
+  OutputBox.ItemIndex := -1;
+  RunBtn.Enabled := True;
+  StopBtn.Enabled := False;
+  finally
+    OutputBox.Items.EndUpdate;
+  end;
 end;
 
 procedure TMainForm.OpenProject(P: string);
@@ -320,16 +340,6 @@ procedure TMainForm.FinishedRun(Sender: TObject);
 begin
   FDrawState.Add(Pointer(clLime));
   OutputBox.Items.Add(SDoneExec);
-  OutputBox.ItemIndex := OutputBox.Items.Count - 1;
-  OutputBox.ItemIndex := -1;
-  RunBtn.Enabled := True;
-  StopBtn.Enabled := False;
-end;
-
-procedure TMainForm.CompileError(Sender: TObject);
-begin
-  OutputBox.Items.Add(Format(SErrorCompiling, [FCurrentProject.Name]));
-  FDrawState.Add(Pointer(clRed));
   OutputBox.ItemIndex := OutputBox.Items.Count - 1;
   OutputBox.ItemIndex := -1;
   RunBtn.Enabled := True;
@@ -1104,7 +1114,7 @@ begin
   FCompiler.OnOutput := @PrintText;
   FCompiler.OnFinishedCompiling := @FinishedComp;
   FCompiler.OnFinishedRunning := @FinishedRun;
-  FCompiler.OnCompileError := @CompileError;
+  FCompiler.OnRunTimeError:=@OnRuntimeError;
   FFormIsClosing := False;
   FCurrentProject := Tau3Project.Create;
   EditorManager.EnterFunc := @EnterFunction;
@@ -1330,6 +1340,39 @@ end;
 procedure TMainForm.OutputBoxClick(Sender: TObject);
 begin
   OutputBox.Invalidate;
+end;
+
+procedure TMainForm.OutputBoxDblClick(Sender: TObject);
+function ExtractBetween(const Value, A, B: string): string;
+var
+  aPos, bPos: integer;
+begin
+  Result := '';
+  aPos := Pos(A, Value);
+  if aPos > 0 then
+  begin
+    aPos := aPos + Length(A);
+    bPos := PosEx(B, Value, aPos);
+    if bPos > 0 then
+    begin
+      Result := Copy(Value, aPos, bPos - aPos);
+    end;
+  end;
+end;
+
+var ln: String;
+  fName: String;
+  p: String;
+  l, c: Integer;
+begin
+  if OutputBox.ItemIndex<0 then exit;
+  if FDrawState[OutputBox.ItemIndex] <> Pointer(clRed) then exit;
+  ln:=OutputBox.Items[OutputBox.ItemIndex];
+  fName:=ExtractBetween(ln, ' at ', ' (');
+  p:=ExtractBetween(ln, '(', ')');
+  l:=StrToInt(Copy(p, 1, Pos(':', p)-1));
+  c:=StrToInt(Copy(p, Pos(':', p)+1, Length(p)));
+  OpenFile(fName, Point(c,l));
 end;
 
 procedure TMainForm.OutputBoxDrawItem(Control: TWinControl; Index: integer;
