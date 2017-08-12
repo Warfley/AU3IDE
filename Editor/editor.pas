@@ -152,7 +152,7 @@ begin
     Delete(i, 1, Pos('<', i));
   Filename := LowerCase(Filename);
   i := LowerCase(i);
-  Result := (Pos(i, Filename) = 1) or (Length(i) = 0);
+  Result := (Pos(i, Filename) >= 1) or (Length(i) = 0);
 end;
 
 procedure TEditorFrame.LoadGeneralConf(FileName: string);
@@ -665,7 +665,7 @@ begin
     Completion.ItemList.AddStrings(FCompletionList)
   else
     for i := 0 to FCompletionList.Count - 1 do
-      if Pos(LowerCase(Completion.CurrentString), LowerCase(FCompletionList[i])) = 1 then
+      if Pos(LowerCase(Completion.CurrentString), LowerCase(FCompletionList[i])) >= 1 then
         if Length(Completion.CurrentString) = Length(FCompletionList[i]) then
           Completion.ItemList.Insert(0, FCompletionList[i])
         else
@@ -680,10 +680,12 @@ end;
 function TEditorFrame.CompletionPaintItem(const AKey: string;
   ACanvas: TCanvas; X, Y: integer; Selected: boolean; Index: integer): boolean;
 var
-  s, l, p: integer;
+  s, l, p, currStart, currEnd, tokCurrStart, tokCurrEnd: integer;
   curr: TTokenType;
-  tok: string;
+  tok, t: string;
 begin
+  currStart:=Pos(LowerCase(Completion.CurrentString), LowerCase(AKey));
+  currEnd:=currStart+Length(Completion.CurrentString);
   with ACanvas do
   begin
     p := 0;
@@ -722,10 +724,7 @@ begin
         Font.Bold := False;
         case curr of
           tkVar:
-          begin
             Font.Color := Highlight.VariableAttribute.Foreground;
-            Font.Bold := True;
-          end;
           tkFunction:
             Font.Color := Highlight.FunctionAttribute.Foreground;
           tkUnknown:
@@ -741,9 +740,29 @@ begin
           tkTemp:
             Font.Color := Highlight.TempAttribute.Foreground;
         end;
-        TextOut(x + p, y, tok);
+        if (Length(AKey) > 0) and (currStart>0) and
+          (s < currEnd) and (s+l > currStart) then
+        begin
+          tokCurrStart:=max(0, currStart - s);
+          tokCurrEnd:=Min(Length(tok), currEnd-s);
+          t:=Copy(tok, 1, tokCurrStart);
+          TextOut(x + p, y, t);
+          inc(p, TextWidth(t));
+          font.Bold:=True;
+          t:=Copy(tok, tokCurrStart+1, tokCurrEnd-tokCurrStart);
+          TextOut(x + p, y, t);
+          inc(p, TextWidth(t));
+          font.Bold:=false;
+          t:=Copy(tok, tokCurrEnd+1, Length(tok)-tokCurrEnd);
+          TextOut(x + p, y, t);
+          inc(p, TextWidth(t));
+        end
+        else
+        begin
+          TextOut(x + p, y, tok);
+          Inc(p, TextWidth(tok));
+        end;
         Inc(s, l);
-        Inc(p, TextWidth(tok));
       end;
     end;
   end;
@@ -844,7 +863,7 @@ begin
     else
       for i := 0 to FCompletionList.Count - 1 do
         if Pos(LowerCase(Completion.CurrentString),
-          LowerCase(FCompletionList[i])) = 1 then
+          LowerCase(FCompletionList[i])) >= 1 then
           if Length(Completion.CurrentString) = Length(FCompletionList[i]) then
             Completion.ItemList.Insert(0, FCompletionList[i])
           else
@@ -1000,7 +1019,10 @@ begin
       Application.QueueAsyncCall(@MoveHorz, -1);
     end;
   end;
-  if (Length(Value) > 0) and not (Value[1] in ['_', 'A'..'Z', 'a'..'z', '0'..'9']) then
+  if (Length(Value) > 0) and not (Value[1] in ['_', 'A'..'Z', 'a'..'z', '0'..'9'])
+    and (SourceStart.x>1) and // there is at least one char in front of
+    not (ln[SourceStart.x-1] in ['_', 'A'..'Z', 'a'..'z', '0'..'9']) // and its a special char
+    then
     Value := Copy(Value, 2, Length(Value) - 1);
   if (Pos('{', Value) > 0) then
     Application.QueueAsyncCall(@SelectTemp, SourceStart.x);
