@@ -181,28 +181,51 @@ begin
 end;
 var
   sl: TStringList;
-  i, errline, errp, l: integer;
+  i, errline, errp, s, l, delPos: integer;
   errFile, ErrMsg, ln: String;
 begin
   sl := TStringList.Create;
   try
     sl.LoadFromStream(FCProcess.Output);
     if sl.Count=0 then exit;
-    FOutput.AddStrings(sl);
-    errp :=  Pos('^ ERROR', sl[sl.Count-1]);
-    if (errp>0) and Assigned(FOnRunTimeError) then
+    ln:=sl[0];
+    delPos := Pos(') : ==>', ln);
+    if (delPos>0) and Assigned(FOnRunTimeError) then
     begin
-      ln:=FOutput[FOutput.Count-3];
-      errFile:=ExtractBetween(ln,'"', '"');
-      errline:=StrToInt(ExtractBetween(ln,'(', ')'));
-      ErrMsg:=Copy(ln, Pos(' : ==> ', ln)+7, Length(FOutput[FOutput.Count-3]));
-      ln:=FOutput[FOutput.Count-2];
-      for l:=0 to Length(ln)-errp+1  do
-        if not (ln[errp+l] in ['_', 'A'..'Z', 'a'..'z', '0'..'9']) then
+      l:=0;
+      for i:=delPos-1 downto 1 do
+        if ln[i] in ['0'..'9'] then inc(l)
+        else
+        begin
+          s:=i+1;
           break;
-      ErrMsg += ' ' + Copy(ln, errp, l);
+        end;
+      errline:=StrToInt(Copy(ln, s, l));
+      errFile:=ExtractBetween(ln, '"', '"');
+      ErrMsg:=Copy(ln, delPos+7, Length(ln))+' ';
+      for i:=1 to sl.Count-3 do ErrMsg:= ErrMsg + sl[i] + ' ';
+      if sl.Count>1 then
+      begin
+        errp:=Pos('^ ERROR', sl[sl.Count-1]);
+        if errp > 0 then
+        begin
+          ln:=sl[sl.Count-2];
+          l:=0;
+          for i:=errp to Length(ln) do
+            if ln[i] in ['_', 'A'..'Z', 'a'..'z', '0'..'9'] then
+              inc(l)
+            else break;
+          ErrMsg:= ErrMsg+Copy(ln, errp, l);
+        end
+        else
+        begin
+          if sl.Count>2 then
+          ErrMsg:=ErrMsg+sl[sl.Count-2]+' ';
+          ErrMsg:=ErrMsg+sl[sl.Count-1];
+        end;
+      end;
       FOnRunTimeError(self, errFile, errline, errp, ErrMsg);
-      Exit;
+      exit;
     end;
     for i := 0 to sl.Count - 1 do
       if Assigned(FOnOutput) then

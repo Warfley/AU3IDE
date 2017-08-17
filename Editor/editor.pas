@@ -1347,7 +1347,16 @@ begin
 end;
 
 procedure TEditorFrame.CodeJump(p: TPoint);
+var
+  i: Integer;
 begin
+  if (p.x = 0) and (p.y<=CodeEditor.Lines.Count) then
+    for i:=1 to Length(CodeEditor.Lines[p.y-1]) do
+      if CodeEditor.Lines[p.y-1][i] > #32 then
+      begin
+        p.x := i;
+        break;
+      end;
   CodeEditor.LogicalCaretXY := p;
   CodeEditor.TopLine := p.y;
   CodeEditor.SetFocus;

@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: de\n"
-"X-Generator: Poedit 2.0.1\n"
+"X-Generator: Poedit 2.0.3\n"
 
 #: taboutform.button2.caption
 msgctxt "taboutform.button2.caption"
@@ -912,8 +912,8 @@ msgid "End of file reached"
 msgstr "Dateiende erreicht"
 
 #: tlstrings.serrorcompiling
-msgid "Error: %s at %s (%d:%d)"
-msgstr "Fehler: %s in %s (%d:%d)"
+msgid "Error: %s at \"%s\" <%d:%d>"
+msgstr "Fehler: %s in \"%s\" <%d:%d>"
 
 #: tlstrings.serrorcreateprojectdir
 msgid "An error occured creating project directories"
@@ -1579,4 +1579,3 @@ msgstr "Projekt öffnen"
 #: tstartupscreen.openprojdialog.title
 msgid "Open Project"
 msgstr "Offenes Projekt"
-

@@ -1368,8 +1368,8 @@ begin
   if OutputBox.ItemIndex<0 then exit;
   if FDrawState[OutputBox.ItemIndex] <> Pointer(clRed) then exit;
   ln:=OutputBox.Items[OutputBox.ItemIndex];
-  fName:=ExtractBetween(ln, ' at ', ' (');
-  p:=ExtractBetween(ln, '(', ')');
+  fName:=ExtractBetween(ln, '"', '"');
+  p:=ExtractBetween(ln, '" <', '>');
   l:=StrToInt(Copy(p, 1, Pos(':', p)-1));
   c:=StrToInt(Copy(p, Pos(':', p)+1, Length(p)));
   OpenFile(fName, Point(c,l));
