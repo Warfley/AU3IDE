@@ -1398,7 +1398,7 @@ begin
     Brush.Style:=bsSolid;
     Rectangle(ARect);
     Brush.Style:=bsClear;
-    xPos:=ARect.Left;
+    xPos:=ARect.Left+2;
     TextOut(xPos, ARect.Top, SInfo);
     inc(xPos, Sender.Column[0].Width);
     TextOut(xPos, ARect.Top, AItem.Caption);
@@ -1409,7 +1409,7 @@ begin
     Brush.Color:=clRed;
     Rectangle(ARect);
     Brush.Style:=bsClear;
-    xPos:=ARect.Left;
+    xPos:=ARect.Left + 2;
     TextOut(xPos, ARect.Top, SError);
     w:=ARect.Width-Sender.Column[0].Width;
     w1:=w div 6*3;
