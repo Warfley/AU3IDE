@@ -586,7 +586,7 @@ begin
       else
         (Sender as TControl).Cursor := crDefault;
     end
-    else
+    else if Assigned(MovingControl) then
     begin
       case MovingControl.Cursor of
         crSizeNWSE:

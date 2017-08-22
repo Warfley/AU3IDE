@@ -21,15 +21,15 @@ object EditorFrame: TEditorFrame
     Visible = False
     object Label1: TLabel
       Left = 0
-      Height = 25
+      Height = 15
       Top = 4
-      Width = 52
+      Width = 35
       Caption = 'Search'
       ParentColor = False
     end
     object SearchEdit: TEdit
       Left = 56
-      Height = 33
+      Height = 23
       Top = 0
       Width = 152
       OnKeyUp = SearchEditKeyUp
@@ -46,7 +46,7 @@ object EditorFrame: TEditorFrame
     end
     object ReplaceEdit: TEdit
       Left = 288
-      Height = 33
+      Height = 23
       Top = 0
       Width = 152
       OnKeyUp = ReplaceEditKeyUp
@@ -604,8 +604,8 @@ object EditorFrame: TEditorFrame
       BevelOuter = bvNone
       BorderStyle = bsSingle
       Caption = 'Code Explorer'
-      ClientHeight = 34
-      ClientWidth = 235
+      ClientHeight = 30
+      ClientWidth = 231
       TabOrder = 0
       object CloseCodeExplorerButton: TSpeedButton
         Left = 203
@@ -625,7 +625,7 @@ object EditorFrame: TEditorFrame
       Top = 34
       Width = 235
       Align = alClient
-      DefaultItemHeight = 28
+      DefaultItemHeight = 24
       ExpandSignType = tvestPlusMinus
       Images = CodeExplorerImages
       MultiSelectStyle = [msControlSelect, msShiftSelect]

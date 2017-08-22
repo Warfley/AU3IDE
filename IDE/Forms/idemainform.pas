@@ -221,12 +221,23 @@ procedure TMainForm.PerformUpdate;
 var
   p: TProcess;
   c: TCloseAction;
+  fs: TFileStream;
 begin
   c := caNone;
   FormClose(Self, c);
   if EditorManager.Count > 0 then
     exit;
   FCurrentProject.Clear;
+  if FileExistsUTF8(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) +
+      'Updater.exe') then DeleteFileUTF8(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) +
+      'Updater.exe');
+  fs:=TFileStream.Create(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) +
+      'Updater.exe', fmCreate);
+  try
+    TFPHTTPClient.Get(SUpdateURL+'Updater.exe', fs);
+  finally
+    fs.Free;
+  end;
   p := TProcess.Create(nil);
   try
     p.Executable := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) +

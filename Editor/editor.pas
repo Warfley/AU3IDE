@@ -9,7 +9,7 @@ uses
   au3Highlighter, Types, contnrs, LCLType, ExtCtrls, au3Types, UnitParser,
   Dialogs, Graphics, StdCtrls, Buttons, ComCtrls, strutils, CodeFormatter,
   ToolTip, ListRecords, SynEditTypes, Math, SynGutterBase, SynGutterChanges,
-  GraphUtil, Project, gvector, fgl, TLStrings, LCLTranslator;
+  GraphUtil, Project, gvector, fgl, TLStrings, LCLTranslator, Menus;
 
 type
 
@@ -755,12 +755,12 @@ begin
           font.Bold:=false;
           t:=Copy(tok, tokCurrEnd+1, Length(tok)-tokCurrEnd);
           TextOut(x + p, y, t);
-          inc(p, TextWidth(t));
+          inc(p, TextWidth(t)+2);
         end
         else
         begin
           TextOut(x + p, y, tok);
-          Inc(p, TextWidth(tok));
+          Inc(p, TextWidth(tok)+2);
         end;
         Inc(s, l);
       end;
@@ -1019,9 +1019,9 @@ begin
       Application.QueueAsyncCall(@MoveHorz, -1);
     end;
   end;
-  if (Length(Value) > 0) and not (Value[1] in ['_', 'A'..'Z', 'a'..'z', '0'..'9'])
+  if (Length(Value) > 0) and (Value[1] in ['$', '@'])
     and (SourceStart.x>1) and // there is at least one char in front of
-    not (ln[SourceStart.x-1] in ['_', 'A'..'Z', 'a'..'z', '0'..'9']) // and its a special char
+    (ln[SourceStart.x-1] in ['$', '@']) // and its a special char
     then
     Value := Copy(Value, 2, Length(Value) - 1);
   if (Pos('{', Value) > 0) then
@@ -1527,20 +1527,34 @@ end;
 
 procedure TEditorFrame.CodeEditorKeyDown(Sender: TObject; var Key: word;
   Shift: TShiftState);
+function GetTab: String; inline;
+begin
+  SetLength(Result, CodeEditor.TabWidth);
+  FillChar(Result[1], CodeEditor.TabWidth, ' ');
+end;
+
 var
   p: TPoint;
+  i: Integer;
 begin
   FillChar(p, SizeOf(p), 0);
   if Key = 9 then
   begin
+    if CodeEditor.BlockBegin.y<CodeEditor.BlockEnd.y then
+    begin
+      for i:=CodeEditor.BlockBegin.y-1 to CodeEditor.BlockEnd.y-1 do
+        CodeEditor.Lines[i] := GetTab + CodeEditor.Lines[i];
+      key:=0;
+      exit;
+    end;
     p := GetTemplatePos(False);
     if p.x > 0 then
       Key := 0;
   end
-  else if Key = 13 then
-    CodeEditor.TextBetweenPoints[Point(0, CodeEditor.LogicalCaretXY.Y),
-      Point(Length(CodeEditor.Lines[CodeEditor.LogicalCaretXY.y - 1]) + 1,
-      CodeEditor.LogicalCaretXY.Y)] := TrimRight(CodeEditor.Lines[CodeEditor.LogicalCaretXY.y - 1])
+  //else if Key = 13 then // Dont know what this was in first place
+    //CodeEditor.TextBetweenPoints[Point(0, CodeEditor.LogicalCaretXY.Y),
+      //Point(Length(CodeEditor.Lines[CodeEditor.LogicalCaretXY.y - 1]) + 1,
+      //CodeEditor.LogicalCaretXY.Y)] := TrimRight(CodeEditor.Lines[CodeEditor.LogicalCaretXY.y - 1])
   else if Key = VK_BACK then
     p := GetTemplatePos(True);
   if p.x > 0 then
