@@ -7,7 +7,10 @@ interface
 resourcestring
   SDoneCompileing = '%s compiled';
   SDoneExec = 'Excecution finished';
-  SErrorCompiling = 'Error: %s at "%s" <%d:%d>';
+  SError = 'Error';
+  SInfo = 'Info';
+  SErrorPosition = 'at (%s:%s)';
+  SErrorFile = 'in %s';
 
   SStillRunningTitle = 'Excecution has not finished';
   SStillRunningText = 'Excecution of the compiler/project has not finished. Terminate it now?';

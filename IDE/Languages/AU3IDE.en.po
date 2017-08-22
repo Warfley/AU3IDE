@@ -253,6 +253,7 @@ msgid "Key"
 msgstr "Key"
 
 #: teditorconf.keywordview.columns[1].caption
+msgctxt "teditorconf.keywordview.columns[1].caption"
 msgid "Type"
 msgstr "Type"
 
@@ -912,13 +913,21 @@ msgstr "End of file reached, continue at the first line?"
 msgid "End of file reached"
 msgstr "End of file reached"
 
-#: tlstrings.serrorcompiling
-msgid "Error: %s at \"%s\" <%d:%d>"
-msgstr "Error: %s at \"%s\" <%d:%d>"
+#: tlstrings.serror
+msgid "Error"
+msgstr ""
 
 #: tlstrings.serrorcreateprojectdir
 msgid "An error occured creating project directories"
 msgstr "An error occured creating project directories"
+
+#: tlstrings.serrorfile
+msgid "in %s"
+msgstr ""
+
+#: tlstrings.serrorposition
+msgid "at (%s:%s)"
+msgstr ""
 
 #: tlstrings.sfile
 msgctxt "tlstrings.sfile"
@@ -953,6 +962,10 @@ msgstr "Functions"
 #: tlstrings.sinclude
 msgid "Include"
 msgstr "Include"
+
+#: tlstrings.sinfo
+msgid "Info"
+msgstr ""
 
 #: tlstrings.slanguagekeyword
 msgid "Language"
@@ -1255,6 +1268,16 @@ msgstr "Open File"
 msgctxt "TMAINFORM.OTHEROPTIONSITEM.CAPTION"
 msgid "Other"
 msgstr "Other"
+
+#: tmainform.outputview.columns[0].caption
+#, fuzzy
+msgctxt "tmainform.outputview.columns[0].caption"
+msgid "Type"
+msgstr "Type"
+
+#: tmainform.outputview.columns[1].caption
+msgid "Message"
+msgstr ""
 
 #: tmainform.prevtabitem.caption
 msgid "Previous editor"

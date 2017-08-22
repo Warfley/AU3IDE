@@ -987,13 +987,13 @@ object MainForm: TMainForm
         end
         object SelectModeBox: TComboBox
           Left = 80
-          Height = 33
+          Height = 23
           Hint = 'Mode'
-          Top = -2
+          Top = 3
           Width = 100
           Anchors = [akLeft]
           AutoSize = False
-          ItemHeight = 25
+          ItemHeight = 15
           ItemIndex = 0
           Items.Strings = (
             'x86'
@@ -1011,41 +1011,51 @@ object MainForm: TMainForm
   end
   object CenterPanel: TPanel
     Left = 5
-    Height = 531
+    Height = 541
     Top = 36
     Width = 1255
     Align = alClient
     Caption = 'CenterPanel'
-    ClientHeight = 531
+    ClientHeight = 541
     ClientWidth = 1255
     TabOrder = 1
-    object OutputBox: TListBox
-      Left = 1
-      Height = 143
-      Top = 387
-      Width = 1253
-      Align = alBottom
-      ExtendedSelect = False
-      ItemHeight = 32
-      OnClick = OutputBoxClick
-      OnDblClick = OutputBoxDblClick
-      OnDrawItem = OutputBoxDrawItem
-      Style = lbOwnerDrawFixed
-      TabOrder = 0
-    end
     object OutBoxSplitter: TSplitter
       Cursor = crVSplit
       Left = 1
       Height = 5
-      Top = 382
+      Top = 385
       Width = 1253
       Align = alBottom
       ResizeAnchor = akBottom
     end
+    object OutputView: TListView
+      Left = 1
+      Height = 150
+      Top = 390
+      Width = 1253
+      Align = alBottom
+      Columns = <      
+        item
+          Caption = 'Type'
+        end      
+        item
+          Caption = 'Message'
+          Width = 200
+        end>
+      OwnerDraw = True
+      ReadOnly = True
+      RowSelect = True
+      ScrollBars = ssVertical
+      TabOrder = 1
+      ViewStyle = vsReport
+      OnDblClick = OutputViewDblClick
+      OnDrawItem = OutputViewDrawItem
+      OnResize = OutputViewResize
+    end
   end
   object ProjectExplorerSplitter: TSplitter
     Left = 0
-    Height = 531
+    Height = 541
     Top = 36
     Width = 5
   end

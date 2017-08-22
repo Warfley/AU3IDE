@@ -11,7 +11,8 @@ uses
   ProjectInspector, EditorManagerFrame, au3Types, FormEditor, Editor,
   au3FileInfo, strutils, CompilerOptions, au3Compiler, EditorOptions, FormEditorOptions,
   SampeProjectView, fphttpclient, process, AboutWindow, Math,
-  aboutautoit, OtherOptionsForm, TLStrings, Types, LCLTranslator, DefaultTranslator;
+  aboutautoit, OtherOptionsForm, TLStrings, Types, LCLTranslator, DefaultTranslator,
+  LCLType;
 
 type
 
@@ -45,6 +46,7 @@ type
     ExtrasMenuItem: TMenuItem;
     CompileMenuItem: TMenuItem;
     AboutAutoitItem: TMenuItem;
+    OutputView: TListView;
     OtherOptionsItem: TMenuItem;
     NewEditView: TMenuItem;
     NextTabItem: TMenuItem;
@@ -59,7 +61,6 @@ type
     InfoMenuItem: TMenuItem;
     SampeButton: TMenuItem;
     TextEditorOptionsItem: TMenuItem;
-    OutputBox: TListBox;
     SaveAllBtn: TSpeedButton;
     CloseAllBtn: TSpeedButton;
     CloseEditorBtn: TSpeedButton;
@@ -121,10 +122,11 @@ type
     procedure NewProjectItemClick(Sender: TObject);
     procedure NextTabItemClick(Sender: TObject);
     procedure OtherOptionsItemClick(Sender: TObject);
-    procedure OutputBoxClick(Sender: TObject);
     procedure OutputBoxDblClick(Sender: TObject);
-    procedure OutputBoxDrawItem(Control: TWinControl; Index: integer;
-      ARect: TRect; State: TOwnerDrawState);
+    procedure OutputViewDblClick(Sender: TObject);
+    procedure OutputViewDrawItem(Sender: TCustomListView; AItem: TListItem;
+      ARect: TRect; AState: TOwnerDrawState);
+    procedure OutputViewResize(Sender: TObject);
     procedure PrevTabItemClick(Sender: TObject);
     procedure RedoMenuItemClick(Sender: TObject);
     procedure RunBtnClick(Sender: TObject);
@@ -142,7 +144,6 @@ type
     procedure UpdateMenuItemClick(Sender: TObject);
   private
     ProjectInspector: TProjectInspector;
-    FDrawState: TList;
     EditorManager: TEditorManager;
     FFirstLoad: boolean;
     FSaveOnClosing: boolean;
@@ -240,18 +241,25 @@ end;
 procedure TMainForm.OnRuntimeError(Sender: TObject; FileName: string;
   Line: Integer; Column: Integer; Message: String);
 begin
-  OutputBox.Items.BeginUpdate;
+  OutputView.BeginUpdate;
   try
-  OutputBox.Items.Add(Format(SErrorCompiling, [Message,FCurrentProject.GetRelPath(FileName),Line,Column]));
-  FDrawState.Add(Pointer(clRed));
-  OutputBox.ItemIndex := OutputBox.Items.Count - 1;
-  OutputBoxDblClick(OutputBox);
-  OutputBox.ItemIndex := -1;
+  with OutputView.Items.Add do
+  begin
+  Data:=Pointer(2);
+  Caption:=Message;
+  SubItems.Add(FileName);
+  SubItems.Add(IntToStr(Line));
+  SubItems.Add(IntToStr(Column));
+  Selected:=True;
+  MakeVisible(False);
+  end;
   RunBtn.Enabled := True;
   StopBtn.Enabled := False;
+  OutputView.TopItem;
   finally
-    OutputBox.Items.EndUpdate;
+    OutputView.EndUpdate;
   end;
+  OutputViewDblClick(OutputView);
 end;
 
 procedure TMainForm.OpenProject(P: string);
@@ -322,26 +330,31 @@ end;
 
 procedure TMainForm.PrintText(Sender: TObject; FileName: string; Output: string);
 begin
-  OutputBox.Items.Add(FCurrentProject.GetRelPath(FileName) + ': ' + Output);
-  FDrawState.Add(Pointer(clWhite));
-  OutputBox.ItemIndex := OutputBox.Items.Count - 1;
-  OutputBox.ItemIndex := -1;
+  with OutputView.Items.Add do
+  begin
+    Caption:= Output;
+    MakeVisible(False);
+  end;
 end;
 
 procedure TMainForm.FinishedComp(Sender: TObject);
 begin
-  FDrawState.Add(Pointer(clLime));
-  OutputBox.Items.Add(Format(SDoneCompileing, [FCurrentProject.Name]));
-  OutputBox.ItemIndex := OutputBox.Items.Count - 1;
-  OutputBox.ItemIndex := -1;
+  with OutputView.Items.Add do
+  begin
+    Caption:= Format(SDoneCompileing, [FCurrentProject.Name]);
+    Data:=Pointer(1);
+    MakeVisible(False);
+  end;
 end;
 
 procedure TMainForm.FinishedRun(Sender: TObject);
 begin
-  FDrawState.Add(Pointer(clLime));
-  OutputBox.Items.Add(SDoneExec);
-  OutputBox.ItemIndex := OutputBox.Items.Count - 1;
-  OutputBox.ItemIndex := -1;
+  with OutputView.Items.Add do
+  begin
+    Caption:= SDoneExec;
+    Data:=Pointer(1);
+    MakeVisible(False);
+  end;
   RunBtn.Enabled := True;
   StopBtn.Enabled := False;
 end;
@@ -520,8 +533,7 @@ end;
 procedure TMainForm.CompileMenuItemClick(Sender: TObject);
 begin
   SaveAllItemClick(nil);
-  OutputBox.Clear;
-  FDrawState.Clear;
+  OutputView.Clear;
   if SelectModeBox.ItemIndex = 0 then
     FCompiler.Compile(FCurrentProject, cax86)
   else
@@ -1122,7 +1134,6 @@ begin
   EditorManager.OnParserFinished := @EditorParserFinished;
   EditorManager.IDEOpenFile := @OpenFile;
   ProjectInspector.ChangeMainForm := @ChangeMainForm;
-  FDrawState := TList.Create;
   FLastOpend := TStringList.Create;
   if FileExists(ExtractFilePath(ParamStr(0)) + 'lastopend.cnf') then
     FLastOpend.LoadFromFile(ExtractFilePath(ParamStr(0)) + 'lastopend.cnf');
@@ -1142,7 +1153,6 @@ begin
   FFileData.Free;
   FCurrentProject.Free;
   FCompiler.Free;
-  FDrawState.Free;
 end;
 
 procedure TMainForm.FormOptionsItemClick(Sender: TObject);
@@ -1337,61 +1347,100 @@ begin
   end;
 end;
 
-procedure TMainForm.OutputBoxClick(Sender: TObject);
-begin
-  OutputBox.Invalidate;
-end;
-
 procedure TMainForm.OutputBoxDblClick(Sender: TObject);
-function ExtractBetween(const Value, A, B: string): string;
-var
-  aPos, bPos: integer;
 begin
-  Result := '';
-  aPos := Pos(A, Value);
-  if aPos > 0 then
-  begin
-    aPos := aPos + Length(A);
-    bPos := PosEx(B, Value, aPos);
-    if bPos > 0 then
-    begin
-      Result := Copy(Value, aPos, bPos - aPos);
-    end;
-  end;
+
 end;
 
-var ln: String;
+procedure TMainForm.OutputViewDblClick(Sender: TObject);
+var
   fName: String;
   p: String;
   l, c: Integer;
 begin
-  if OutputBox.ItemIndex<0 then exit;
-  if FDrawState[OutputBox.ItemIndex] <> Pointer(clRed) then exit;
-  ln:=OutputBox.Items[OutputBox.ItemIndex];
-  fName:=ExtractBetween(ln, '"', '"');
-  p:=ExtractBetween(ln, '" <', '>');
-  l:=StrToInt(Copy(p, 1, Pos(':', p)-1));
-  c:=StrToInt(Copy(p, Pos(':', p)+1, Length(p)));
+  if not Assigned(OutputView.Selected) Or (IntPtr(OutputView.Selected.Data) <> 2) then
+    exit;
+  fName:=OutputView.Selected.SubItems[0];
+  l:=StrToInt(OutputView.Selected.SubItems[1]);
+  c:=StrToInt(OutputView.Selected.SubItems[2]);
   OpenFile(fName, Point(c,l));
 end;
 
-procedure TMainForm.OutputBoxDrawItem(Control: TWinControl; Index: integer;
-  ARect: TRect; State: TOwnerDrawState);
+procedure TMainForm.OutputViewDrawItem(Sender: TCustomListView;
+  AItem: TListItem; ARect: TRect; AState: TOwnerDrawState);
+var xPos, w, w1, w2, w3: Integer;
+  str: String;
 begin
-  with OutputBox.Canvas do
+  with Sender.Canvas do
   begin
-    Brush.Color := TColor(FDrawState[Index]);
-    Brush.Style := bsSolid;
-    pen.Style := psSolid;
-    if OutputBox.ItemIndex = Index then
-      pen.Color := clBlack
+    if odSelected in AState then
+    begin
+      Pen.Color:=clBlack;
+      pen.Style:=pssolid;
+    end
     else
-      pen.Color := clWhite;
+      Pen.Style:=psClear;
+  case IntPtr(AItem.Data) of
+  0: // output
+  begin
+    Brush.Style:=bsSolid;
+    Brush.Color:=clWhite;
     Rectangle(ARect);
-    Brush.Style := bsClear;
-    Font.Color := OutputBox.Font.Color;
-    TextOut(ARect.Left, ARect.Top, OutputBox.Items[Index]);
+    xPos:=ARect.Left+OutputView.Column[0].Width-TextWidth('>>');
+    Brush.Style:=bsClear;
+    TextOut(xPos, ARect.Top, '>>');
+    inc(xPos, TextWidth('>>'));
+    TextOut(xPos, ARect.Top, AItem.Caption);
   end;
+  1: // Information
+  begin
+    Brush.Color:=clLime;
+    Brush.Style:=bsSolid;
+    Rectangle(ARect);
+    Brush.Style:=bsClear;
+    xPos:=ARect.Left;
+    TextOut(xPos, ARect.Top, SInfo);
+    inc(xPos, Sender.Column[0].Width);
+    TextOut(xPos, ARect.Top, AItem.Caption);
+  end;
+  2: // ERROR
+  begin
+    Brush.Style:=bsSolid;
+    Brush.Color:=clRed;
+    Rectangle(ARect);
+    Brush.Style:=bsClear;
+    xPos:=ARect.Left;
+    TextOut(xPos, ARect.Top, SError);
+    w:=ARect.Width-Sender.Column[0].Width;
+    w1:=w div 6*3;
+    w2:=w div 3;
+    w3:=w div 6;
+    // message
+    str:=AItem.Caption;
+    while TextWidth(str)>w1 do
+      str:=Copy(str, 1, Length(str)-8) + '...';
+    xPos:=ARect.Left+Sender.Column[0].Width;
+    TextOut(xPos,ARect.Top, str);
+    inc(xPos, w1);
+    // file
+    str:=Format(SErrorFile, [AItem.SubItems[0]]);
+    while TextWidth(str)>w2 do
+      str:=Copy(str, 1, Length(str)-8) + '...';
+    TextOut(xPos,ARect.Top, str);
+    inc(xPos, w2);
+    // Position
+    str:=Format(SErrorPosition, [AItem.SubItems[1], AItem.SubItems[2]]);
+    while TextWidth(str)>w3 do
+      str:=Copy(str, 1, Length(str)-5) + '...';
+    TextOut(xPos,ARect.Top, str);
+  end;
+  end;
+  end;
+end;
+
+procedure TMainForm.OutputViewResize(Sender: TObject);
+begin
+  OutputView.Column[1].Width:=OutputView.ClientWidth-OutputView.Column[0].Width;
 end;
 
 procedure TMainForm.PrevTabItemClick(Sender: TObject);
@@ -1416,8 +1465,7 @@ begin
   SaveAllItemClick(nil);
   RunBtn.Enabled := False;
   StopBtn.Enabled := True;
-  OutputBox.Clear;
-  FDrawState.Clear;
+  OutputView.Clear;
   if SelectModeBox.ItemIndex = 0 then
     FCompiler.Run(FCurrentProject, cax86)
   else
