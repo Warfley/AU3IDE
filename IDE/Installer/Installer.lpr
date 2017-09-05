@@ -27,7 +27,7 @@ type
   end;
 
 const
-  SDownloadURL = 'http://kehrein.org/AS/Updates/';
+  SDownloadURL = 'https://automatestudio.org/Updates/';
 
 resourcestring
   SSelectDirectory = 'Select installation destination directory';
@@ -62,7 +62,7 @@ end;
   const ContentLength, CurrentPos: int64);
   begin
     GotoXY(Length(DownloadName) + 1, WhereY);
-    Write(WriteSize(CurrentPos),'...');
+    Write(WriteSize(CurrentPos),'...   ');
   end;
 
 

@@ -10,9 +10,8 @@ uses
   Project, IDEStartupScreen,
   ProjectInspector, EditorManagerFrame, au3Types, FormEditor, Editor,
   au3FileInfo, strutils, CompilerOptions, au3Compiler, EditorOptions, FormEditorOptions,
-  SampeProjectView, fphttpclient, process, AboutWindow, Math,
-  aboutautoit, OtherOptionsForm, TLStrings, Types, LCLTranslator, DefaultTranslator,
-  LCLType;
+  SampeProjectView, fphttpclient, process, AboutWindow, Math, OtherOptionsForm, TLStrings, Types, LCLTranslator, DefaultTranslator,
+  LCLType, LCLIntf;
 
 type
 
@@ -221,7 +220,6 @@ procedure TMainForm.PerformUpdate;
 var
   p: TProcess;
   c: TCloseAction;
-  fs: TFileStream;
 begin
   c := caNone;
   FormClose(Self, c);
@@ -231,13 +229,8 @@ begin
   if FileExistsUTF8(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) +
       'Updater.exe') then DeleteFileUTF8(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) +
       'Updater.exe');
-  fs:=TFileStream.Create(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) +
-      'Updater.exe', fmCreate);
-  try
-    TFPHTTPClient.Get(SUpdateURL+'Updater.exe', fs);
-  finally
-    fs.Free;
-  end;
+    TFPHTTPClient.SimpleGet(SUpdateURL+'Updater.exe', IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) +
+      'Updater.exe');
   p := TProcess.Create(nil);
   try
     p.Executable := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) +
@@ -571,7 +564,7 @@ end;
 
 procedure TMainForm.AboutAutoitItemClick(Sender: TObject);
 begin
-  AboutAutoitForm.ShowModal;
+  OpenURL('https://www.autoitscript.com/site/autoit/');
 end;
 
 procedure TMainForm.EnterFunc(Data: IntPtr);
