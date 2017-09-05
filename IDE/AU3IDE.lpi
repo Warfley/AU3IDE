@@ -21,8 +21,8 @@
     <VersionInfo>
       <UseVersionInfo Value="True"/>
       <AutoIncrementBuild Value="True"/>
-      <RevisionNr Value="17"/>
-      <BuildNr Value="55"/>
+      <RevisionNr Value="18"/>
+      <BuildNr Value="57"/>
       <Attributes pvaPreRelease="True"/>
       <StringTable Comments="Automate Studio early Alpha" FileDescription="IDE for AutoIt language" LegalCopyright="Copyright (c) F. Kehrein 2016" ProductName="Automate Studio" ProductVersion="0.0.x Alpha"/>
     </VersionInfo>

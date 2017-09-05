@@ -2,6 +2,7 @@ unit FormEditor;
 
 { TODO : Impelement Undo, Redo for Creation/Deletion of Components }
 { TODO : Persitent Undo }
+{ TODO : Fix namechange recognition for Texteditor (var name) }
 
 {$mode objfpc}{$H+}
 
@@ -382,7 +383,7 @@ procedure TFormEditFrame.LoadControlData(c: TComponent);
 begin
   (c as Iau3Component).FillEvents(EventEditor);
   PropEditor.TIObject := c;
-  PropEditor.Refresh;
+  Application.ProcessMessages;
 end;
 
 function TFormEditFrame.FindControl(s: string): integer;
@@ -1369,6 +1370,7 @@ procedure TFormEditFrame.FormPanelDblClick(Sender: TObject);
 var
   s: string;
 begin
+  Application.ProcessMessages;
   EventEditor.Row := 1;
   s := EventEditor.Rows[1][0];
   if EventEditor.Values[s] = '' then

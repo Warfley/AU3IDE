@@ -384,7 +384,8 @@ procedure TMainForm.OpenFile(Filename: string; Pos: TPoint);
 begin
   if not FilenameIsAbsolute(Filename) then
     FileName := FCurrentProject.GetAbsPath(Filename);
-  EditorManager.OpenEditor(Filename, Pos);
+  if FileExistsUTF8(Filename) then
+    EditorManager.OpenEditor(Filename, Pos);
 end;
 
 procedure TMainForm.ShowStartupScreen(Data: IntPtr);

@@ -570,7 +570,7 @@ end;
 
 function TEditorManager.GetEditor(i: integer): TFrame;
 begin
-  if (i >= 0) and (i < Count) then
+  if (i >= 0) and (i < FTabs.Count) then
     Result := FTabs[i].Controls[0] as TFrame
   else
     Result := nil;
@@ -765,8 +765,8 @@ begin
   begin
     FUndoSteps:=1024;
     FCompleteSort:=32;
-    FBorderW:=15;
-    FBorderH:= 32;
+    FBorderW:=0;
+    FBorderH:= 0;
     FAutoComp:=aoVar;
     FShowIncVar:=True;
     exit;
