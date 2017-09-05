@@ -477,7 +477,11 @@ end;
 procedure TEditorFrame.SetFocus;
 begin
   inherited;
+  try
   CodeEditor.SetFocus;
+  except
+    on E: EInvalidOperation do ;
+  end;
 end;
 
 procedure TEditorFrame.ParserHasFinished(Sender: TObject);
@@ -1359,7 +1363,11 @@ begin
       end;
   CodeEditor.LogicalCaretXY := p;
   CodeEditor.TopLine := p.y;
+  try
   CodeEditor.SetFocus;
+  except
+    on E: EInvalidOperation do ;
+  end;
 end;
 
 procedure TEditorFrame.CodeEditorMouseUp(Sender: TObject; Button: TMouseButton;

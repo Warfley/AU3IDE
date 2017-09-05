@@ -21,8 +21,8 @@
     <VersionInfo>
       <UseVersionInfo Value="True"/>
       <AutoIncrementBuild Value="True"/>
-      <RevisionNr Value="15"/>
-      <BuildNr Value="54"/>
+      <RevisionNr Value="17"/>
+      <BuildNr Value="55"/>
       <Attributes pvaPreRelease="True"/>
       <StringTable Comments="Automate Studio early Alpha" FileDescription="IDE for AutoIt language" LegalCopyright="Copyright (c) F. Kehrein 2016" ProductName="Automate Studio" ProductVersion="0.0.x Alpha"/>
     </VersionInfo>
@@ -312,7 +312,7 @@
     </Linking>
   </CompilerOptions>
   <Debugging>
-    <Exceptions Count="3">
+    <Exceptions Count="4">
       <Item1>
         <Name Value="EAbort"/>
       </Item1>
@@ -322,6 +322,10 @@
       <Item3>
         <Name Value="EFOpenError"/>
       </Item3>
+      <Item4>
+        <Name Value="EInvalidOperation"/>
+        <Enabled Value="False"/>
+      </Item4>
     </Exceptions>
   </Debugging>
 </CONFIG>

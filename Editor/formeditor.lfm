@@ -60,8 +60,8 @@ object FormEditFrame: TFormEditFrame
       TabOrder = 0
       object ControlProps: TTabSheet
         Caption = 'Properties'
-        ClientHeight = 436
-        ClientWidth = 526
+        ClientHeight = 872
+        ClientWidth = 1052
         object PropEditor: TTIPropertyGrid
           Left = 0
           Height = 218
@@ -80,8 +80,8 @@ object FormEditFrame: TFormEditFrame
       end
       object ControlEvents: TTabSheet
         Caption = 'Events'
-        ClientHeight = 872
-        ClientWidth = 1052
+        ClientHeight = 1744
+        ClientWidth = 2104
         object EventEditor: TValueListEditor
           Left = 0
           Height = 218

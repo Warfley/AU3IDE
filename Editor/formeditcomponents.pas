@@ -1101,6 +1101,7 @@ end;
 procedure TEditorComponent.Paint;
 begin
   inherited Paint;
+  if not Assigned(FComponent) then exit;
   Canvas.Lock;
   try
   (FComponent as IEditorComponent).PaintToEditor(Canvas);
@@ -1636,7 +1637,7 @@ begin
         end;
       end;
       if hkey.Count > 0 then
-        s := Format('Dim $%s_AccelTable[3][2] = [', [Name]);
+        s := Format('Dim $%s_AccelTable[%d][2] = [', [Name, hKey.Count]);
       for k := 0 to hkey.Count - 1 do
         s += hkey[k] + ',';
       if Length(s) > 0 then

@@ -16,7 +16,6 @@ type
     Button1: TButton;
     CheckListBox1: TCheckListBox;
     DirectoryEdit1: TDirectoryEdit;
-    DirectoryEdit2: TDirectoryEdit;
     Edit1: TEdit;
     Panel1: TPanel;
     procedure Button1Click(Sender: TObject);
@@ -71,24 +70,16 @@ var
   i: integer;
   sl: TStringList;
 begin
-  if DirectoryEdit2.Directory = '' then
-    exit;
   sl := TStringList.Create;
   try
     sl.Add(Edit1.Text);
     for i := 0 to CheckListBox1.Items.Count - 1 do
       if CheckListBox1.Checked[i] then
-      begin
-        ForceDirectories(ExtractFilePath(CreateAbsolutePath(CheckListBox1.Items[i],
-          DirectoryEdit2.Directory)));
-        CopyFile(CreateAbsolutePath(CheckListBox1.Items[i], DirectoryEdit1.Directory),
-          CreateAbsolutePath(CheckListBox1.Items[i], DirectoryEdit2.Directory));
         sl.Values[CheckListBox1.Items[i]] :=
           GetHash(CreateAbsolutePath(CheckListBox1.Items[i], DirectoryEdit1.Directory));
-      end;
     sl.Insert(1, IntToStr(sl.Count));
-    sl.SaveToFile(CreateAbsolutePath('Update.txt', DirectoryEdit2.Directory));
-    CheckListBox1.Items.SaveToFile(CreateAbsolutePath('Install.txt', DirectoryEdit2.Directory));
+    sl.SaveToFile(CreateAbsolutePath('Update.txt', DirectoryEdit1.Directory));
+    CheckListBox1.Items.SaveToFile(CreateAbsolutePath('Install.txt', DirectoryEdit1.Directory));
   finally
     sl.Free;
   end;

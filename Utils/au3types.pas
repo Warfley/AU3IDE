@@ -95,7 +95,7 @@ type
   end;
 
 const
-  Version = '0.0.16';
+  Version = '0.0.17';
   SUpdateURL = 'https://automatestudio.org/Updates/';
 
 function OpendFileInfo(Name: string; Line: integer = 1;

@@ -593,7 +593,11 @@ begin
     begin
       if Assigned(FTabs[i].PageControl) then
         FTabs[i].PageControl.ActivePage := FTabs[i];
+      try
       FTabs[i].SetFocus;
+      except
+        on E: EInvalidOperation do;
+      end;
       FFocused := i;
       Break;
     end;
@@ -852,7 +856,11 @@ begin
       MaxCompletionCount:=FCompleteSort;
       CodeEditor.MaxUndo:=FUndoSteps;
       Name := Format('CodeEditor%d', [FFocused]);
+      try
       CodeEditor.SetFocus;
+      except
+        on E: EInvalidOperation do ;
+      end;
       IncludePath := FIncludePath;
       OpenEditor := FOpenEditor;
       OnChange := @EditorChanged;
@@ -864,7 +872,11 @@ begin
         FileName := FName;
       if (Line > 0) and (Pos > 0) then
         CodeJump(Point(Pos, Line));
+      try
       CodeEditor.SetFocus;
+      except
+        on E: EInvalidOperation do;
+      end;
     end;
   if Assigned(FOnEditorCreated) then
     OnEditorCreated(Self, EditorIndex);
@@ -888,7 +900,11 @@ begin
       if (Pos.Y > 0) then
         (GetCurrentEditor as TEditorFrame).CodeJump(Pos);
       GetCurrentEditor.SetFocus;
+      try
       (GetCurrentEditor as TEditorFrame).CodeEditor.SetFocus;
+      except
+        on E: EInvalidOperation do ;
+      end;
     end
     else if GetCurrentEditor is TFormEditFrame then
       (GetCurrentEditor as TFormEditFrame).EventEditor.Selection := Rect(0, 0, 0, 0);

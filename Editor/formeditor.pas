@@ -1612,7 +1612,7 @@ begin
               IsNumeric(FuncParams[5]) and IsNumeric(FuncParams[6])) then
               Continue;
             // Read Data
-            CreateEditorControl(TObject(currParent.Data) as TWinControl);
+            c:=CreateEditorControl(TObject(currParent.Data) as TWinControl);
             c.Component:=Tau3Label.Create(FFormular);
             AddComponent(c.Component, IcoLabel);
             c.Component.Name := VarName;
@@ -1633,7 +1633,7 @@ begin
               IsNumeric(FuncParams[5]) and IsNumeric(FuncParams[6])) then
               Continue;
             // Read Data
-            CreateEditorControl(TObject(currParent.Data) as TWinControl);
+            c:= CreateEditorControl(TObject(currParent.Data) as TWinControl);
             c.Component:=Tau3Edit.Create(FFormular);
             AddComponent(c.Component, IcoEdit);
             c.Component.Name := VarName;
