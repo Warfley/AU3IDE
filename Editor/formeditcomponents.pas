@@ -455,8 +455,6 @@ type
     property Text: string read GetText write SetText;
     property Caption: string read GetText write SetText;
     property TextHint;
-    property TextHintFontColor;
-    property TextHintFontStyle;
   end;
 
   Tau3Button = class(TCustomBitBtn, Iau3Component, IHotKeyComponent, IEditorComponent)

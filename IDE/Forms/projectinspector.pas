@@ -5,7 +5,7 @@ unit ProjectInspector;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, TreeFilterEdit, Forms, Controls, ComCtrls,
+  Classes, SysUtils, LazFileUtils, FileUtil, TreeFilterEdit, Forms, Controls, ComCtrls,
   ExtCtrls, StdCtrls, Project, Dialogs, au3Types, ProjectConfForm, TLStrings, LCLTranslator;
 
 type

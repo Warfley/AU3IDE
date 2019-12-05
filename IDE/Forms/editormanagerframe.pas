@@ -183,7 +183,7 @@ var
 begin
   EC := Sender as TPageControl;
   if Button = mbMiddle then
-    CloseEditor(FindIndex(ec.Pages[EC.TabIndexAtClientPos(Point(X, Y))]));
+    CloseEditor(FindIndex(ec.Pages[EC.IndexOfTabAt(X, Y)]));
 end;
 
 procedure TEditorManager.MoveToButton1Click(Sender: TObject);
