@@ -31,3 +31,6 @@ lib/
 
 # Configs
 *.cnf
+
+# build directory
+build/
