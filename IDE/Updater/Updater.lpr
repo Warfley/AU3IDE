@@ -23,7 +23,7 @@ type
   end;
 
 const
-  SUpdateURL = 'https://automatestudio.org/Updates/';
+  SUpdateURL = 'https://kehrein.eu/automatestudio/Updates/';
 
 resourcestring
   SLoadInformation = 'Loading update information: ';

@@ -27,7 +27,7 @@ type
   end;
 
 const
-  SDownloadURL = 'https://automatestudio.org/Updates/';
+  SDownloadURL = 'https://kehrein.eu/automatestudio/Updates/';
 
 resourcestring
   SSelectDirectory = 'Select installation destination directory';

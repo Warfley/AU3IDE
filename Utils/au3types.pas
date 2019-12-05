@@ -96,7 +96,7 @@ type
 
 const
   Version = '0.0.18';
-  SUpdateURL = 'https://automatestudio.org/Updates/';
+  SUpdateURL = 'https://kehrein.eu/automatestudio/Updates/';
 
 function OpendFileInfo(Name: string; Line: integer = 1;
   Pos: integer = 1; View: integer = 0): TOpendFileInfo;
